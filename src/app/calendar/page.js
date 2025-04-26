@@ -202,7 +202,7 @@ export default function Calendar() {
 					</h2>
 					<p className="mb-6">
 						We regularly invite industry professionals to share insights with our student fund members.
-						If you're interested in speaking at one of our events, please contact us.
+						If you&apos;re interested in speaking at one of our events, please contact us.
 					</p>
 					<Link
 						href="/contact"

@@ -17,7 +17,7 @@ export default function About() {
 						<div className="space-y-4">
 							<p>
 								The Augustana College Student Investment Fund (SIF) is dedicated to providing students
-								with hands-on investment experience while managing a portion of the college's endowment.
+								with hands-on investment experience while managing a portion of the college&apos;s endowment.
 								Our goal is to consistently outperform market benchmarks while adhering to responsible
 								investment principles.
 							</p>
@@ -35,12 +35,12 @@ export default function About() {
 						</h2>
 						<div className="space-y-4">
 							<p>
-								Established in 2007, the fund began with an initial allocation of $100,000 from the college's
+								Established in 2007, the fund began with an initial allocation of $100,000 from the college&apos;s
 								endowment. Since then, our portfolio has grown significantly through both additional allocations
 								and investment returns.
 							</p>
 							<p>
-								Over the years, we've expanded our investment strategy from primarily large-cap U.S. equities
+								Over the years, we&apos;ve expanded our investment strategy from primarily large-cap U.S. equities
 								to include international stocks, fixed income securities, and ESG-focused investments.
 							</p>
 						</div>
@@ -53,7 +53,7 @@ export default function About() {
 						</h2>
 						<div className="space-y-4">
 							<p>
-								The fund is entirely student-managed, with oversight from faculty advisors and the college's
+								The fund is entirely student-managed, with oversight from faculty advisors and the college&apos;s
 								investment committee. Our team consists of:
 							</p>
 							<ul className="list-disc pl-6 space-y-2">

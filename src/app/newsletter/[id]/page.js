@@ -20,7 +20,7 @@ export default function NewsletterPost({ params }) {
 			<div className="min-h-screen p-8 sm:p-20 flex items-center justify-center">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold mb-4">Newsletter not found</h1>
-					<p className="mb-6">The newsletter post you're looking for doesn't exist or has been removed.</p>
+					<p className="mb-6">The newsletter post you&apos;re looking for doesn&apos;t exist or has been removed.</p>
 					<Link
 						href="/newsletter"
 						className="rounded-full bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-3 transition-colors"
