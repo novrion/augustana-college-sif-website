@@ -1,5 +1,5 @@
 import React from 'react';
-import { FeatureBox, BoxGrid } from './components/Boxes';
+import { FeatureBox, BoxGrid } from '../components/Boxes';
 
 const boxesData = [
   {
@@ -68,21 +68,6 @@ export default function Home() {
             />
           ))}
         </BoxGrid>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row mt-4">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="/research"
-          >
-            View Research Reports
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto"
-            href="/join"
-          >
-            Join the Fund
-          </a>
-        </div>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         <a
@@ -93,11 +78,17 @@ export default function Home() {
         </a>
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="/signup"
+        >
+          Sign Up
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://www.augustana.edu/"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Augustana College →
+          Augustana College
         </a>
       </footer>
     </div>
