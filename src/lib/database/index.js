@@ -23,6 +23,13 @@ export const {
 	getCashBalance,
 	updateCashBalance,
 
+	// Meeting minutes management
+	getAllMeetingMinutes,
+	getMeetingMinuteById,
+	createMeetingMinute,
+	updateMeetingMinute,
+	deleteMeetingMinute,
+
 	// Initialize connection (if needed)
 	initDb
 } = dbProvider;

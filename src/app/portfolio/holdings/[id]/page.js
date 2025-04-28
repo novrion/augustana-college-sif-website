@@ -13,7 +13,8 @@ export default async function HoldingDetail({ params }) {
 
 	try {
 		// Fetch holding details
-		const holding = await getHoldingById(params.id);
+		const id = params.id;
+		const holding = await getHoldingById(id);
 
 		if (!holding) {
 			redirect('/portfolio');

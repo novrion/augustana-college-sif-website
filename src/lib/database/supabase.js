@@ -316,6 +316,109 @@ export async function updateCashBalance(amount) {
 	return true;
 }
 
+
+
+
+
+/**
+ * Get all meeting minutes
+ * @returns {Promise<Array>} Array of meeting minutes
+ */
+export async function getAllMeetingMinutes() {
+	const { data, error } = await supabase
+		.from('meeting_minutes')
+		.select('*')
+		.order('date', { ascending: false });
+
+	if (error) {
+		console.error('Error fetching meeting minutes:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+/**
+ * Get meeting minute by ID
+ * @param {string} id - Meeting minute ID
+ * @returns {Promise<Object|null>} Meeting minute object or null
+ */
+export async function getMeetingMinuteById(id) {
+	const { data, error } = await supabase
+		.from('meeting_minutes')
+		.select('*')
+		.eq('id', id)
+		.single();
+
+	if (error) {
+		console.error('Error fetching meeting minute by ID:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Create a new meeting minute entry
+ * @param {Object} meetingData - Meeting minute data
+ * @returns {Promise<Object|null>} Created meeting minute or null
+ */
+export async function createMeetingMinute(meetingData) {
+	const { data, error } = await supabase
+		.from('meeting_minutes')
+		.insert([meetingData])
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error creating meeting minute:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Update an existing meeting minute
+ * @param {string} id - Meeting minute ID
+ * @param {Object} meetingData - Updated meeting minute data
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateMeetingMinute(id, meetingData) {
+	const { error } = await supabase
+		.from('meeting_minutes')
+		.update(meetingData)
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error updating meeting minute:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Delete a meeting minute
+ * @param {string} id - Meeting minute ID
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteMeetingMinute(id) {
+	const { error } = await supabase
+		.from('meeting_minutes')
+		.delete()
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error deleting meeting minute:', error);
+		return false;
+	}
+
+	return true;
+}
+
+
+
 /**
  * Initialize database connection (not needed for Supabase)
  */

@@ -62,6 +62,17 @@ export default async function AdminPage() {
 							Manage Gallery →
 						</Link>
 					</BoxBase>
+
+					<BoxBase>
+						<h2 className="text-xl font-semibold mb-4">Meeting Minutes Management</h2>
+						<p className="mb-4">Create, edit, and manage meeting minutes</p>
+						<Link
+							className="text-blue-500 hover:underline font-medium"
+							href="/admin/meeting-minutes"
+						>
+							Manage Meeting Minutes →
+						</Link>
+					</BoxBase>
 				</div>
 			</div>
 		</div>
