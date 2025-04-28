@@ -13,6 +13,16 @@ export const {
 	updateUserStatus,
 	getAllUsers,
 	verifyPassword,
+
+	// Portfolio management
+	getAllHoldings,
+	getHoldingById,
+	createHolding,
+	updateHolding,
+	deleteHolding,
+	getCashBalance,
+	updateCashBalance,
+
 	// Initialize connection (if needed)
 	initDb
 } = dbProvider;

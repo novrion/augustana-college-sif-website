@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// Common static file extensions
+const STATIC_EXTENSIONS = [
+	'.svg', '.png', '.jpg', '.jpeg', '.gif', '.ico',
+	'.css', '.js', '.ttf', '.woff', '.woff2', '.eot'
+];
+
 // Paths that require authentication and specific roles
 const protectedPaths = [
 	{
@@ -22,6 +28,17 @@ const authCheckedPaths = [
 export async function middleware(request) {
 	const { pathname } = request.nextUrl;
 
+	// NEW: Check if the request is for a static file first
+	const isStaticResource = STATIC_EXTENSIONS.some(ext =>
+		pathname.endsWith(ext)
+	);
+
+	// If it's a static resource (like logo.svg), skip auth checks
+	if (isStaticResource) {
+		return NextResponse.next();
+	}
+
+	// Continue with your existing authentication logic
 	// Check if the path requires authentication
 	const isAuthChecked = authCheckedPaths.some(path =>
 		pathname === path || pathname.startsWith(`${path}/`)
