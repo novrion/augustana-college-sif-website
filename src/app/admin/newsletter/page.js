@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { isAdmin } from '../../../lib/auth';
-import { getPaginatedMeetingMinutes, getMeetingMinutesYears } from '../../../lib/database';
-import MeetingMinutesList from '../../../components/admin/MeetingMinutesList';
+import { getPaginatedNewsletters, getNewsletterYears } from '../../../lib/database';
+import NewsletterList from '../../../components/admin/NewsletterList';
 import PaginationControls from '../../../components/PaginationControls';
 import YearFilter from '../../../components/YearFilter';
 
-export default async function AdminMeetingMinutesPage(props) {
+export default async function AdminNewsletterPage(props) {
 	// Verify user is admin
 	const isAdminUser = await isAdmin();
 
@@ -23,8 +23,8 @@ export default async function AdminMeetingMinutesPage(props) {
 	const year = searchParams?.year || null;
 	const search = searchParams?.search || null;
 
-	// Fetch meeting minutes with pagination
-	const { data: meetingMinutes, total, totalPages } = await getPaginatedMeetingMinutes({
+	// Fetch newsletters with pagination
+	const { data: newsletters, total, totalPages } = await getPaginatedNewsletters({
 		page,
 		pageSize,
 		year,
@@ -32,14 +32,14 @@ export default async function AdminMeetingMinutesPage(props) {
 	});
 
 	// Fetch available years for filtering
-	const years = await getMeetingMinutesYears();
+	const years = await getNewsletterYears();
 
 	return (
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
 			<div className="max-w-6xl mx-auto">
 				<div className="flex justify-between items-center mb-6">
 					<h1 className="text-3xl font-bold">
-						Meeting Minutes Management
+						Newsletter Management
 					</h1>
 
 					<div className="flex gap-3">
@@ -51,10 +51,10 @@ export default async function AdminMeetingMinutesPage(props) {
 						</Link>
 
 						<Link
-							href="/admin/meeting-minutes/add"
+							href="/admin/newsletter/add"
 							className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4"
 						>
-							Add New Meeting Minutes
+							Add New Newsletter
 						</Link>
 					</div>
 				</div>
@@ -70,11 +70,11 @@ export default async function AdminMeetingMinutesPage(props) {
 
 					{/* Display total count */}
 					<div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-						{total ? `Showing ${meetingMinutes ? meetingMinutes.length : 0} of ${total} meeting minutes` : 'No meeting minutes found'}
+						{total ? `Showing ${newsletters ? newsletters.length : 0} of ${total} newsletters` : 'No newsletters found'}
 					</div>
 
-					{/* Meeting Minutes List */}
-					<MeetingMinutesList meetingMinutes={meetingMinutes || []} />
+					{/* Newsletter List */}
+					<NewsletterList newsletters={newsletters || []} />
 
 					{/* Pagination controls */}
 					{totalPages > 1 && (

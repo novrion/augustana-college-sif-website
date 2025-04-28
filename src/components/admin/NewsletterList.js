@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-export default function MeetingMinutesList({ meetingMinutes }) {
+export default function NewsletterList({ newsletters }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const router = useRouter();
@@ -18,8 +18,8 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 		});
 	};
 
-	const handleDeleteMeeting = async (meetingId) => {
-		if (!window.confirm('Are you sure you want to delete these meeting minutes? This action cannot be undone.')) {
+	const handleDeleteNewsletter = async (newsletterId) => {
+		if (!window.confirm('Are you sure you want to delete this newsletter? This action cannot be undone.')) {
 			return;
 		}
 
@@ -27,19 +27,19 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 		setError('');
 
 		try {
-			const response = await fetch(`/api/admin/meeting-minutes/delete`, {
+			const response = await fetch(`/api/admin/newsletter/delete`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					meetingId,
+					newsletterId,
 				}),
 			});
 
 			if (!response.ok) {
 				const data = await response.json();
-				throw new Error(data.error || 'Failed to delete meeting minutes');
+				throw new Error(data.error || 'Failed to delete newsletter');
 			}
 
 			// Refresh the page
@@ -72,44 +72,50 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 							<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
 								Author
 							</th>
+							<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+								Attachments
+							</th>
 							<th className="px-4 py-3"></th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-black/[.08] dark:divide-white/[.145]">
-						{meetingMinutes.length === 0 ? (
+						{newsletters.length === 0 ? (
 							<tr>
-								<td colSpan="4" className="px-4 py-4 text-center">
-									No meeting minutes found with the current filters. Try adjusting your search or filter criteria.
+								<td colSpan="5" className="px-4 py-4 text-center">
+									No newsletters found with the current filters. Try adjusting your search or filter criteria.
 								</td>
 							</tr>
 						) : (
-							meetingMinutes.map((meeting) => (
-								<tr key={meeting.id}>
+							newsletters.map((newsletter) => (
+								<tr key={newsletter.id}>
 									<td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-										{meeting.title}
+										{newsletter.title}
 									</td>
 									<td className="px-4 py-4 whitespace-nowrap text-sm">
-										{formatDate(meeting.date)}
+										{formatDate(newsletter.date)}
 									</td>
 									<td className="px-4 py-4 whitespace-nowrap text-sm">
-										{meeting.author}
+										{newsletter.author}
+									</td>
+									<td className="px-4 py-4 whitespace-nowrap text-sm">
+										{newsletter.attachments?.length || 0}
 									</td>
 									<td className="px-4 py-4 whitespace-nowrap text-sm text-right">
 										<div className="flex justify-end space-x-3">
 											<Link
-												href={`/meeting-minutes/${meeting.id}`}
+												href={`/newsletter/${newsletter.id}`}
 												className="text-blue-500 hover:underline"
 											>
 												View
 											</Link>
 											<Link
-												href={`/admin/meeting-minutes/edit/${meeting.id}`}
+												href={`/admin/newsletter/edit/${newsletter.id}`}
 												className="text-blue-500 hover:underline"
 											>
 												Edit
 											</Link>
 											<button
-												onClick={() => handleDeleteMeeting(meeting.id)}
+												onClick={() => handleDeleteNewsletter(newsletter.id)}
 												disabled={isLoading}
 												className="text-red-500 hover:underline"
 											>

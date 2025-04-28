@@ -417,6 +417,413 @@ export async function deleteMeetingMinute(id) {
 	return true;
 }
 
+/**
+ * Get meeting minutes with pagination and filters
+ * @param {Object} options - Pagination and filter options
+ * @param {number} options.page - Page number (starting from 1)
+ * @param {number} options.pageSize - Number of items per page
+ * @param {string} options.year - Filter by year (optional)
+ * @param {string} options.search - Search term for title or content (optional)
+ * @returns {Promise<{data: Array, total: number, totalPages: number}>} Paginated results
+ */
+export async function getPaginatedMeetingMinutes({
+	page = 1,
+	pageSize = 10,
+	year = null,
+	search = null
+}) {
+	// Calculate offset for pagination
+	const offset = (page - 1) * pageSize;
+
+	// Start building the query
+	let query = supabase
+		.from('meeting_minutes')
+		.select('*', { count: 'exact' });
+
+	// Apply year filter if provided
+	if (year) {
+		const startDate = `${year}-01-01`;
+		const endDate = `${year}-12-31`;
+		query = query.gte('date', startDate).lte('date', endDate);
+	}
+
+	// Apply search filter if provided
+	if (search) {
+		query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
+	}
+
+	// Apply pagination and ordering
+	const { data, error, count } = await query
+		.order('date', { ascending: false })
+		.range(offset, offset + pageSize - 1);
+
+	if (error) {
+		console.error('Error fetching paginated meeting minutes:', error);
+		return { data: [], total: 0, totalPages: 0 };
+	}
+
+	// Calculate total pages
+	const totalPages = Math.ceil(count / pageSize);
+
+	return {
+		data: data || [],
+		total: count || 0,
+		totalPages
+	};
+}
+
+/**
+ * Get all available years that have meeting minutes
+ * @returns {Promise<Array>} Array of years
+ */
+export async function getMeetingMinutesYears() {
+	// This query uses PostgreSQL date_trunc to extract years
+	const { data, error } = await supabase
+		.rpc('get_meeting_minutes_years');
+
+	if (error) {
+		console.error('Error fetching meeting minute years:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+
+
+
+// Add these functions to your existing supabase.js file
+
+/**
+ * Get all newsletters
+ * @returns {Promise<Array>} Array of newsletters
+ */
+export async function getAllNewsletters() {
+	const { data, error } = await supabase
+		.from('newsletters')
+		.select('*')
+		.order('date', { ascending: false });
+
+	if (error) {
+		console.error('Error fetching newsletters:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+/**
+ * Get newsletter by ID
+ * @param {string} id - Newsletter ID
+ * @returns {Promise<Object|null>} Newsletter object or null
+ */
+export async function getNewsletterById(id) {
+	const { data, error } = await supabase
+		.from('newsletters')
+		.select('*')
+		.eq('id', id)
+		.single();
+
+	if (error) {
+		console.error('Error fetching newsletter by ID:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Create a new newsletter entry
+ * @param {Object} newsletterData - Newsletter data
+ * @returns {Promise<Object|null>} Created newsletter or null
+ */
+export async function createNewsletter(newsletterData) {
+	const { data, error } = await supabase
+		.from('newsletters')
+		.insert([newsletterData])
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error creating newsletter:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Update an existing newsletter
+ * @param {string} id - Newsletter ID
+ * @param {Object} newsletterData - Updated newsletter data
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateNewsletter(id, newsletterData) {
+	const { error } = await supabase
+		.from('newsletters')
+		.update(newsletterData)
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error updating newsletter:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Delete a newsletter
+ * @param {string} id - Newsletter ID
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteNewsletter(id) {
+	const { error } = await supabase
+		.from('newsletters')
+		.delete()
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error deleting newsletter:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Get newsletters with pagination and filters
+ * @param {Object} options - Pagination and filter options
+ * @param {number} options.page - Page number (starting from 1)
+ * @param {number} options.pageSize - Number of items per page
+ * @param {string} options.year - Filter by year (optional)
+ * @param {string} options.search - Search term for title or content (optional)
+ * @returns {Promise<{data: Array, total: number, totalPages: number}>} Paginated results
+ */
+export async function getPaginatedNewsletters({
+	page = 1,
+	pageSize = 10,
+	year = null,
+	search = null
+}) {
+	// Calculate offset for pagination
+	const offset = (page - 1) * pageSize;
+
+	// Start building the query
+	let query = supabase
+		.from('newsletters')
+		.select('*', { count: 'exact' });
+
+	// Apply year filter if provided
+	if (year) {
+		const startDate = `${year}-01-01`;
+		const endDate = `${year}-12-31`;
+		query = query.gte('date', startDate).lte('date', endDate);
+	}
+
+	// Apply search filter if provided
+	if (search) {
+		query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
+	}
+
+	// Apply pagination and ordering
+	const { data, error, count } = await query
+		.order('date', { ascending: false })
+		.range(offset, offset + pageSize - 1);
+
+	if (error) {
+		console.error('Error fetching paginated newsletters:', error);
+		return { data: [], total: 0, totalPages: 0 };
+	}
+
+	// Calculate total pages
+	const totalPages = Math.ceil(count / pageSize);
+
+	return {
+		data: data || [],
+		total: count || 0,
+		totalPages
+	};
+}
+
+/**
+ * Get all available years that have newsletters
+ * @returns {Promise<Array>} Array of years
+ */
+export async function getNewsletterYears() {
+	// This query uses PostgreSQL date_trunc to extract years
+	const { data, error } = await supabase
+		.rpc('get_newsletter_years');
+
+	if (error) {
+		console.error('Error fetching newsletter years:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+/**
+ * Upload a file attachment for a newsletter
+ * @param {File} file - The file to upload
+ * @param {string} newsletterId - The ID of the newsletter
+ * @returns {Promise<Object|null>} File metadata or null
+ */
+export async function uploadNewsletterAttachment(file, newsletterId) {
+	const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+	const filePath = `newsletter_attachments/${newsletterId}/${fileName}`;
+
+	const { error } = await supabase.storage
+		.from('attachments')
+		.upload(filePath, file);
+
+	if (error) {
+		console.error('Error uploading file:', error);
+		return null;
+	}
+
+	const { data } = supabase.storage
+		.from('attachments')
+		.getPublicUrl(filePath);
+
+	return {
+		name: fileName,
+		originalName: file.name,
+		url: data.publicUrl,
+		path: filePath,
+		type: file.type,
+		size: file.size
+	};
+}
+
+/**
+ * Get attachments for a newsletter
+ * @param {string} newsletterId - The ID of the newsletter
+ * @returns {Promise<Array>} Array of attachment objects
+ */
+export async function getNewsletterAttachments(newsletterId) {
+	const { data, error } = await supabase.storage
+		.from('attachments')
+		.list(`newsletter_attachments/${newsletterId}`);
+
+	if (error) {
+		console.error('Error fetching attachments:', error);
+		return [];
+	}
+
+	return data.map(file => {
+		const url = supabase.storage
+			.from('attachments')
+			.getPublicUrl(`newsletter_attachments/${newsletterId}/${file.name}`).data.publicUrl;
+
+		return {
+			name: file.name,
+			url: url,
+			path: `newsletter_attachments/${newsletterId}/${file.name}`,
+			type: file.metadata?.mimetype || '',
+			size: file.metadata?.size || 0
+		};
+	});
+}
+
+/**
+ * Delete a newsletter attachment
+ * @param {string} filePath - Path to the file in storage
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteNewsletterAttachment(filePath) {
+	const { error } = await supabase.storage
+		.from('attachments')
+		.remove([filePath]);
+
+	if (error) {
+		console.error('Error deleting attachment:', error);
+		return false;
+	}
+
+	return true;
+}
+
+
+
+
+
+
+// About Us management
+export async function getAllAboutSections() {
+	const { data, error } = await supabase
+		.from('about_sections')
+		.select('*')
+		.order('order_index');
+
+	if (error) {
+		console.error('Error fetching about sections:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+export async function getAboutSectionById(id) {
+	const { data, error } = await supabase
+		.from('about_sections')
+		.select('*')
+		.eq('id', id)
+		.single();
+
+	if (error) {
+		console.error('Error fetching about section by id:', error);
+		return null
+	}
+
+	return data
+}
+
+export async function createAboutSection(aboutSectionData) {
+	const { data, error } = await supabase
+		.from('about_sections')
+		.insert([aboutSectionData])
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error creating about section:', error);
+		return null;
+	}
+
+	return data;
+}
+
+export async function updateAboutSection(id, aboutSectionData) {
+	const { error } = await supabase
+		.from('about_sections')
+		.update(aboutSectionData)
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error updating about section:', error);
+		return false;
+	}
+
+	return true;
+}
+
+export async function deleteAboutSection(id) {
+	const { error } = await supabase
+		.from("about_sections")
+		.delete()
+		.eq("id", id);
+
+	if (error) {
+		console.error('Error deleting about section:', error);
+		return false;
+	}
+
+	return true;
+}
+
+
+
 
 
 /**

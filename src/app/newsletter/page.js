@@ -1,13 +1,13 @@
-import { getPaginatedMeetingMinutes, getMeetingMinutesYears } from '../../lib/database';
-import { MeetingBox } from '../../components/Boxes';
+import { getPaginatedNewsletters, getNewsletterYears } from '../../lib/database';
+import { NewsletterBox } from '../../components/Boxes';
 import Link from 'next/link';
 import { isAdmin } from '../../lib/auth';
 import PaginationControls from '../../components/PaginationControls';
 import YearFilter from '../../components/YearFilter';
 
 export const metadata = {
-	title: 'Meeting Minutes | Augustana College SIF',
-	description: 'Access notes and summaries from our weekly meetings.',
+	title: 'Newsletter | Augustana College SIF',
+	description: 'Stay informed with our market analyses, investment insights, and fund updates.',
 };
 
 // Function to create an excerpt from the content
@@ -24,7 +24,7 @@ function createExcerpt(content, maxLength = 150) {
 	return `${excerpt}...`;
 }
 
-export default async function MeetingMinutesPage(props) {
+export default async function NewsletterPage(props) {
 	// Properly await searchParams
 	const searchParams = await props.searchParams;
 
@@ -34,8 +34,8 @@ export default async function MeetingMinutesPage(props) {
 	const year = searchParams?.year || null;
 	const search = searchParams?.search || null;
 
-	// Fetch meeting minutes with pagination
-	const { data: meetingMinutes, total, totalPages } = await getPaginatedMeetingMinutes({
+	// Fetch newsletters with pagination
+	const { data: newsletters, total, totalPages } = await getPaginatedNewsletters({
 		page,
 		pageSize,
 		year,
@@ -43,7 +43,7 @@ export default async function MeetingMinutesPage(props) {
 	});
 
 	// Fetch available years for filtering
-	const years = await getMeetingMinutesYears();
+	const years = await getNewsletterYears();
 
 	// Check if user is admin
 	const isAdminUser = await isAdmin();
@@ -53,16 +53,16 @@ export default async function MeetingMinutesPage(props) {
 			<div className="max-w-4xl mx-auto">
 				<div className="flex justify-between items-center mb-8">
 					<h1 className="text-3xl font-bold">
-						Meeting Minutes
+						Newsletter
 					</h1>
 
 					{/* Only show Add button if user is admin */}
 					{isAdminUser && (
 						<Link
-							href="/admin/meeting-minutes/add"
+							href="/admin/newsletter/add"
 							className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4"
 						>
-							Add Meeting Minutes
+							Add Newsletter
 						</Link>
 					)}
 				</div>
@@ -75,27 +75,27 @@ export default async function MeetingMinutesPage(props) {
 					/>
 				</div>
 
-				{/* Meeting minutes list */}
+				{/* Newsletter list */}
 				<div className="flex flex-col gap-4">
-					{meetingMinutes && meetingMinutes.length > 0 ? (
-						meetingMinutes.map((meeting) => (
-							<MeetingBox
-								key={meeting.id}
-								id={meeting.id}
-								title={meeting.title}
-								date={new Date(meeting.date).toLocaleDateString('en-US', {
+					{newsletters && newsletters.length > 0 ? (
+						newsletters.map((newsletter) => (
+							<NewsletterBox
+								key={newsletter.id}
+								id={newsletter.id}
+								title={newsletter.title}
+								date={new Date(newsletter.date).toLocaleDateString('en-US', {
 									weekday: 'long',
 									year: 'numeric',
 									month: 'long',
 									day: 'numeric'
 								})}
-								publisher={meeting.author}
-								excerpt={createExcerpt(meeting.content)}
+								author={newsletter.author}
+								excerpt={createExcerpt(newsletter.content)}
 							/>
 						))
 					) : (
 						<div className="text-center py-8 text-gray-500 dark:text-gray-400">
-							No meeting minutes available for the selected criteria.
+							No newsletters available for the selected criteria.
 						</div>
 					)}
 				</div>
@@ -112,7 +112,7 @@ export default async function MeetingMinutesPage(props) {
 
 				{/* Display total count */}
 				<div className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-					Showing {meetingMinutes ? meetingMinutes.length : 0} of {total || 0} meeting minutes
+					Showing {newsletters ? newsletters.length : 0} of {total || 0} newsletters
 				</div>
 			</div>
 		</div>

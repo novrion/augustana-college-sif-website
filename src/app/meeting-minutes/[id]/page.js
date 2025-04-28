@@ -3,8 +3,12 @@ import Link from 'next/link';
 import { getMeetingMinuteById } from '../../../lib/database';
 import { BoxBase } from '../../../components/Boxes';
 
-export async function generateMetadata({ params }) {
-	const meeting = await getMeetingMinuteById(params.id);
+export async function generateMetadata(props) {
+	// Properly await params
+	const params = await props.params;
+	const id = params.id;
+
+	const meeting = await getMeetingMinuteById(id);
 
 	if (!meeting) {
 		return {
@@ -18,10 +22,14 @@ export async function generateMetadata({ params }) {
 	};
 }
 
-export default async function MeetingMinuteDetail({ params }) {
+export default async function MeetingMinuteDetail(props) {
+	// Properly await params
+	const params = await props.params;
+	const id = params.id;
+
 	try {
 		// Fetch meeting minute by ID
-		const meeting = await getMeetingMinuteById(params.id);
+		const meeting = await getMeetingMinuteById(id);
 
 		if (!meeting) {
 			redirect('/meeting-minutes');
@@ -55,8 +63,10 @@ export default async function MeetingMinuteDetail({ params }) {
 						<h2 className="text-2xl font-semibold mb-4">
 							{meeting.title}
 						</h2>
-						<div className="flex justify-between items-center mb-6 text-sm text-gray-500 dark:text-gray-400">
-							<span>{formattedDate}</span>
+
+						{/* Changed from flex row to flex column layout */}
+						<div className="flex flex-col mb-6 text-sm text-gray-500 dark:text-gray-400">
+							<span className="mb-1">{formattedDate}</span>
 							<span>Published by: {meeting.author}</span>
 						</div>
 

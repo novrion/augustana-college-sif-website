@@ -1,13 +1,10 @@
-// src/app/admin/meeting-minutes/edit/[id]/page.js
-
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { isAdmin } from '../../../../../lib/auth';
-import { getMeetingMinuteById } from '../../../../../lib/database';
-import MeetingMinuteForm from '../../../../../components/admin/MeetingMinuteForm';
+import { getAboutSectionById } from '../../../../../lib/database';
+import AboutSectionForm from '../../../../../components/admin/AboutSectionForm';
 
-export default async function EditMeetingMinutePage(props) {
-	// Verify user is admin
+export default async function EditAboutSectionForm(props) {
 	const isAdminUser = await isAdmin();
 
 	if (!isAdminUser) {
@@ -20,10 +17,10 @@ export default async function EditMeetingMinutePage(props) {
 		const id = params.id;
 
 		// Fetch meeting minute
-		const meeting = await getMeetingMinuteById(id);
+		const aboutSection = await getAboutSectionById(id);
 
-		if (!meeting) {
-			redirect('/admin/meeting-minutes');
+		if (!aboutSection) {
+			redirect('/admin/about');
 		}
 
 		return (
@@ -31,23 +28,23 @@ export default async function EditMeetingMinutePage(props) {
 				<div className="max-w-4xl mx-auto">
 					<div className="flex justify-between items-center mb-6">
 						<h1 className="text-3xl font-bold">
-							Edit Meeting Minutes: {meeting.title}
+							Edit About Sections: {aboutSection.title}
 						</h1>
 
 						<Link
-							href="/admin/meeting-minutes"
+							href="/admin/about"
 							className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4"
 						>
-							Back to Minutes
+							Back to About Management
 						</Link>
 					</div>
 
-					<MeetingMinuteForm initialData={meeting} />
+					<AboutSectionForm initialData={aboutSection} isEditing={true} />
 				</div>
 			</div>
 		);
 	} catch (error) {
-		console.error('Error loading meeting minute:', error);
-		redirect('/admin/meeting-minutes');
+		console.error('Error loading about_section:', error);
+		redirect('/admin/about'); // CHANGE THIS
 	}
 }

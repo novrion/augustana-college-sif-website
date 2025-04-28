@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 /**
@@ -29,8 +30,14 @@ export function BoxBase({
  * Extended from the base BoxBase component
  */
 export function FeatureBox({ title, description, link, linkText }) {
+	const router = useRouter();
+
+	const handleClick = () => {
+		router.push(link)
+	};
+
 	return (
-		<BoxBase>
+		<BoxBase onClick={handleClick} className="cursor-pointer">
 			<h3 className="text-xl font-semibold mb-3">
 				{title}
 			</h3>
@@ -47,98 +54,63 @@ export function FeatureBox({ title, description, link, linkText }) {
 	);
 }
 
-/**
- * Meeting Box component used for displaying meeting minutes
- * Extended from the base BoxBase component
- */
-export function MeetingBox({ id, title, date, publisher, notes }) {
+export function MeetingBox({ id, title, date, publisher, excerpt }) {
+	const router = useRouter();
+
+	const handleClick = () => {
+		router.push(`/meeting-minutes/${id}`);
+	};
+
 	return (
-		<BoxBase>
+		<BoxBase onClick={handleClick} className="cursor-pointer">
 			<div className="mb-4">
 				<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-mono)]">
 					{title}
 				</h2>
-				<div className="flex justify-between items-center mt-2">
-					<p className="text-sm text-gray-500 dark:text-gray-400">
-						{date}
-					</p>
-					<p className="text-sm text-gray-500 dark:text-gray-400">
-						Published by: {publisher}
-					</p>
+
+				<div className="flex flex-col mt-2 text-sm text-gray-500 dark:text-gray-400">
+					<span className="mb-1">{date}</span>
+					<span>{publisher}</span>
 				</div>
 			</div>
 
 			<div className="prose prose-sm max-w-none dark:prose-invert">
-				<p>{notes}</p>
+				<p>{excerpt}</p>
 			</div>
-
-			<Link
-				href={`/meeting-minutes/${id}`}
-				className="inline-block mt-4 text-blue-500 hover:underline font-medium"
-			>
-				View full details →
-			</Link>
 		</BoxBase>
 	);
 }
 
-/**
- * Collapsible Meeting Box component 
- * Displays meeting info with expandable content
- * Extended from the base BoxBase component
- */
-export function CollapsibleMeetingBox({ id, title, date, publisher, notes }) {
-	const [isExpanded, setIsExpanded] = useState(false);
 
-	const toggleExpand = () => {
-		setIsExpanded(!isExpanded);
+
+export function NewsletterBox({ id, title, date, author, excerpt }) {
+	const router = useRouter();
+
+	const handleClick = () => {
+		router.push(`/newsletter/${id}`);
 	};
 
 	return (
-		<BoxBase>
-			<div
-				className="flex justify-between items-start cursor-pointer"
-				onClick={toggleExpand}
-			>
-				<div>
-					<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-mono)]">
-						{title}
-					</h2>
-					<div className="mt-2">
-						<p className="text-sm text-gray-500 dark:text-gray-400">
-							{date}
-						</p>
-						<p className="text-sm text-gray-500 dark:text-gray-400">
-							{publisher}
-						</p>
-					</div>
+		<BoxBase onClick={handleClick} className="cursor-pointer">
+			<div className="mb-4">
+				<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-mono)]">
+					{title}
+				</h2>
+				<div className="flex flex-col mt-2 text-sm text-gray-500 dark:text-gray-400">
+					<span className="mb-1">{date}</span>
+					<span>{author}</span>
 				</div>
-				<button
-					className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-					aria-label={isExpanded ? "Collapse" : "Expand"}
-				>
-					{isExpanded ? (
-						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-							<polyline points="18 15 12 9 6 15"></polyline>
-						</svg>
-					) : (
-						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-							<polyline points="6 9 12 15 18 9"></polyline>
-						</svg>
-					)}
-				</button>
 			</div>
-
-			{isExpanded && (
-				<div className="mt-4 pt-4 border-t border-black/[.08] dark:border-white/[.145]">
-					<div className="prose prose-sm max-w-none dark:prose-invert">
-						<p>{notes}</p>
-					</div>
-				</div>
-			)}
-		</BoxBase>
+		</BoxBase >
 	);
+
+	//	<div className="prose prose-sm max-w-none dark:prose-invert">
+	//		<p>{excerpt}</p>
+	//	</div>
 }
+
+
+
 
 /**
  * Speaker Event Box component for displaying guest speaker events
@@ -238,40 +210,6 @@ export function SpeakerEventBox({ id, title, speaker, role, company, date, descr
 	);
 }
 
-/**
- * Newsletter Box component for displaying newsletter posts
- * Extended from the base BoxBase component
- */
-export function NewsletterBox({ id, title, date, author, excerpt }) {
-	return (
-		<BoxBase>
-			<div className="mb-4">
-				<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-mono)]">
-					{title}
-				</h2>
-				<div className="flex justify-between items-center mt-2">
-					<p className="text-sm text-gray-500 dark:text-gray-400">
-						{date}
-					</p>
-					<p className="text-sm text-gray-500 dark:text-gray-400">
-						By: {author}
-					</p>
-				</div>
-			</div>
-
-			<div className="prose prose-sm max-w-none dark:prose-invert">
-				<p>{excerpt}</p>
-			</div>
-
-			<Link
-				href={`/newsletter/${id}`}
-				className="inline-block mt-4 text-blue-500 hover:underline font-medium"
-			>
-				Read more →
-			</Link>
-		</BoxBase>
-	);
-}
 
 /**
  * Generic BoxGrid component that accepts any type of box components as children

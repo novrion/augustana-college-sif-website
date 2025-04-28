@@ -29,6 +29,27 @@ export const {
 	createMeetingMinute,
 	updateMeetingMinute,
 	deleteMeetingMinute,
+	getPaginatedMeetingMinutes,
+	getMeetingMinutesYears,
+
+	// Newsletter management
+	getAllNewsletters,
+	getNewsletterById,
+	createNewsletter,
+	updateNewsletter,
+	deleteNewsletter,
+	getPaginatedNewsletters,
+	getNewsletterYears,
+	uploadNewsletterAttachment,
+	getNewsletterAttachments,
+	deleteNewsletterAttachment,
+
+	// About Us management
+	getAllAboutSections,
+	getAboutSectionById,
+	createAboutSection,
+	updateAboutSection,
+	deleteAboutSection,
 
 	// Initialize connection (if needed)
 	initDb

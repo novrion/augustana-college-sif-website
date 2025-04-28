@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { isAdmin } from '../../lib/auth';
-import { BoxBase } from '../../components/Boxes';
+import AdminDashboardItem from '../../components/admin/AdminDashboardItem';
 
 export default async function AdminPage() {
 	// Verify user is admin
@@ -11,6 +10,40 @@ export default async function AdminPage() {
 		redirect('/unauthorized');
 	}
 
+	// Dashboard items configuration
+	const dashboardItems = [
+		{
+			title: "User Management",
+			description: "Manage user accounts and permissions",
+			href: "/admin/users"
+		},
+		{
+			title: "Portfolio Management",
+			description: "Add, edit, or remove portfolio holdings",
+			href: "/admin/portfolio"
+		},
+		{
+			title: "Newsletter Management",
+			description: "Create and edit newsletter posts",
+			href: "/admin/newsletter"
+		},
+		{
+			title: "Gallery Management",
+			description: "Upload and manage gallery images",
+			href: "/admin/gallery"
+		},
+		{
+			title: "Meeting Minutes Management",
+			description: "Create, edit, and manage meeting minutes",
+			href: "/admin/meeting-minutes"
+		},
+		{
+			title: "About Us Management",
+			description: "Create, edit, and manage sections in the About Us page",
+			href: "/admin/about"
+		},
+	];
+
 	return (
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
 			<div className="max-w-6xl mx-auto">
@@ -19,60 +52,14 @@ export default async function AdminPage() {
 				</h1>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-					<BoxBase>
-						<h2 className="text-xl font-semibold mb-4">User Management</h2>
-						<p className="mb-4">Manage user accounts and permissions</p>
-						<Link
-							className="text-blue-500 hover:underline font-medium"
-							href="/admin/users"
-						>
-							Manage Users →
-						</Link>
-					</BoxBase>
-
-					<BoxBase>
-						<h2 className="text-xl font-semibold mb-4">Portfolio Management</h2>
-						<p className="mb-4">Add, edit, or remove portfolio holdings</p>
-						<Link
-							className="text-blue-500 hover:underline font-medium"
-							href="/admin/portfolio"
-						>
-							Manage Portfolio →
-						</Link>
-					</BoxBase>
-
-					<BoxBase>
-						<h2 className="text-xl font-semibold mb-4">Newsletter Management</h2>
-						<p className="mb-4">Create and edit newsletter posts</p>
-						<Link
-							className="text-blue-500 hover:underline font-medium"
-							href="/admin/newsletter"
-						>
-							Manage Newsletter →
-						</Link>
-					</BoxBase>
-
-					<BoxBase>
-						<h2 className="text-xl font-semibold mb-4">Gallery Management</h2>
-						<p className="mb-4">Upload and manage gallery images</p>
-						<Link
-							className="text-blue-500 hover:underline font-medium"
-							href="/admin/gallery"
-						>
-							Manage Gallery →
-						</Link>
-					</BoxBase>
-
-					<BoxBase>
-						<h2 className="text-xl font-semibold mb-4">Meeting Minutes Management</h2>
-						<p className="mb-4">Create, edit, and manage meeting minutes</p>
-						<Link
-							className="text-blue-500 hover:underline font-medium"
-							href="/admin/meeting-minutes"
-						>
-							Manage Meeting Minutes →
-						</Link>
-					</BoxBase>
+					{dashboardItems.map((item, index) => (
+						<AdminDashboardItem
+							key={index}
+							title={item.title}
+							description={item.description}
+							href={item.href}
+						/>
+					))}
 				</div>
 			</div>
 		</div>
