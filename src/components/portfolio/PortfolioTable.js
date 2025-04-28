@@ -5,17 +5,13 @@ import { useRouter } from 'next/navigation';
 
 export default function PortfolioTable({ holdings, cashBalance, totalPortfolioValue }) {
 	const [sortConfig, setSortConfig] = useState({
-		key: 'ticker',       // Default sort key
-		direction: 'ascending' // Default sort direction
+		key: 'marketValue',       // Default sort key
+		direction: 'descending' // Default sort direction
 	});
 	const router = useRouter();
 
-	// --- Pre-calculate values and memoize ---
-	// Calculate total equity value once
 	const totalEquityValue = totalPortfolioValue - cashBalance;
 
-	// Create an augmented array with calculated values for sorting and display
-	// useMemo ensures this calculation only re-runs if dependencies change
 	const holdingsWithCalculatedValues = useMemo(() => {
 		return holdings.map(holding => {
 			const currentPrice = holding.current_price ?? 0;
