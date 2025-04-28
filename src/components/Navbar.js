@@ -4,11 +4,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
 	const { data: session, status } = useSession();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
+	const pathname = usePathname();
 
 	const isAdmin = session?.user?.role === 'admin';
 	const hasPortfolioAccess = session?.user?.role === 'admin' || session?.user?.role === 'portfolio-access';
@@ -38,16 +40,32 @@ export default function Navbar() {
 			</Link>
 
 			<div className="hidden sm:flex items-center gap-8">
-				<Link href="/portfolio" className={`hover:underline ${!hasPortfolioAccess ? 'opacity-50 pointer-events-none' : ''}`}>
-					Portfolio
-				</Link>
+				{hasPortfolioAccess ? (
+					<Link
+						href="/portfolio"
+						className={`relative px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border border-emerald-200 dark:border-emerald-800 group transition-all duration-300 ${pathname?.startsWith('/portfolio') ? 'shadow-md' : 'hover:shadow-md'
+							}`}
+					>
+						<span className="font-medium text-emerald-800 dark:text-emerald-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-200 transition-colors">
+							Portfolio
+						</span>
+						{pathname?.startsWith('/portfolio') && (
+							<span className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-emerald-500 dark:bg-emerald-400 rounded-full"></span>
+						)}
+					</Link>
+				) : (
+					<span className="opacity-50 px-4 py-1.5 text-gray-500">Portfolio</span>
+				)}
+
 				<Link href="/calendar" className="hover:underline">Calendar</Link>
 				<Link href="/newsletter" className="hover:underline">Newsletter</Link>
 				<Link href="/contact" className="hover:underline">Contact</Link>
 				<Link href="/about" className="hover:underline">About</Link>
 
 				{isAdmin && (
-					<Link href="/admin" className="hover:underline">Admin</Link>
+					<Link href="/admin" className="font-bold text-blue-600 hover:underline hover:text-blue-800 transition-colors">
+						Admin
+					</Link>
 				)}
 
 				{status === 'authenticated' ? (
@@ -56,7 +74,7 @@ export default function Navbar() {
 							onClick={toggleProfile}
 							className="flex items-center gap-2 hover:underline"
 						>
-							<span>{session.user.name}</span>
+							<span className="font-semibold text-blue-600">{session.user.name}</span>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="16"
@@ -92,7 +110,7 @@ export default function Navbar() {
 						)}
 					</div>
 				) : (
-					<Link href="/login" className="hover:underline">Log in</Link>
+					<Link href="/login" className="hover:underline font-bold text-blue-600">Log in</Link>
 				)}
 			</div>
 
@@ -118,21 +136,31 @@ export default function Navbar() {
 
 					<div className="flex flex-col items-center gap-6 p-8">
 						<Link href="/" className="text-xl" onClick={toggleMenu}>Home</Link>
+
 						{hasPortfolioAccess && (
-							<Link href="/portfolio" className="text-xl" onClick={toggleMenu}>Portfolio</Link>
+							<Link
+								href="/portfolio"
+								className="text-xl px-6 py-2 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border border-emerald-200 dark:border-emerald-800 font-medium text-emerald-800 dark:text-emerald-300"
+								onClick={toggleMenu}
+							>
+								<span>
+									Portfolio
+								</span>
+							</Link>
 						)}
+
 						<Link href="/calendar" className="text-xl" onClick={toggleMenu}>Calendar</Link>
 						<Link href="/newsletter" className="text-xl" onClick={toggleMenu}>Newsletter</Link>
 						<Link href="/contact" className="text-xl" onClick={toggleMenu}>Contact</Link>
 						<Link href="/about" className="text-xl" onClick={toggleMenu}>About</Link>
 
 						{isAdmin && (
-							<Link href="/admin" className="text-xl" onClick={toggleMenu}>Admin</Link>
+							<Link href="/admin" className="text-xl font-bold text-blue-600" onClick={toggleMenu}>Admin</Link>
 						)}
 
 						{status === 'authenticated' ? (
 							<>
-								<Link href="/profile" className="text-xl" onClick={toggleMenu}>Profile</Link>
+								<Link href="/profile" className="text-xl font-semibold text-blue-600" onClick={toggleMenu}>Profile</Link>
 								<button
 									onClick={() => {
 										handleSignOut();
@@ -144,7 +172,7 @@ export default function Navbar() {
 								</button>
 							</>
 						) : (
-							<Link href="/login" className="text-xl" onClick={toggleMenu}>Log in</Link>
+							<Link href="/login" className="text-xl font-bold text-blue-600" onClick={toggleMenu}>Log in</Link>
 						)}
 					</div>
 				</div>

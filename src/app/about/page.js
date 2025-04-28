@@ -1,13 +1,14 @@
 import { getAllAboutSections } from '../../lib/database';
-import { AboutSection } from '../../components/AboutSection'
+import { AboutSection } from '../../components/AboutSection';
+import DefaultFooter from '../../components/DefaultFooter';
 
 export default async function About() {
 	// Make the function async and directly await the result
 	const aboutSections = await getAllAboutSections();
 
 	return (
-		<div className="min-h-screen p-8 sm:p-20">
-			<div className="max-w-4xl mx-auto">
+		<div className="flex flex-col min-h-screen p-8 sm:p-20">
+			<div className="flex-grow max-w-4xl mx-auto w-full">
 				<h1 className="text-3xl font-bold mb-12 font-[family-name:var(--font-geist-mono)]">
 					About Us
 				</h1>
@@ -27,6 +28,9 @@ export default async function About() {
 						</p>
 					)}
 				</div>
+			</div>
+			<div className="mt-20">
+				<DefaultFooter />
 			</div>
 		</div>
 	);

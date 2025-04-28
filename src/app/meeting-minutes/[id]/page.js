@@ -44,9 +44,9 @@ export default async function MeetingMinuteDetail(props) {
 		});
 
 		return (
-			<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
+			<div className="min-h-screen p-8 sm:p-20">
 				<div className="max-w-4xl mx-auto">
-					<div className="flex justify-between items-center mb-6">
+					<div className="flex justify-between items-center mb-6 font-[family-name:var(--font-geist-mono)]">
 						<h1 className="text-3xl font-bold">
 							Meeting Minutes
 						</h1>
@@ -60,19 +60,19 @@ export default async function MeetingMinuteDetail(props) {
 					</div>
 
 					<BoxBase className="mb-6" hoverEffect={false}>
-						<h2 className="text-2xl font-semibold mb-4">
+						<h2 className="text-2xl font-semibold mb-4 font-[family-name:var(--font-geist-mono)]">
 							{meeting.title}
 						</h2>
 
 						{/* Changed from flex row to flex column layout */}
-						<div className="flex flex-col mb-6 text-sm text-gray-500 dark:text-gray-400">
+						<div className="flex flex-col mb-6 text-sm text-gray-500 dark:text-gray-400 font-[family-name:var(--font-geist-mono)]">
 							<span className="mb-1">{formattedDate}</span>
 							<span>Published by: {meeting.author}</span>
 						</div>
 
-						<div className="prose prose-sm max-w-none dark:prose-invert">
+						<div className="prose prose-sm max-w-none dark:prose-invert font-[family-name:var(--font-geist-sans)]">
 							{meeting.content.split('\n').map((paragraph, index) => (
-								<p key={index}>{paragraph}</p>
+								<p key={index} className="mb-4">{paragraph}</p>
 							))}
 						</div>
 					</BoxBase>

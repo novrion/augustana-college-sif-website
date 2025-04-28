@@ -74,7 +74,7 @@ export function MeetingBox({ id, title, date, publisher, excerpt }) {
 				</div>
 			</div>
 
-			<div className="prose prose-sm max-w-none dark:prose-invert">
+			<div className="prose prose-sm max-w-none dark:prose-invert font-[family-name:var(--font-geist-sans)]">
 				<p>{excerpt}</p>
 			</div>
 		</BoxBase>

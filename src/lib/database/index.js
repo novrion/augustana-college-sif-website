@@ -13,6 +13,8 @@ export const {
 	updateUserStatus,
 	getAllUsers,
 	verifyPassword,
+	updateUser,
+	updateUserPassword,
 
 	// Portfolio management
 	getAllHoldings,

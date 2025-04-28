@@ -147,6 +147,50 @@ export async function verifyPassword(plainPassword, hashedPassword) {
 	return await bcrypt.compare(plainPassword, hashedPassword);
 }
 
+/**
+ * Update user information
+ * @param {string} userId - User ID
+ * @param {Object} userData - User data to update (name, email, description)
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateUser(userId, userData) {
+	const { error } = await supabase
+		.from('users')
+		.update({
+			name: userData.name,
+			email: userData.email,
+			description: userData.description
+		})
+		.eq('id', userId);
+
+	if (error) {
+		console.error('Error updating user:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Update user password
+ * @param {string} userId - User ID
+ * @param {string} hashedPassword - New hashed password
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateUserPassword(userId, hashedPassword) {
+	const { error } = await supabase
+		.from('users')
+		.update({ password: hashedPassword })
+		.eq('id', userId);
+
+	if (error) {
+		console.error('Error updating user password:', error);
+		return false;
+	}
+
+	return true;
+}
+
 
 
 

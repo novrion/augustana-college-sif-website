@@ -67,9 +67,9 @@ export default async function NewsletterDetail(props) {
 		};
 
 		return (
-			<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
+			<div className="min-h-screen p-8 sm:p-20">
 				<div className="max-w-4xl mx-auto">
-					<div className="flex justify-between items-center mb-6">
+					<div className="flex justify-between items-center mb-6 font-[family-name:var(--font-geist-mono)]">
 						<h1 className="text-3xl font-bold">
 							Newsletter
 						</h1>
@@ -83,26 +83,26 @@ export default async function NewsletterDetail(props) {
 					</div>
 
 					<BoxBase className="mb-6" hoverEffect={false}>
-						<h2 className="text-2xl font-semibold mb-4">
+						<h2 className="text-2xl font-semibold mb-4 font-[family-name:var(--font-geist-mono)]">
 							{newsletter.title}
 						</h2>
 
 						{/* Changed from flex row to flex column layout */}
-						<div className="flex flex-col mb-6 text-sm text-gray-500 dark:text-gray-400">
+						<div className="flex flex-col mb-6 text-sm text-gray-500 dark:text-gray-400 font-[family-name:var(--font-geist-mono)]">
 							<span className="mb-1">{formattedDate}</span>
 							<span>{newsletter.author}</span>
 						</div>
 
 						{/* Content */}
-						<div className="prose prose-sm max-w-none dark:prose-invert mb-8">
+						<div className="prose prose-sm max-w-none dark:prose-invert mb-8 font-[family-name:var(--font-geist-sans)]">
 							{newsletter.content.split('\n').map((paragraph, index) => (
-								<p key={index}>{paragraph}</p>
+								<p key={index} className="mb-4">{paragraph}</p>
 							))}
 						</div>
 
 						{/* Image Attachments Section */}
 						{newsletter.attachments && newsletter.attachments.filter(isImageAttachment).length > 0 && (
-							<div className="mb-8">
+							<div className="mb-8 font-[family-name:var(--font-geist-mono)]">
 								<h3 className="text-lg font-semibold mb-4">Images</h3>
 								<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 									{newsletter.attachments
@@ -135,7 +135,7 @@ export default async function NewsletterDetail(props) {
 
 						{/* Other Attachments Section */}
 						{newsletter.attachments && newsletter.attachments.filter(a => !isImageAttachment(a)).length > 0 && (
-							<div>
+							<div className="font-[family-name:var(--font-geist-mono)]">
 								<h3 className="text-lg font-semibold mb-4">Attachments</h3>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									{newsletter.attachments
