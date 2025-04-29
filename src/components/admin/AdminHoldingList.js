@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 export default function AdminHoldingList({ holdings }) {
 	const [isLoading, setIsLoading] = useState(false);
@@ -16,10 +17,22 @@ export default function AdminHoldingList({ holdings }) {
 		}).format(value);
 	};
 
-	const handleDeleteHolding = async (holdingId) => {
-		if (!window.confirm('Are you sure you want to delete this holding? This action cannot be undone.')) {
-			return;
-		}
+	// State for delete confirmation modal
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [holdingToDelete, setHoldingToDelete] = useState(null);
+
+	const openDeleteModal = (holding) => {
+		setHoldingToDelete(holding);
+		setIsDeleteModalOpen(true);
+	};
+
+	const closeDeleteModal = () => {
+		setIsDeleteModalOpen(false);
+		setHoldingToDelete(null);
+	};
+
+	const confirmDeleteHolding = async () => {
+		if (!holdingToDelete) return;
 
 		setIsLoading(true);
 		setError('');
@@ -31,7 +44,7 @@ export default function AdminHoldingList({ holdings }) {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					holdingId,
+					holdingId: holdingToDelete.id,
 				}),
 			});
 
@@ -41,6 +54,7 @@ export default function AdminHoldingList({ holdings }) {
 			}
 
 			// Refresh the page
+			closeDeleteModal();
 			router.refresh();
 		} catch (error) {
 			setError(error.message);
@@ -166,9 +180,9 @@ export default function AdminHoldingList({ holdings }) {
 													Edit
 												</Link>
 												<button
-													onClick={() => handleDeleteHolding(holding.id)}
+													onClick={() => openDeleteModal(holding)}
 													disabled={isLoading}
-													className="text-red-500 hover:underline"
+													className="cursor-pointer text-red-500 hover:underline"
 												>
 													Delete
 												</button>
@@ -181,6 +195,17 @@ export default function AdminHoldingList({ holdings }) {
 					</tbody>
 				</table>
 			</div>
+
+			{/* Delete Confirmation Modal */}
+			<DeleteConfirmationModal
+				isOpen={isDeleteModalOpen}
+				onClose={closeDeleteModal}
+				onConfirm={confirmDeleteHolding}
+				title="Delete Holding"
+				message="Are you sure you want to delete this holding?"
+				itemName={holdingToDelete?.title}
+				isLoading={isLoading}
+			/>
 		</div>
 	);
 }

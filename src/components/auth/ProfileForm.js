@@ -190,7 +190,7 @@ export default function ProfileForm({ initialUserData }) {
 						<button
 							type="submit"
 							disabled={isUpdating}
-							className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4 disabled:opacity-50"
+							className="cursor-pointer rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4 disabled:opacity-50"
 						>
 							{isUpdating ? 'Updating...' : 'Update Profile'}
 						</button>
@@ -264,7 +264,7 @@ export default function ProfileForm({ initialUserData }) {
 						<button
 							type="submit"
 							disabled={isChangingPassword}
-							className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4 disabled:opacity-50"
+							className="cursor-pointer rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4 disabled:opacity-50"
 						>
 							{isChangingPassword ? 'Changing...' : 'Change Password'}
 						</button>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 export default function AdminAboutSectionsList({ aboutSections }) {
 	const [isLoading, setIsLoading] = useState(false);
@@ -12,10 +13,22 @@ export default function AdminAboutSectionsList({ aboutSections }) {
 	// Sort sections by order_index before rendering
 	const sortedSections = [...aboutSections].sort((a, b) => a.order_index - b.order_index);
 
-	const handleDeleteAboutSection = async (aboutSectionId) => {
-		if (!window.confirm('Are you sure you want to delete this section? This action cannot be undone.')) {
-			return;
-		}
+	// State for delete confirmation modal
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [aboutSectionToDelete, setAboutSectionToDelete] = useState(null);
+
+	const openDeleteModal = (section) => {
+		setAboutSectionToDelete(section);
+		setIsDeleteModalOpen(true);
+	};
+
+	const closeDeleteModal = () => {
+		setIsDeleteModalOpen(false);
+		setAboutSectionToDelete(null);
+	};
+
+	const confirmDeleteAboutSection = async () => {
+		if (!aboutSectionToDelete) return;
 
 		setIsLoading(true);
 		setError('');
@@ -27,7 +40,7 @@ export default function AdminAboutSectionsList({ aboutSections }) {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					aboutSectionId,
+					aboutSectionId: aboutSectionToDelete.id,
 				}),
 			});
 
@@ -37,6 +50,7 @@ export default function AdminAboutSectionsList({ aboutSections }) {
 			}
 
 			// Refresh the page
+			closeDeleteModal();
 			router.refresh();
 		} catch (error) {
 			setError(error.message);
@@ -140,9 +154,9 @@ export default function AdminAboutSectionsList({ aboutSections }) {
 												Edit
 											</Link>
 											<button
-												onClick={() => handleDeleteAboutSection(section.id)}
+												onClick={() => openDeleteModal(section)}
 												disabled={isLoading}
-												className="text-red-500 hover:underline"
+												className="cursor-pointer text-red-500 hover:underline"
 											>
 												Delete
 											</button>
@@ -154,6 +168,17 @@ export default function AdminAboutSectionsList({ aboutSections }) {
 					</tbody>
 				</table>
 			</div>
+
+			{/* Delete Confirmation Modal */}
+			<DeleteConfirmationModal
+				isOpen={isDeleteModalOpen}
+				onClose={closeDeleteModal}
+				onConfirm={confirmDeleteAboutSection}
+				title="Delete About Section"
+				message="Are you sure you want to delete this section?"
+				itemName={aboutSectionToDelete?.title}
+				isLoading={isLoading}
+			/>
 		</div>
 	);
 }

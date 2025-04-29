@@ -3,11 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 export default function NewsletterList({ newsletters }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const router = useRouter();
+
+	// State for delete confirmation modal
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [newsletterToDelete, setNewsletterToDelete] = useState(null);
 
 	const formatDate = (dateString) => {
 		const date = new Date(dateString);
@@ -18,10 +23,18 @@ export default function NewsletterList({ newsletters }) {
 		});
 	};
 
-	const handleDeleteNewsletter = async (newsletterId) => {
-		if (!window.confirm('Are you sure you want to delete this newsletter? This action cannot be undone.')) {
-			return;
-		}
+	const openDeleteModal = (newsletter) => {
+		setNewsletterToDelete(newsletter);
+		setIsDeleteModalOpen(true);
+	};
+
+	const closeDeleteModal = () => {
+		setIsDeleteModalOpen(false);
+		setNewsletterToDelete(null);
+	};
+
+	const confirmDeleteNewsletter = async () => {
+		if (!newsletterToDelete) return;
 
 		setIsLoading(true);
 		setError('');
@@ -33,7 +46,7 @@ export default function NewsletterList({ newsletters }) {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					newsletterId,
+					newsletterId: newsletterToDelete.id,
 				}),
 			});
 
@@ -42,10 +55,12 @@ export default function NewsletterList({ newsletters }) {
 				throw new Error(data.error || 'Failed to delete newsletter');
 			}
 
-			// Refresh the page
+			// Close modal and refresh the page
+			closeDeleteModal();
 			router.refresh();
 		} catch (error) {
 			setError(error.message);
+			// Keep modal open in case of error
 		} finally {
 			setIsLoading(false);
 		}
@@ -115,9 +130,9 @@ export default function NewsletterList({ newsletters }) {
 												Edit
 											</Link>
 											<button
-												onClick={() => handleDeleteNewsletter(newsletter.id)}
+												onClick={() => openDeleteModal(newsletter)}
 												disabled={isLoading}
-												className="text-red-500 hover:underline"
+												className="cursor-pointer text-red-500 hover:underline"
 											>
 												Delete
 											</button>
@@ -129,6 +144,17 @@ export default function NewsletterList({ newsletters }) {
 					</tbody>
 				</table>
 			</div>
+
+			{/* Delete Confirmation Modal */}
+			<DeleteConfirmationModal
+				isOpen={isDeleteModalOpen}
+				onClose={closeDeleteModal}
+				onConfirm={confirmDeleteNewsletter}
+				title="Delete Newsletter"
+				message="Are you sure you want to delete this newsletter? This action cannot be undone."
+				itemName={newsletterToDelete?.title}
+				isLoading={isLoading}
+			/>
 		</div>
 	);
 }

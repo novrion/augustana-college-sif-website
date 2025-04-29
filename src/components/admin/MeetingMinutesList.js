@@ -3,11 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 export default function MeetingMinutesList({ meetingMinutes }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const router = useRouter();
+
+	// State for delete confirmation modal
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [meetingToDelete, setMeetingToDelete] = useState(null);
 
 	const formatDate = (dateString) => {
 		const date = new Date(dateString);
@@ -18,10 +23,18 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 		});
 	};
 
-	const handleDeleteMeeting = async (meetingId) => {
-		if (!window.confirm('Are you sure you want to delete these meeting minutes? This action cannot be undone.')) {
-			return;
-		}
+	const openDeleteModal = (meeting) => {
+		setMeetingToDelete(meeting);
+		setIsDeleteModalOpen(true);
+	};
+
+	const closeDeleteModal = () => {
+		setIsDeleteModalOpen(false);
+		setMeetingToDelete(null);
+	};
+
+	const confirmDeleteMeeting = async () => {
+		if (!meetingToDelete) return;
 
 		setIsLoading(true);
 		setError('');
@@ -33,7 +46,7 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					meetingId,
+					meetingId: meetingToDelete.id,
 				}),
 			});
 
@@ -42,10 +55,12 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 				throw new Error(data.error || 'Failed to delete meeting minutes');
 			}
 
-			// Refresh the page
+			// Close modal and refresh the page
+			closeDeleteModal();
 			router.refresh();
 		} catch (error) {
 			setError(error.message);
+			// Keep modal open in case of error
 		} finally {
 			setIsLoading(false);
 		}
@@ -109,9 +124,9 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 												Edit
 											</Link>
 											<button
-												onClick={() => handleDeleteMeeting(meeting.id)}
+												onClick={() => openDeleteModal(meeting)}
 												disabled={isLoading}
-												className="text-red-500 hover:underline"
+												className="cursor-pointer text-red-500 hover:underline"
 											>
 												Delete
 											</button>
@@ -123,6 +138,17 @@ export default function MeetingMinutesList({ meetingMinutes }) {
 					</tbody>
 				</table>
 			</div>
+
+			{/* Delete Confirmation Modal */}
+			<DeleteConfirmationModal
+				isOpen={isDeleteModalOpen}
+				onClose={closeDeleteModal}
+				onConfirm={confirmDeleteMeeting}
+				title="Delete Meeting Minute"
+				message="Are you sure you want to delete this meeting minute?"
+				itemName={meetingToDelete?.title}
+				isLoading={isLoading}
+			/>
 		</div>
 	);
 }

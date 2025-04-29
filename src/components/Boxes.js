@@ -37,7 +37,7 @@ export function FeatureBox({ title, description, link, linkText }) {
 	};
 
 	return (
-		<BoxBase onClick={handleClick} className="cursor-pointer">
+		<BoxBase onClick={handleClick} className="cursor-pointer h-full transition-transform hover:scale-[1.02]">
 			<h3 className="text-xl font-semibold mb-3">
 				{title}
 			</h3>
