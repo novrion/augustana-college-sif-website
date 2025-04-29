@@ -12,8 +12,8 @@ export default function Navbar() {
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
 	const pathname = usePathname();
 
-	const isAdmin = session?.user?.role === 'admin';
-	const hasPortfolioAccess = session?.user?.role === 'admin' || session?.user?.role === 'portfolio-access';
+	const hasAdminAccess = session?.user?.role === 'admin' || session?.user?.role === 'president' || session?.user?.role === 'vice_president';
+	const hasPortfolioAccess = hasAdminAccess || session?.user?.role === 'portfolio-access';
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -62,7 +62,7 @@ export default function Navbar() {
 				<Link href="/contact" className="hover:underline">Contact</Link>
 				<Link href="/about" className="hover:underline">About</Link>
 
-				{isAdmin && (
+				{hasAdminAccess && (
 					<Link href="/admin" className="font-bold text-blue-600 hover:underline hover:text-blue-800 transition-colors">
 						Admin
 					</Link>
@@ -72,7 +72,7 @@ export default function Navbar() {
 					<div className="relative">
 						<button
 							onClick={toggleProfile}
-							className="flex items-center gap-2 hover:underline"
+							className="cursor-pointer flex items-center gap-2 hover:underline"
 						>
 							<span className="font-semibold text-blue-600">{session.user.name}</span>
 							<svg
@@ -102,7 +102,7 @@ export default function Navbar() {
 								</Link>
 								<button
 									onClick={handleSignOut}
-									className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500"
+									className="cursor-pointer block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500"
 								>
 									Sign out
 								</button>
@@ -154,7 +154,7 @@ export default function Navbar() {
 						<Link href="/contact" className="text-xl" onClick={toggleMenu}>Contact</Link>
 						<Link href="/about" className="text-xl" onClick={toggleMenu}>About</Link>
 
-						{isAdmin && (
+						{hasAdminAccess && (
 							<Link href="/admin" className="text-xl font-bold text-blue-600" onClick={toggleMenu}>Admin</Link>
 						)}
 

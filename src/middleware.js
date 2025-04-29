@@ -11,11 +11,11 @@ const STATIC_EXTENSIONS = [
 const protectedPaths = [
 	{
 		path: '/portfolio',
-		requiredRoles: ['admin', 'portfolio-access']
+		requiredRoles: ['admin', 'president', 'vice_president', 'portfolio-access']
 	},
 	{
 		path: '/admin',
-		requiredRoles: ['admin']
+		requiredRoles: ['admin', 'president', 'vice_president']
 	}
 ];
 

@@ -1,13 +1,11 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from '../../../../lib/auth';
+import { hasAdminAccess } from '../../../../lib/auth';
 import NewsletterForm from '../../../../components/admin/NewsletterForm';
 
 export default async function AddNewsletterPage() {
-	// Verify user is admin
-	const isAdminUser = await isAdmin();
-
-	if (!isAdminUser) {
+	const hasAccess = await hasAdminAccess();
+	if (!hasAccess) {
 		redirect('/unauthorized');
 	}
 

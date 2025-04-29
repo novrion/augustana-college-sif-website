@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { isAdmin } from '../../../../../lib/auth';
+import { hasAdminAccess } from '../../../../../lib/auth';
 import { updateNewsletter, getNewsletterById } from '../../../../../lib/database';
 
 export async function POST(request) {
 	try {
-		// Verify user is admin
-		const isAdminUser = await isAdmin();
+		const hasAccess = await hasAdminAccess();
 
-		if (!isAdminUser) {
+		if (!hasAccess) {
 			return NextResponse.json(
 				{ error: 'Unauthorized' },
 				{ status: 403 }

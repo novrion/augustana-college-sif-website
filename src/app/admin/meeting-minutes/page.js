@@ -1,16 +1,14 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from '../../../lib/auth';
+import { hasAdminAccess } from '../../../lib/auth';
 import { getPaginatedMeetingMinutes, getMeetingMinutesYears } from '../../../lib/database';
 import MeetingMinutesList from '../../../components/admin/MeetingMinutesList';
 import PaginationControls from '../../../components/PaginationControls';
 import YearFilter from '../../../components/YearFilter';
 
 export default async function AdminMeetingMinutesPage(props) {
-	// Verify user is admin
-	const isAdminUser = await isAdmin();
-
-	if (!isAdminUser) {
+	const hasAccess = await hasAdminAccess();
+	if (!hasAccess) {
 		redirect('/unauthorized');
 	}
 

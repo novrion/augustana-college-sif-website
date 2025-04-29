@@ -1,13 +1,12 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from '../../../../../lib/auth';
+import { hasAdminAccess } from '../../../../../lib/auth';
 import { getAboutSectionById } from '../../../../../lib/database';
 import AboutSectionForm from '../../../../../components/admin/AboutSectionForm';
 
 export default async function EditAboutSectionForm(props) {
-	const isAdminUser = await isAdmin();
-
-	if (!isAdminUser) {
+	const hasAccess = await hasAdminAccess();
+	if (!hasAccess) {
 		redirect('/unauthorized');
 	}
 

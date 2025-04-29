@@ -2,15 +2,13 @@
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from '../../../../../lib/auth';
+import { hasAdminAccess } from '../../../../../lib/auth';
 import { getMeetingMinuteById } from '../../../../../lib/database';
 import MeetingMinuteForm from '../../../../../components/admin/MeetingMinuteForm';
 
 export default async function EditMeetingMinutePage(props) {
-	// Verify user is admin
-	const isAdminUser = await isAdmin();
-
-	if (!isAdminUser) {
+	const hasAccess = await hasAdminAccess();
+	if (!hasAccess) {
 		redirect('/unauthorized');
 	}
 

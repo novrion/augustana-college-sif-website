@@ -40,7 +40,8 @@ export async function POST(request) {
 		const success = await updateUser(session.user.id, {
 			name: userData.name,
 			email: userData.email,
-			description: userData.description || ''
+			description: userData.description || '',
+			phone: userData.phone || null
 		});
 
 		if (!success) {

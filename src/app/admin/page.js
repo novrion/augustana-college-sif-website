@@ -1,12 +1,10 @@
 import { redirect } from 'next/navigation';
-import { isAdmin } from '../../lib/auth';
+import { hasAdminAccess } from '../../lib/auth';
 import AdminDashboardItem from '../../components/admin/AdminDashboardItem';
 
 export default async function AdminPage() {
-	// Verify user is admin
-	const isAdminUser = await isAdmin();
-
-	if (!isAdminUser) {
+	const hasAccess = await hasAdminAccess();
+	if (!hasAccess) {
 		redirect('/unauthorized');
 	}
 

@@ -1,14 +1,59 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import ProfilePicture from '../ProfilePicture';
 
 export default function UserTable({ users }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const router = useRouter();
+	const { data: session } = useSession();
 
-	const handleRoleChange = async (userId, newRole) => {
+	// Check current user's role
+	const isVicePresident = session?.user?.role === 'vice_president';
+	const isAdmin = session?.user?.role === 'admin';
+	const isPresident = session?.user?.role === 'president';
+
+	// Role hierarchy for access control
+	const roleHierarchy = {
+		'admin': 3,
+		'president': 2,
+		'vice_president': 1,
+		'portfolio-access': 0,
+		'user': 0
+	};
+
+	// Get user's hierarchy level
+	const getUserLevel = (role) => {
+		return roleHierarchy[role] || 0;
+	};
+
+	// Current user's level
+	const currentUserLevel = getUserLevel(session?.user?.role);
+
+	const handleRoleChange = async (userId, newRole, currentRole) => {
+		// Prevent changing roles if target user has higher or equal hierarchy
+		const targetUserLevel = getUserLevel(currentRole);
+		if (targetUserLevel >= currentUserLevel) {
+			setError(`You cannot modify users with ${currentRole} role`);
+			return;
+		}
+
+		// Prevent assigning roles higher than the current user's role
+		const newRoleLevel = getUserLevel(newRole);
+		if (newRoleLevel >= currentUserLevel) {
+			setError(`You cannot assign a role higher than or equal to your own role`);
+			return;
+		}
+
+		// President can't modify their own role
+		if (isPresident && userId === session.user.id) {
+			setError('You cannot modify your own role');
+			return;
+		}
+
 		setIsLoading(true);
 		setError('');
 
@@ -38,7 +83,20 @@ export default function UserTable({ users }) {
 		}
 	};
 
-	const handleToggleActive = async (userId, currentStatus) => {
+	const handleToggleActive = async (userId, currentStatus, userRole) => {
+		// Prevent changing status if target user has higher or equal hierarchy
+		const targetUserLevel = getUserLevel(userRole);
+		if (targetUserLevel >= currentUserLevel) {
+			setError(`You cannot modify users with ${userRole} role`);
+			return;
+		}
+
+		// President can't deactivate themselves
+		if (userId === session.user.id) {
+			setError('You cannot deactivate your own account');
+			return;
+		}
+
 		setIsLoading(true);
 		setError('');
 
@@ -68,6 +126,17 @@ export default function UserTable({ users }) {
 		}
 	};
 
+	// Function to determine if user can edit a particular user
+	const canEditUser = (userRole) => {
+		if (!session?.user?.role) return false;
+
+		const targetUserLevel = getUserLevel(userRole);
+		const currentUserLevel = getUserLevel(session.user.role);
+
+		// Can only edit users with lower hierarchy level
+		return currentUserLevel > targetUserLevel;
+	};
+
 	return (
 		<div className="rounded-lg border border-solid border-black/[.08] dark:border-white/[.145] overflow-hidden">
 			{error && (
@@ -81,7 +150,7 @@ export default function UserTable({ users }) {
 					<thead className="bg-gray-50 dark:bg-gray-800">
 						<tr>
 							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider font-[family-name:var(--font-geist-mono)]">
-								Name
+								User
 							</th>
 							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider font-[family-name:var(--font-geist-mono)]">
 								Email
@@ -101,8 +170,19 @@ export default function UserTable({ users }) {
 						{users.map((user) => (
 							<tr key={user.id}>
 								<td className="px-6 py-4 whitespace-nowrap">
-									<div className="text-sm font-medium font-[family-name:var(--font-geist-mono)]">
-										{user.name}
+									<div className="flex items-center">
+										<div className="flex-shrink-0 h-10 w-10">
+											<ProfilePicture
+												src={user.profile_picture || '/default-avatar.svg'}
+												alt={`${user.name}'s profile`}
+												size="small"
+											/>
+										</div>
+										<div className="ml-4">
+											<div className="text-sm font-medium font-[family-name:var(--font-geist-mono)]">
+												{user.name}
+											</div>
+										</div>
 									</div>
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap">
@@ -113,12 +193,14 @@ export default function UserTable({ users }) {
 								<td className="px-6 py-4 whitespace-nowrap">
 									<select
 										value={user.role}
-										onChange={(e) => handleRoleChange(user.id, e.target.value)}
-										disabled={isLoading}
-										className="text-sm rounded-md border border-black/[.08] dark:border-white/[.145] bg-white dark:bg-gray-800 font-[family-name:var(--font-geist-mono)]"
+										onChange={(e) => handleRoleChange(user.id, e.target.value, user.role)}
+										disabled={isLoading || !canEditUser(user.role)}
+										className={`text-sm rounded-md border border-black/[.08] dark:border-white/[.145] bg-white dark:bg-gray-800 font-[family-name:var(--font-geist-mono)] ${!canEditUser(user.role) ? 'opacity-60 cursor-not-allowed' : ''}`}
 									>
 										<option value="user">User</option>
 										<option value="portfolio-access">Portfolio Access</option>
+										<option value="vice_president">Vice President</option>
+										<option value="president">President</option>
 										<option value="admin">Admin</option>
 									</select>
 								</td>
@@ -131,13 +213,17 @@ export default function UserTable({ users }) {
 									</span>
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-									<button
-										onClick={() => handleToggleActive(user.id, user.is_active)}
-										disabled={isLoading}
-										className="text-blue-500 hover:underline font-[family-name:var(--font-geist-mono)]"
-									>
-										{user.is_active ? 'Deactivate' : 'Activate'}
-									</button>
+									<div className="flex space-x-3">
+										{canEditUser(user.role) && (
+											<button
+												onClick={() => handleToggleActive(user.id, user.is_active, user.role)}
+												disabled={isLoading}
+												className="cursor-pointer text-blue-500 hover:underline font-[family-name:var(--font-geist-mono)]"
+											>
+												{user.is_active ? 'Deactivate' : 'Activate'}
+											</button>
+										)}
+									</div>
 								</td>
 							</tr>
 						))}

@@ -159,7 +159,8 @@ export async function updateUser(userId, userData) {
 		.update({
 			name: userData.name,
 			email: userData.email,
-			description: userData.description
+			description: userData.description,
+			phone: userData.phone
 		})
 		.eq('id', userId);
 
@@ -191,6 +192,135 @@ export async function updateUserPassword(userId, hashedPassword) {
 	return true;
 }
 
+
+/**
+ * Upload a profile picture
+ * @param {File} file - The file to upload
+ * @param {string} userId - The ID of the user
+ * @returns {Promise<Object|null>} Profile picture metadata or null
+ */
+export async function uploadProfilePicture(file, userId) {
+	const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+	const filePath = `profile_pictures/${userId}/${fileName}`;
+
+	const { error } = await supabase.storage
+		.from('profile-pictures')
+		.upload(filePath, file);
+
+	if (error) {
+		console.error('Error uploading profile picture:', error);
+		return null;
+	}
+
+	const { data } = supabase.storage
+		.from('profile-pictures')
+		.getPublicUrl(filePath);
+
+	return {
+		name: fileName,
+		originalName: file.name,
+		url: data.publicUrl,
+		path: filePath,
+		type: file.type,
+		size: file.size
+	};
+}
+
+/**
+ * Update user profile picture URL
+ * @param {string} userId - User ID
+ * @param {string} profilePictureUrl - URL to the profile picture
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateUserProfilePicture(userId, profilePictureUrl) {
+	const { error } = await supabase
+		.from('users')
+		.update({ profile_picture: profilePictureUrl })
+		.eq('id', userId);
+
+	if (error) {
+		console.error('Error updating user profile picture:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Get user by role
+ * @param {string} role - User role to search for
+ * @returns {Promise<Array>} Array of users with specified role
+ */
+export async function getUsersByRole(role) {
+	const { data, error } = await supabase
+		.from('users')
+		.select('*')
+		.eq('role', role);
+
+	if (error) {
+		console.error('Error fetching users by role:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+/**
+ * Get leadership users (president and vice_president)
+ * @returns {Promise<Object>} Object containing president and vice_president user data
+ */
+export async function getLeadershipUsers() {
+	const { data, error } = await supabase
+		.from('users')
+		.select('*')
+		.in('role', ['president', 'vice_president']);
+
+	if (error) {
+		console.error('Error fetching leadership users:', error);
+		return { president: null, vicePresident: null };
+	}
+
+	const president = data.find(user => user.role === 'president') || null;
+	const vicePresident = data.find(user => user.role === 'vice_president') || null;
+
+	return { president, vicePresident };
+}
+
+/**
+ * Create a new user with extended profile data
+ * @param {Object} userData - User data (name, email, password, etc.)
+ * @returns {Promise<Object|null>} Created user or null
+ */
+export async function createUserExtended({ name, email, password, title = '', description = '', profile_picture = null, phone = null }) {
+	// Hash the password
+	const salt = await bcrypt.genSalt(10);
+	const hashedPassword = await bcrypt.hash(password, salt);
+
+	const { data, error } = await supabase
+		.from('users')
+		.insert([
+			{
+				name,
+				email,
+				password: hashedPassword,
+				role: 'user',
+				is_active: true,
+				title,
+				description,
+				profile_picture,
+				phone
+			}
+		])
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error creating user:', error);
+		throw error;
+	}
+
+	return data;
+}
 
 
 

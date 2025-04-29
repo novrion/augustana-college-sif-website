@@ -1,20 +1,18 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { hasPortfolioAccess, isAdmin } from '../../lib/auth';
+import { hasPortfolioAccess, hasAdminAccess } from '../../lib/auth';
 import { getAllHoldings, getCashBalance } from '../../lib/database';
 import PortfolioTable from '../../components/portfolio/PortfolioTable';
 import PortfolioSummary from '../../components/portfolio/PortfolioSummary';
 
 export default async function Portfolio() {
-	// Verify user has access to portfolio
-	const hasAccess = await hasPortfolioAccess();
-
-	if (!hasAccess) {
+	const hasPortfolioViewAccess = await hasPortfolioAccess();
+	if (!hasPortfolioViewAccess) {
 		redirect('/unauthorized');
 	}
 
 	// Verify user is admin to show 'Manage Portfolio'
-	const canManagePortfolio = await isAdmin();
+	const canManagePortfolio = await hasAdminAccess();
 
 	// Fetch all holdings and cash balance
 	const holdings = await getAllHoldings();

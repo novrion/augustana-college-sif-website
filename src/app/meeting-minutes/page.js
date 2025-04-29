@@ -1,7 +1,7 @@
 import { getPaginatedMeetingMinutes, getMeetingMinutesYears } from '../../lib/database';
 import { MeetingBox } from '../../components/Boxes';
 import Link from 'next/link';
-import { isAdmin } from '../../lib/auth';
+import { hasAdminAccess } from '../../lib/auth';
 import PaginationControls from '../../components/PaginationControls';
 import YearFilter from '../../components/YearFilter';
 
@@ -46,7 +46,7 @@ export default async function MeetingMinutesPage(props) {
 	const years = await getMeetingMinutesYears();
 
 	// Check if user is admin
-	const isAdminUser = await isAdmin();
+	const hasAccess = await hasAdminAccess();
 
 	return (
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
@@ -57,7 +57,7 @@ export default async function MeetingMinutesPage(props) {
 					</h1>
 
 					{/* Only show Add button if user is admin */}
-					{isAdminUser && (
+					{hasAccess && (
 						<Link
 							href="/admin/meeting-minutes/add"
 							className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4"

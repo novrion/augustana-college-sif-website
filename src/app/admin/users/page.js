@@ -1,14 +1,12 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from '../../../lib/auth';
+import { hasAdminAccess } from '../../../lib/auth';
 import { getAllUsers } from '../../../lib/database';
 import UserTable from '../../../components/admin/UserTable';
 
 export default async function UsersPage() {
-	// Verify user is admin
-	const isAdminUser = await isAdmin();
-
-	if (!isAdminUser) {
+	const hasAccess = await hasAdminAccess();
+	if (!hasAccess) {
 		redirect('/unauthorized');
 	}
 

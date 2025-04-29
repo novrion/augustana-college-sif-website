@@ -80,7 +80,7 @@ export default function MeetingMinuteForm({ initialData = null }) {
 			}
 
 			// Redirect back to meeting minutes page
-			router.push('/meeting-minutes');
+			router.push('/admin/meeting-minutes');
 			router.refresh();
 		} catch (error) {
 			console.error("Submission error:", error);

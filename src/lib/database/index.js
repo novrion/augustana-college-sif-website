@@ -15,6 +15,11 @@ export const {
 	verifyPassword,
 	updateUser,
 	updateUserPassword,
+	uploadProfilePicture,
+	updateUserProfilePicture,
+	getUsersByRole,
+	getLeadershipUsers,
+	createUserExtended,
 
 	// Portfolio management
 	getAllHoldings,
