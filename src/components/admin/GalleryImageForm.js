@@ -26,7 +26,7 @@ export default function GalleryImageForm({ initialData = null }) {
 		if (formData.description) {
 			setCharCount(formData.description.length);
 		}
-	}, []);
+	}, [formData.description]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
