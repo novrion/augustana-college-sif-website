@@ -126,10 +126,6 @@ export default function PortfolioTable({ holdings, cashBalance, totalPortfolioVa
 								Sector {getSortIndicator('sector')}
 							</th>
 							<th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer"
-								onClick={() => requestSort('share_count')}>
-								Shares {getSortIndicator('share_count')}
-							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer"
 								onClick={() => requestSort('current_price')}>
 								Current Price {getSortIndicator('current_price')}
 							</th>
@@ -172,9 +168,6 @@ export default function PortfolioTable({ holdings, cashBalance, totalPortfolioVa
 									</td>
 									<td className="px-6 py-4 whitespace-nowrap text-sm">
 										{holding.sector}
-									</td>
-									<td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-										{(holding.share_count ?? 0).toLocaleString()}
 									</td>
 									<td className="px-6 py-4 whitespace-nowrap text-sm text-right">
 										{formatCurrency(holding.current_price)}

@@ -1000,6 +1000,581 @@ export async function deleteAboutSection(id) {
 
 
 
+
+/**
+ * Get the maximum order_index from gallery images
+ * @returns {Promise<number>} Max order index or 0 if no images exist
+ */
+export async function getMaxGalleryImageOrderIndex() {
+	const { data, error } = await supabase
+		.from('gallery_images')
+		.select('order_index')
+		.order('order_index', { ascending: false })
+		.limit(1);
+
+	if (error || !data || data.length === 0) {
+		return 0;
+	}
+
+	return data[0].order_index || 0;
+}
+
+/**
+ * Update order_index of a gallery image
+ * @param {string} id - Gallery image ID
+ * @param {number} orderIndex - New order index
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateGalleryImageOrder(id, orderIndex) {
+	const { error } = await supabase
+		.from('gallery_images')
+		.update({ order_index: orderIndex })
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error updating gallery image order:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Reorder a gallery image (move up or down)
+ * @param {string} id - Gallery image ID to reorder
+ * @param {string} direction - Direction to move ('up' or 'down')
+ * @returns {Promise<boolean>} Success status
+ */
+export async function reorderGalleryImage(id, direction) {
+	// Get the current image
+	const { data: currentImage, error: currentError } = await supabase
+		.from('gallery_images')
+		.select('*')
+		.eq('id', id)
+		.single();
+
+	if (currentError || !currentImage) {
+		console.error('Error fetching current image:', currentError);
+		return false;
+	}
+
+	// Find the adjacent image based on direction
+	const operator = direction === 'up' ? 'lt' : 'gt';
+	const ordering = direction === 'up' ? { ascending: false } : { ascending: true };
+
+	const { data: adjacentImage, error: adjacentError } = await supabase
+		.from('gallery_images')
+		.select('*')
+		.filter('order_index', operator, currentImage.order_index)
+		.order('order_index', ordering)
+		.limit(1)
+		.single();
+
+	if (adjacentError || !adjacentImage) {
+		// No adjacent image means this image is already at the boundary
+		return true;
+	}
+
+	// Swap order indices
+	const tempOrderIndex = currentImage.order_index;
+
+	// Update both images
+	const updates = [
+		updateGalleryImageOrder(currentImage.id, adjacentImage.order_index),
+		updateGalleryImageOrder(adjacentImage.id, tempOrderIndex)
+	];
+
+	// Wait for both updates to complete
+	const results = await Promise.all(updates);
+
+	// Return true only if both updates succeeded
+	return results.every(result => result === true);
+}
+
+/**
+ * Modified version of getAllGalleryImages to respect order_index
+ * @returns {Promise<Array>} Array of gallery images
+ */
+export async function getAllGalleryImages() {
+	const { data, error } = await supabase
+		.from('gallery_images')
+		.select('*')
+		.order('order_index', { ascending: true })
+		.order('created_at', { ascending: false });
+
+	if (error) {
+		console.error('Error fetching gallery images:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+/**
+ * Modified version of createGalleryImage to set initial order_index
+ * @param {Object} imageData - Gallery image data
+ * @returns {Promise<Object|null>} Created gallery image or null
+ */
+export async function createGalleryImage(imageData) {
+	// Get max order index and increment by 1
+	const maxOrderIndex = await getMaxGalleryImageOrderIndex();
+	const newOrderIndex = maxOrderIndex + 1;
+
+	// Add order_index to image data
+	const imageWithOrder = {
+		...imageData,
+		order_index: newOrderIndex
+	};
+
+	const { data, error } = await supabase
+		.from('gallery_images')
+		.insert([imageWithOrder])
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error creating gallery image:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Get gallery image by ID
+ * @param {string} id - Gallery image ID
+ * @returns {Promise<Object|null>} Gallery image object or null
+ */
+export async function getGalleryImageById(id) {
+	const { data, error } = await supabase
+		.from('gallery_images')
+		.select('*')
+		.eq('id', id)
+		.single();
+
+	if (error) {
+		console.error('Error fetching gallery image by ID:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Upload a gallery image
+ * @param {File} file - The file to upload
+ * @returns {Promise<Object|null>} Image metadata or null
+ */
+export async function uploadGalleryImage(file) {
+	const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+	const filePath = `gallery_images/${fileName}`;
+
+	const { error } = await supabase.storage
+		.from('gallery')
+		.upload(filePath, file);
+
+	if (error) {
+		console.error('Error uploading gallery image:', error);
+		return null;
+	}
+
+	const { data } = supabase.storage
+		.from('gallery')
+		.getPublicUrl(filePath);
+
+	return {
+		name: fileName,
+		originalName: file.name,
+		url: data.publicUrl,
+		path: filePath,
+		type: file.type,
+		size: file.size
+	};
+}
+
+/**
+ * Delete a gallery image
+ * @param {string} id - Gallery image ID
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteGalleryImage(id) {
+	// First get the image to get its path
+	const image = await getGalleryImageById(id);
+
+	if (!image || !image.src) {
+		return false;
+	}
+
+	// Extract the path from the URL
+	const urlParts = image.src.split('/');
+	const fileName = urlParts[urlParts.length - 1];
+	const filePath = `gallery_images/${fileName}`;
+
+	// Delete the file from storage
+	const { error: storageError } = await supabase.storage
+		.from('gallery')
+		.remove([filePath]);
+
+	if (storageError) {
+		console.error('Error deleting file from storage:', storageError);
+		// Continue anyway to try deleting the database record
+	}
+
+	// Delete the database record
+	const { error } = await supabase
+		.from('gallery_images')
+		.delete()
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error deleting gallery image:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Update a gallery image
+ * @param {string} id - Gallery image ID
+ * @param {Object} updateData - Data to update
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateGalleryImage(id, updateData) {
+	const { error } = await supabase
+		.from('gallery_images')
+		.update(updateData)
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error updating gallery image:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Delete a gallery image file from storage
+ * @param {string} url - URL of the file to delete
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteGalleryImageFile(url) {
+	try {
+		// Extract the file path from the URL
+		const urlObj = new URL(url);
+		const pathParts = urlObj.pathname.split('/');
+		const bucketName = pathParts[1]; // Usually "gallery"
+
+		// The file path will be everything after the bucket name
+		const filePath = pathParts.slice(2).join('/');
+
+		// Delete the file from storage
+		const { error } = await supabase.storage
+			.from(bucketName)
+			.remove([filePath]);
+
+		if (error) {
+			console.error('Error deleting gallery image file:', error);
+			return false;
+		}
+
+		return true;
+	} catch (error) {
+		console.error('Error parsing URL for file deletion:', error);
+		return false;
+	}
+}
+
+// Add or update these functions in lib/supabase.js
+
+/**
+ * Extract file path from a Supabase storage URL
+ * @param {string} url - The Supabase storage URL
+ * @returns {Object|null} Object containing bucket and filePath, or null if invalid
+ */
+export function extractFilePathFromUrl(url) {
+	try {
+		if (!url) return null;
+
+		// Match bucket and file path from URL
+		// Format: https://[domain]/storage/v1/object/public/[bucket]/[filepath]
+		const regex = /\/storage\/v1\/object\/public\/([^\/]+)\/(.+)$/;
+		const match = url.match(regex);
+
+		if (!match || match.length < 3) return null;
+
+		return {
+			bucket: match[1],
+			filePath: match[2]
+		};
+	} catch (error) {
+		console.error('Error extracting file path from URL:', error);
+		return null;
+	}
+}
+
+/**
+ * Delete a file from Supabase storage
+ * @param {string} url - URL of the file to delete
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteFileFromStorage(url) {
+	try {
+		if (!url) return false;
+
+		const fileInfo = extractFilePathFromUrl(url);
+		if (!fileInfo) return false;
+
+		const { bucket, filePath } = fileInfo;
+
+		// Delete the file from storage
+		const { error } = await supabase.storage
+			.from(bucket)
+			.remove([filePath]);
+
+		if (error) {
+			console.error(`Error deleting file from ${bucket}:`, error);
+			return false;
+		}
+
+		console.log(`Successfully deleted file from ${bucket}: ${filePath}`);
+		return true;
+	} catch (error) {
+		console.error('Error deleting file from storage:', error);
+		return false;
+	}
+}
+
+/**
+ * Enhanced version of updateGalleryImage that also handles file cleanup
+ * @param {string} id - Gallery image ID
+ * @param {Object} updateData - Data to update
+ * @param {string|null} oldImageUrl - URL of the old image to delete (if replacing)
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateGalleryImageWithCleanup(id, updateData, oldImageUrl = null) {
+	try {
+		// Delete old image if provided and a new one is being set
+		if (oldImageUrl && updateData.src && oldImageUrl !== updateData.src) {
+			await deleteFileFromStorage(oldImageUrl);
+		}
+
+		// Update the database record
+		const { error } = await supabase
+			.from('gallery_images')
+			.update(updateData)
+			.eq('id', id);
+
+		if (error) {
+			console.error('Error updating gallery image:', error);
+			return false;
+		}
+
+		return true;
+	} catch (error) {
+		console.error('Error in updateGalleryImageWithCleanup:', error);
+		return false;
+	}
+}
+
+/**
+ * Enhanced version of uploadProfilePicture that also handles cleanup
+ * @param {File} file - The file to upload
+ * @param {string} userId - The ID of the user
+ * @param {string|null} oldImageUrl - URL of the old profile picture to delete
+ * @returns {Promise<Object|null>} Profile picture metadata or null
+ */
+export async function uploadProfilePictureWithCleanup(file, userId, oldImageUrl = null) {
+	try {
+		// Delete old profile picture if it exists
+		if (oldImageUrl) {
+			await deleteFileFromStorage(oldImageUrl);
+		}
+
+		// Now upload the new file
+		const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+		const filePath = `profile_pictures/${userId}/${fileName}`;
+
+		const { error } = await supabase.storage
+			.from('profile-pictures')
+			.upload(filePath, file);
+
+		if (error) {
+			console.error('Error uploading profile picture:', error);
+			return null;
+		}
+
+		const { data } = supabase.storage
+			.from('profile-pictures')
+			.getPublicUrl(filePath);
+
+		return {
+			name: fileName,
+			originalName: file.name,
+			url: data.publicUrl,
+			path: filePath,
+			type: file.type,
+			size: file.size
+		};
+	} catch (error) {
+		console.error('Error in uploadProfilePictureWithCleanup:', error);
+		return null;
+	}
+}
+
+
+
+/**
+ * Get all guest speakers
+ * @returns {Promise<Array>} Array of guest speakers
+ */
+export async function getAllSpeakers() {
+	const { data, error } = await supabase
+		.from('guest_speakers')
+		.select('*')
+		.order('event_date', { ascending: true });
+
+	if (error) {
+		console.error('Error fetching speakers:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+/**
+ * Get speaker by ID
+ * @param {string} id - Speaker ID
+ * @returns {Promise<Object|null>} Speaker object or null
+ */
+export async function getSpeakerById(id) {
+	const { data, error } = await supabase
+		.from('guest_speakers')
+		.select('*')
+		.eq('id', id)
+		.single();
+
+	if (error) {
+		console.error('Error fetching speaker by ID:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Create a new guest speaker event
+ * @param {Object} speakerData - Speaker data
+ * @returns {Promise<Object|null>} Created speaker or null
+ */
+export async function createSpeaker(speakerData) {
+	const { data, error } = await supabase
+		.from('guest_speakers')
+		.insert([speakerData])
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error creating speaker:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Update a guest speaker event
+ * @param {string} id - Speaker ID
+ * @param {Object} speakerData - Updated speaker data
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateSpeaker(id, speakerData) {
+	const { error } = await supabase
+		.from('guest_speakers')
+		.update(speakerData)
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error updating speaker:', error);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Delete a guest speaker event
+ * @param {string} id - Speaker ID
+ * @returns {Promise<boolean>} Success status
+ */
+export async function deleteSpeaker(id) {
+	const { error } = await supabase
+		.from('guest_speakers')
+		.delete()
+		.eq('id', id);
+
+	if (error) {
+		console.error('Error deleting speaker:', error);
+		return false;
+	}
+
+	return true;
+}
+
+export async function getUpcomingSpeakers() {
+	// Get current date at the start of the day (midnight) in local time
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const todayString = today.toISOString().split('T')[0];
+
+	const { data, error } = await supabase
+		.from('guest_speakers')
+		.select('*')
+		.gte('event_date', todayString)
+		.order('event_date', { ascending: true });
+
+	if (error) {
+		console.error('Error fetching upcoming speakers:', error);
+		return [];
+	}
+
+	return data || [];
+}
+
+export async function getPastSpeakers(page = 1, pageSize = 10) {
+	// Get current date at the start of the day (midnight) in local time
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const todayString = today.toISOString().split('T')[0];
+
+	// Calculate pagination offset
+	const offset = (page - 1) * pageSize;
+
+	const { data, count, error } = await supabase
+		.from('guest_speakers')
+		.select('*', { count: 'exact' })
+		.lt('event_date', todayString)
+		.order('event_date', { ascending: false })
+		.range(offset, offset + pageSize - 1);
+
+	if (error) {
+		console.error('Error fetching past speakers:', error);
+		return { data: [], total: 0, totalPages: 0 };
+	}
+
+	// Calculate total pages
+	const totalPages = Math.ceil((count || 0) / pageSize);
+
+	return {
+		data: data || [],
+		total: count || 0,
+		totalPages
+	};
+}
+
+
+
 /**
  * Initialize database connection (not needed for Supabase)
  */

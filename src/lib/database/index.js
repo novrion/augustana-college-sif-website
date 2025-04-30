@@ -20,6 +20,7 @@ export const {
 	getUsersByRole,
 	getLeadershipUsers,
 	createUserExtended,
+	uploadProfilePictureWithCleanup,
 
 	// Portfolio management
 	getAllHoldings,
@@ -57,6 +58,31 @@ export const {
 	createAboutSection,
 	updateAboutSection,
 	deleteAboutSection,
+
+	// Gallery management
+	getAllGalleryImages,
+	getGalleryImageById,
+	uploadGalleryImage,
+	createGalleryImage,
+	deleteGalleryImage,
+	getMaxGalleryImageOrderIndex,
+	updateGalleryImageOrder,
+	reorderGalleryImage,
+	updateGalleryImage,
+	updateGalleryImageWithCleanup,
+
+	// File management utilities
+	extractFilePathFromUrl,
+	deleteFileFromStorage,
+
+	// Guest speaker management
+	getAllSpeakers,
+	getSpeakerById,
+	createSpeaker,
+	updateSpeaker,
+	deleteSpeaker,
+	getUpcomingSpeakers,
+	getPastSpeakers,
 
 	// Initialize connection (if needed)
 	initDb

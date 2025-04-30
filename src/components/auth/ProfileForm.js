@@ -189,7 +189,7 @@ export default function ProfileForm({ initialUserData }) {
 							editable={true}
 							onImageChange={handleProfilePictureChange}
 						/>
-						<p className="mt-4 text-sm text-gray-500">Click the image to upload a new profile picture</p>
+						<p className="mt-4 text-sm text-gray-500">Click the image to upload a profile picture</p>
 					</div>
 
 					<div>
@@ -224,7 +224,7 @@ export default function ProfileForm({ initialUserData }) {
 
 					<div>
 						<label className="block text-sm font-medium mb-1 font-[family-name:var(--font-geist-mono)]" htmlFor="phone">
-							Phone (Optional)
+							Phone
 						</label>
 						<input
 							id="phone"
@@ -232,7 +232,7 @@ export default function ProfileForm({ initialUserData }) {
 							type="tel"
 							value={formData.phone}
 							onChange={handleChange}
-							placeholder="(Optional) E.g., (309) 555-1234"
+							placeholder="(Optional)"
 							className="w-full px-3 py-2 border border-black/[.08] dark:border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>

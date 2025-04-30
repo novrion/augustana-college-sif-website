@@ -1,7 +1,12 @@
+// app/api/auth/upload-profile-picture/route.js
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/auth';
-import { uploadProfilePicture, updateUserProfilePicture, getUserById } from '../../../../lib/database';
+import {
+	uploadProfilePictureWithCleanup,
+	updateUserProfilePicture,
+	getUserById
+} from '../../../../lib/database';
 
 export async function POST(request) {
 	try {
@@ -45,8 +50,21 @@ export async function POST(request) {
 			);
 		}
 
-		// Upload the profile picture
-		const profilePicture = await uploadProfilePicture(file, session.user.id);
+		// Get the current user to check if they have an existing profile picture
+		const user = await getUserById(session.user.id);
+		if (!user) {
+			return NextResponse.json(
+				{ error: 'User not found' },
+				{ status: 404 }
+			);
+		}
+
+		// Upload the profile picture with cleanup
+		const profilePicture = await uploadProfilePictureWithCleanup(
+			file,
+			session.user.id,
+			user.profile_picture // Pass current profile picture URL for cleanup
+		);
 
 		if (!profilePicture) {
 			return NextResponse.json(

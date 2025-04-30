@@ -120,6 +120,16 @@ export function NewsletterBox({ id, title, date, author, excerpt }) {
 export function SpeakerEventBox({ id, title, speaker, role, company, date, description, past, details }) {
 	const [isExpanded, setIsExpanded] = useState(false);
 
+	// Updated isPast check - event is only past if the day is completely over
+	const isPast = () => {
+		const eventDate = new Date(event.event_date);
+		eventDate.setHours(23, 59, 59, 999); // End of the event day
+		return eventDate < new Date();
+	};
+
+	// Use the function
+	const eventIsPast = isPast();
+
 	const toggleExpand = () => {
 		setIsExpanded(!isExpanded);
 	};
@@ -132,9 +142,6 @@ export function SpeakerEventBox({ id, title, speaker, role, company, date, descr
 		month: 'long',
 		day: 'numeric'
 	});
-
-	// Determine if the event is upcoming or past
-	const isPast = past || (new Date() > eventDate);
 
 	return (
 		<BoxBase className={isPast ? "border-l-4 border-l-gray-400" : "border-l-4 border-l-blue-500"}>

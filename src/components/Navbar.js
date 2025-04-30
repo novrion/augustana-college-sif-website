@@ -28,15 +28,14 @@ export default function Navbar() {
 	};
 
 	return (
-		<nav className="w-full px-8 py-4 sm:px-20 flex items-center justify-between border-b border-black/[.08] dark:border-white/[.145] font-[family-name:var(--font-geist-mono)]">
+		<nav className="w-full px-8 py-4 sm:px-18 flex items-center justify-between border-b border-black/[.08] dark:border-white/[.145] font-[family-name:var(--font-geist-mono)]">
 			<Link href="/" className="font-bold text-xl flex items-center gap-2">
 				<Image
 					src="/logo.svg"
 					alt="LOGO"
-					width={32}
-					height={32}
+					width={60}
+					height={60}
 				/>
-				Augustana College SIF
 			</Link>
 
 			<div className="hidden sm:flex items-center gap-8">
