@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { hasAdminAccess } from '../../../../../lib/auth';
 import { updateHolding, getHoldingById } from '../../../../../lib/database';
+import { getStockQuote, getStockInfo } from '@/lib/finnhub.js'
 
 export async function POST(request) {
 	try {
@@ -32,6 +33,29 @@ export async function POST(request) {
 				{ status: 404 }
 			);
 		}
+
+		// Get holding information from stock API provider
+		const holdingInfo = await getStockInfo(holdingData?.ticker);
+		if (!holdingInfo) {
+			return NextResponse.json(
+				{ error: 'Failed to get holding info' },
+				{ status: 500 }
+			);
+		}
+
+		// Populate with company data
+		holdingData.company_name = holdingInfo.name;
+		holdingData.sector = holdingInfo.finnhubIndustry;
+
+		const holdingQuote = await getStockQuote(holdingData?.ticker);
+		if (!holdingQuote) {
+			return NextResponse.json(
+				{ error: 'Failed to get holding quote' },
+				{ status: 500 }
+			);
+		}
+
+		holdingData.current_price = holdingQuote.c;
 
 		// Update the holding
 		const success = await updateHolding(holdingData.id, holdingData);

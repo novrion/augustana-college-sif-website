@@ -6,9 +6,15 @@ import DefaultFooter from '@/components/DefaultFooter';
 const boxesData = [
   {
     title: "Our Portfolio",
-    description: "View our current holdings, performance metrics, and investment strategy.",
+    description: "View our current holdings and performance metrics.",
     link: "/portfolio",
     linkText: "Portfolio Tracker"
+  },
+  {
+    title: "Guest Speakers",
+    description: "Access our upcoming and past industry experts sharing valuable insights.",
+    link: "/calendar",
+    linkText: "Calendar"
   },
   {
     title: "Our Newsletter",
@@ -16,12 +22,7 @@ const boxesData = [
     link: "/newsletter",
     linkText: "Newsletter"
   },
-  {
-    title: "Guest Speakers",
-    description: "Access our upcoming and past industry experts and financial professionals sharing valuable insights.",
-    link: "/calendar",
-    linkText: "Calendar"
-  },
+
   {
     title: "Gallery",
     description: "Browse photos from stock pitches, events, fund meetings, guest speakers, and more.",

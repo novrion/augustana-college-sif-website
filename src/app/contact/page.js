@@ -138,7 +138,7 @@ export default function Contact() {
 					<h2 className="text-xl font-semibold mb-4 font-[family-name:var(--font-geist-mono)]">
 						Follow Us
 					</h2>
-					<div className="flex items-center gap-4">
+					<div className="flex items-center gap-4 font-[family-name:var(--font-geist-sans)]">
 						<a
 							href="https://www.instagram.com/augieinvestmentfund/"
 							target="_blank"

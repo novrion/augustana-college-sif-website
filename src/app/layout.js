@@ -1,6 +1,8 @@
+// app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar";
+import StockTicker from "../components/StockTicker"; // Import StockTicker
 import { AuthProvider } from "../components/auth/AuthProvider";
 
 const geistSans = Geist({
@@ -28,6 +30,7 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <Navbar />
+          <StockTicker /> {/* Add StockTicker right after Navbar */}
           {children}
         </AuthProvider>
       </body>

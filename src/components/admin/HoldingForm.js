@@ -13,7 +13,7 @@ export default function HoldingForm({ initialData = null }) {
 		share_count: initialData?.share_count || '',
 		cost_basis: initialData?.cost_basis || '',
 		current_price: initialData?.current_price || '',
-		purchase_date: initialData?.purchase_date ? new Date(initialData.purchase_date).toISOString().split('T')[0] : '',
+		purchase_date: initialData?.purchase_date ? new Date(initialData.purchase_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
 	});
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -32,8 +32,7 @@ export default function HoldingForm({ initialData = null }) {
 		setError('');
 
 		// Validate form
-		if (!formData.ticker || !formData.company_name || !formData.share_count ||
-			!formData.cost_basis || !formData.current_price || !formData.purchase_date) {
+		if (!formData.ticker || !formData.share_count || !formData.cost_basis || !formData.purchase_date) {
 			setError('Please fill in all required fields');
 			setIsLoading(false);
 			return;
@@ -115,35 +114,6 @@ export default function HoldingForm({ initialData = null }) {
 							required
 						/>
 					</div>
-
-					<div>
-						<label className="block text-sm font-medium mb-1" htmlFor="company_name">
-							Company Name *
-						</label>
-						<input
-							id="company_name"
-							name="company_name"
-							type="text"
-							value={formData.company_name}
-							onChange={handleChange}
-							className="w-full px-3 py-2 border border-black/[.08] dark:border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-							required
-						/>
-					</div>
-
-					<div>
-						<label className="block text-sm font-medium mb-1" htmlFor="sector">
-							Sector
-						</label>
-						<input
-							id="sector"
-							name="sector"
-							type="text"
-							value={formData.sector}
-							onChange={handleChange}
-							className="w-full px-3 py-2 border border-black/[.08] dark:border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
-					</div>
 				</div>
 
 				{/* Investment Details */}
@@ -182,23 +152,6 @@ export default function HoldingForm({ initialData = null }) {
 						<p className="text-xs text-gray-500 mt-1">
 							The total amount invested including fees and commissions
 						</p>
-					</div>
-
-					<div>
-						<label className="block text-sm font-medium mb-1" htmlFor="current_price">
-							Current Price ($) *
-						</label>
-						<input
-							id="current_price"
-							name="current_price"
-							type="number"
-							min="0"
-							step="0.01"
-							value={formData.current_price}
-							onChange={handleChange}
-							className="w-full px-3 py-2 border border-black/[.08] dark:border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-							required
-						/>
 					</div>
 				</div>
 

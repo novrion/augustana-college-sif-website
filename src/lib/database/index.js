@@ -1,4 +1,4 @@
-import * as supabaseProvider from './supabase';
+import * as supabaseProvider from './supabase.js';
 
 // Export the current database provider
 // This allows us to easily switch providers by changing this import
@@ -83,6 +83,9 @@ export const {
 	deleteSpeaker,
 	getUpcomingSpeakers,
 	getPastSpeakers,
+
+	updateHoldingPrice,
+	getLeastRecentlyUpdatedHolding,
 
 	// Initialize connection (if needed)
 	initDb

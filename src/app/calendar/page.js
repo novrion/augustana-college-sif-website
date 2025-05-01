@@ -43,7 +43,7 @@ function SpeakerEventBox({ event }) {
 					<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-mono)]">
 						{event.title || `Speaker: ${event.speaker_name}`}
 					</h2>
-					<div className="mt-1">
+					<div className="mt-1 font-[family-name:var(--font-geist-sans)]">
 						<p className="font-medium">
 							{event.speaker_name}
 							{event.role && event.company && (
@@ -83,7 +83,7 @@ function SpeakerEventBox({ event }) {
 			</div>
 
 			{isExpanded && (
-				<div className="mt-4 pt-4 border-t border-black/[.08] dark:border-white/[.145]">
+				<div className="mt-4 pt-4 border-t border-black/[.08] dark:border-white/[.145] font-[family-name:var(--font-geist-sans)]">
 					<div className="prose prose-sm max-w-none dark:prose-invert">
 						<p className="mb-4">{event.description}</p>
 						<div className="space-y-2">
@@ -92,13 +92,6 @@ function SpeakerEventBox({ event }) {
 							{event.contact && <div><strong>Contact:</strong> {event.contact}</div>}
 						</div>
 					</div>
-
-					{!isPast && event.contact && (
-						<div className="mt-4 pt-4 border-t border-black/[.08] dark:border-white/[.145]">
-							<h3 className="text-md font-semibold mb-2">Have questions about this event?</h3>
-							<p>Please contact: {event.contact}</p>
-						</div>
-					)}
 				</div>
 			)}
 		</div>
@@ -280,13 +273,13 @@ export default function Calendar() {
 					<h2 className="text-xl font-semibold mb-4 font-[family-name:var(--font-geist-mono)]">
 						Interested in being a guest speaker?
 					</h2>
-					<p className="mb-6">
+					<p className="mb-6 font-[family-name:var(--font-geist-sans)]">
 						We regularly invite industry professionals to share insights with our student fund members.
 						If you&apos;re interested in speaking at one of our events, please contact us.
 					</p>
 					<Link
 						href="/contact"
-						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-fit"
+						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-fit font-[family-name:var(--font-geist-sans)]"
 					>
 						Contact Us
 					</Link>

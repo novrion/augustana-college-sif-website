@@ -26,7 +26,7 @@ export default async function AdminPage() {
 			href: "/admin/newsletter"
 		},
 		{
-			title: "Guest Speakers",
+			title: "Guest Speakers Management",
 			description: "Manage guest speaker events for the fund",
 			href: "/admin/speakers"
 		},
