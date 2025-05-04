@@ -1,4 +1,3 @@
-/* Import the Digital font */
 @font-face {
 	font-family: 'Digital';
 	src: url('https://fonts.cdnfonts.com/s/16921/DS-DIGI.woff') format('woff');
@@ -7,7 +6,6 @@
 	font-display: swap;
 }
 
-/* Define the ticker animation */
 @keyframes ticker {
 	0% {
 		transform: translate3d(0, 0, 0);
@@ -21,7 +19,7 @@
 	}
 }
 
-/* Ticker Wrapper: Container that hides the overflow */
+/* Container that hides the overflow */
 .ticker-wrapper {
 	width: 100%;
 	height: 2.5rem;
@@ -36,7 +34,7 @@
 	/* Helps center loading/error text */
 }
 
-/* Ticker Element: Contains the duplicated items and animates */
+/* Contains the duplicated items and animates */
 .ticker {
 	display: inline-block;
 	height: 100%;
@@ -56,7 +54,6 @@
 	/* Consider making duration dynamic based on content width in JS if precise speed control is needed */
 }
 
-/* Individual Ticker Item */
 .ticker-item {
 	display: inline-flex;
 	align-items: baseline;
@@ -79,7 +76,6 @@
 	/* Small space before arrow/percentage */
 }
 
-/* Color classes */
 .ticker-item .positive {
 	color: #22c55e;
 	/* Tailwind green-500 */

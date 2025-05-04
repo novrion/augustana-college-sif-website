@@ -3,12 +3,8 @@ import { getSession } from '../../lib/auth';
 import LoginForm from '../../components/auth/LoginForm';
 
 export default async function LoginPage({ searchParams }) {
-  // Check if user is already logged in
   const session = await getSession();
-
-  if (session) {
-    redirect('/');
-  }
+  if (session) { redirect('/'); }
 
   const isRegistered = (await searchParams)?.registered === 'true';
 

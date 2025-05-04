@@ -25,6 +25,7 @@ export default function HoldingForm({ initialData = null }) {
 		setFormData(prev => ({ ...prev, [name]: value }));
 	};
 
+
 	// Updated handleSubmit function for HoldingForm.js
 	const handleSubmit = async (e) => {
 		e.preventDefault();

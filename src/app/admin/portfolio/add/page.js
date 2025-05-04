@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { hasAdminAccess } from '../../../../lib/auth';
 import HoldingForm from '../../../../components/admin/HoldingForm';
+import HoldingQueryForm from '@/components/admin/HoldingQueryForm';
 
 export default async function AddHoldingPage() {
 	const hasAccess = await hasAdminAccess();
@@ -26,6 +27,8 @@ export default async function AddHoldingPage() {
 				</div>
 
 				<HoldingForm />
+
+				<HoldingQueryForm />
 			</div>
 		</div>
 	);

@@ -28,3 +28,8 @@ export async function getStockInfo(ticker) {
 	const url = `https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_API_KEY}`
 	return queryFinnhub(url);
 }
+
+export async function symbolLookup(query) {
+	const url = `https://finnhub.io/api/v1/search?q=${query}&token=${FINNHUB_API_KEY}`
+	return queryFinnhub(url);
+}
