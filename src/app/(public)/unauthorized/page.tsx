@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { FilledLinkButton } from "@/components/Buttons"
 
 export default function UnauthorizedPage() {
