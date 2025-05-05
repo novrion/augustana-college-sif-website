@@ -78,13 +78,13 @@ export default function LoginForm() {
 					/>
 				</div>
 
-				<div>
+				<div className="flex justify-center">
 					<FilledButton
 						type={"submit"}
 						text={"Log In"}
 						loadingText={"Logging in..."}
 						isLoading={isLoading}
-						min_w={"full"}
+						className={"w-full"}
 					/>
 				</div>
 

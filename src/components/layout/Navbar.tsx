@@ -6,7 +6,7 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
-import { HoldingsLinkButton, LogInButton, SignOutButton } from "@/components/Buttons";
+import { HoldingsLinkButton, LogInLinkButton, SignOutButton } from "@/components/Buttons";
 import ProfilePicture from "@/components/ProfilePicture";
 
 export default function Navbar() {
@@ -60,7 +60,7 @@ export default function Navbar() {
 						>
 							<ProfilePicture
 								user={session.user}
-								diameter={50}
+								size={50}
 								className="cursor-pointer"
 							/>
 						</button>
@@ -79,7 +79,7 @@ export default function Navbar() {
 						)}
 					</div>
 				) : (
-					<Link href="/login" className="hover:underline font-bold text-blue-600">Log in</Link>
+					<LogInLinkButton />
 				)}
 			</div>
 		</nav >

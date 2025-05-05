@@ -22,7 +22,7 @@ export function hasAccess(userRole: UserRole | undefined, requiredRole: Required
 }
 
 export function useAuth() {
-	const { data: session, status } = useSession();
+	const { data: session, update: updateSession, status } = useSession();
 
 	const isAuthenticated = status === 'authenticated';
 	const isLoading = status === 'loading';
@@ -41,6 +41,7 @@ export function useAuth() {
 
 	return {
 		session,
+		updateSession,
 		status,
 		isAuthenticated,
 		isLoading,

@@ -1,5 +1,5 @@
 import { Note } from '@/lib/types/note';
-import { getAll, getById, create, update, remove } from './common';
+import { getAll, getById, create, update, remove, getPaginated, getYears } from './common';
 
 const table = 'notes';
 
@@ -22,4 +22,23 @@ export async function updateNote(id: string, note: Record<string, unknown>): Pro
 
 export async function deleteNote(id: string): Promise<boolean> {
 	return await remove(table, id);
+}
+
+export async function getPaginatedNotes(params: {
+	page?: number;
+	pageSize?: number;
+	year?: string | null;
+	search?: string | null;
+}): Promise<{ data: Note[]; total: number; totalPages: number }> {
+	return getPaginated<Note>({
+		table,
+		...params
+	});
+}
+
+export async function getNotesYears(): Promise<number[]> {
+	const notes = await getAllNotes();
+	return getYears<Note>({
+		items: notes
+	});
 }

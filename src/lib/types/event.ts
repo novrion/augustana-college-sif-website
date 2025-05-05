@@ -4,7 +4,7 @@ export interface Event {
 	role?: string;
 	company?: string;
 	title?: string;
-	event_date: string;
+	date: string;
 	description: string;
 	location: string;
 	time: string;

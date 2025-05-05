@@ -184,3 +184,86 @@ export async function uploadFileToBucket(
 		return null;
 	}
 }
+
+
+
+export async function getPaginated<T>({
+	table,
+	page = 1,
+	pageSize = 10,
+	year = null,
+	search = null,
+	dateField = 'date',
+	searchFields = ['title', 'content'],
+	orderBy = 'date',
+	ascending = false
+}: {
+	table: string;
+	page?: number;
+	pageSize?: number;
+	year?: string | null;
+	search?: string | null;
+	dateField?: string;
+	searchFields?: string[];
+	orderBy?: string;
+	ascending?: boolean;
+}): Promise<{ data: T[]; total: number; totalPages: number }> {
+	const offset = (page - 1) * pageSize;
+	let gteParam = undefined;
+	let ltParam = undefined;
+
+	if (year) {
+		const startDate = `${year}-01-01`;
+		const endDate = `${year}-12-31`;
+		gteParam = { column: dateField, cmp: startDate };
+		ltParam = { column: dateField, cmp: endDate };
+	}
+
+	const result = await getAll(
+		table,
+		orderBy,
+		ascending,
+		gteParam,
+		ltParam,
+		{ l: offset, r: offset + pageSize - 1 },
+		'exact'
+	);
+
+	let data = result.data as T[];
+
+	// Search filter
+	if (search) {
+		const searchLower = search.toLowerCase();
+		data = data.filter(item => {
+			return searchFields.some(field => {
+				const value = item[field]?.toLowerCase();
+				return value && value.includes(searchLower);
+			});
+		});
+	}
+
+	return {
+		data,
+		total: result.count || data.length,
+		totalPages: Math.ceil((result.count || data.length) / pageSize)
+	};
+}
+
+export async function getYears<T extends Record<string, any>>({
+	items,
+	dateField = 'date'
+}: {
+	items: T[];
+	dateField?: string;
+}): Promise<number[]> {
+	const years = [...new Set(
+		items
+			.map(item => {
+				const date = item[dateField];
+				return date ? new Date(date).getFullYear() : null;
+			})
+			.filter(year => year !== null)
+	)].sort((a, b) => b - a);
+
+	return years;
+}

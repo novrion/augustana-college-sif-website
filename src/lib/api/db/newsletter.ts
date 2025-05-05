@@ -1,6 +1,6 @@
 import { Newsletter } from '@/lib/types/newsletter';
 import { db } from './supabase';
-import { getAll, getById, create, update, remove, uploadFileToBucket, deleteFileFromBucket } from './common';
+import { getAll, getById, create, update, remove, uploadFileToBucket, deleteFileFromBucket, getPaginated, getYears } from './common';
 
 const table = 'newsletters';
 
@@ -58,4 +58,23 @@ export async function uploadNewsletterAttachment(id: string, file: File): Promis
 
 export async function deleteNewsletterAttachment(path: string): Promise<boolean> {
 	return await deleteFileFromBucket('attachments', path);
+}
+
+export async function getPaginatedNewsletters(params: {
+	page?: number;
+	pageSize?: number;
+	year?: string | null;
+	search?: string | null;
+}): Promise<{ data: Newsletter[]; total: number; totalPages: number }> {
+	return getPaginated<Newsletter>({
+		table,
+		...params
+	});
+}
+
+export async function getNewsletterYears(): Promise<number[]> {
+	const newsletters = await getAllNewsletters();
+	return getYears<Newsletter>({
+		items: newsletters
+	});
 }

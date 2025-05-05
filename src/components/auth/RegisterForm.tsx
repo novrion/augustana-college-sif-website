@@ -120,7 +120,7 @@ export default function RegisterForm() {
 						text={"Sign Up"}
 						loadingText={"Creating account..."}
 						isLoading={isLoading}
-						min_w={"full"}
+						className={"w-full"}
 					/>
 				</div>
 

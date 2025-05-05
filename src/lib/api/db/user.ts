@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { User, UserWithCredentials } from '@/lib/types/user';
+import { User, UserRole, UserWithCredentials } from '@/lib/types/user';
 import { getAll, getById, getByField, create, update, remove, extractUrl, uploadFileToBucket, deleteFileFromBucket } from './common';
 
 const table = 'users';
@@ -15,6 +15,10 @@ export async function getUserById(id: string): Promise<User | null> {
 
 export async function getUserByEmail(email: string): Promise<User | null> {
 	return (await getByField(table, 'email', email)) as User | null;
+}
+
+export async function getUserByRole(role: UserRole): Promise<User | null> {
+	return (await getByField(table, 'role', role)) as User | null;
 }
 
 export async function getUserCredentialsByEmail(email: string): Promise<UserWithCredentials | null> {

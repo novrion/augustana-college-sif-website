@@ -7,16 +7,16 @@ interface EmptyButtonProps {
 	isLoading: boolean;
 	loadingText?: string;
 	type?: "button" | "submit" | "reset" | undefined;
-	min_w?: "0" | "full";
+	className?: string;
 }
 
-export function EmptyButton({ onClick, text, isLoading = false, loadingText = 'Loading...', type = 'button', min_w = '0' }: EmptyButtonProps) {
+export function EmptyButton({ onClick, text, isLoading = false, loadingText = 'Loading...', type = 'button', className = '' }: EmptyButtonProps) {
 	return (
 		<button
 			type={type}
 			onClick={onClick}
 			disabled={isLoading}
-			className={`min-w-${min_w} rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4 disabled:opacity-50`}
+			className={`${className} w-full rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4 disabled:opacity-50`}
 		>
 			{isLoading ? loadingText : text}
 		</button>
@@ -30,16 +30,16 @@ interface FilledButtonProps {
 	isLoading: boolean;
 	loadingText?: string;
 	type?: "button" | "submit" | "reset" | undefined;
-	min_w?: "0" | "full";
+	className?: string;
 }
 
-export function FilledButton({ onClick, text, isLoading = false, loadingText = 'Loading...', type = 'button', min_w = '0' }: FilledButtonProps) {
+export function FilledButton({ onClick, text, isLoading = false, loadingText = 'Loading...', type = 'button', className = '' }: FilledButtonProps) {
 	return (
 		<button
 			type={type}
 			onClick={onClick}
 			disabled={isLoading}
-			className={`min-w-${min_w} rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ccc] font-medium text-sm h-10 px-4 disabled:opacity-50`}
+			className={`${className} rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ccc] font-medium text-sm h-10 px-4 disabled:opacity-50`}
 		>
 			{isLoading ? loadingText : text}
 		</button>
@@ -50,14 +50,14 @@ export function FilledButton({ onClick, text, isLoading = false, loadingText = '
 interface EmptyLinkButtonProps {
 	text: string;
 	href: string;
-	min_w?: "0" | "full";
+	className?: string;
 }
 
-export function EmptyLinkButton({ text, href, min_w = "0" }: EmptyLinkButtonProps) {
+export function EmptyLinkButton({ text, href, className = '' }: EmptyLinkButtonProps) {
 	return (
 		<Link
 			href={href}
-			className={`min-w-${min_w} rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4`}
+			className={`${className} rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4`}
 		>
 			{text}
 		</Link>
@@ -68,14 +68,14 @@ export function EmptyLinkButton({ text, href, min_w = "0" }: EmptyLinkButtonProp
 interface FilledLinkButtonProps {
 	text: string;
 	href: string;
-	min_w?: "0" | "full";
+	className?: string;
 }
 
-export function FilledLinkButton({ text, href, min_w = "0" }: FilledLinkButtonProps) {
+export function FilledLinkButton({ text, href, className = '' }: FilledLinkButtonProps) {
 	return (
 		<Link
 			href={href}
-			className={`min-w-${min_w} rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ccc] font-medium text-sm h-10 px-4`}
+			className={`${className} rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ccc] font-medium text-sm h-10 px-4`}
 		>
 			{text}
 		</Link>
@@ -113,19 +113,14 @@ export function HoldingsLinkButton({ text, href, currentPathName, hasAccess }: H
 }
 
 
-interface LogInButtonProps {
-	children;
-	onClick: () => void;
-}
-
-export function LogInButton({ children, onClick }: LogInButtonProps) {
+export function LogInLinkButton() {
 	return (
-		<button
-			onClick={onClick}
-			className="flex items-center gap-2 hover:underline"
+		<Link
+			href="/login"
+			className="flex items-center gap-2 hover:underline font-bold text-blue-600"
 		>
-			{children}
-		</button>
+			Log in
+		</Link>
 	);
 }
 

@@ -5,22 +5,22 @@ import { useState, useRef, useEffect } from 'react';
 import { User } from "@/lib/types/user";
 
 interface ProfilePictureProps {
-	user: User;
-	diameter: number;
+	user: User | undefined;
+	size: number;
 	className?: string;
 	editable?: boolean;
-	onImageChange?: () => void;
+	onImageChange?: (file: File) => void;
 }
 
-export default function ProfilePicture({ user, diameter, className = '', editable = false, onImageChange }: ProfilePictureProps) {
+export default function ProfilePicture({ user, size, className = '', editable = false, onImageChange }: ProfilePictureProps) {
 	const fileInputRef = useRef(null);
 	const [preview, setPreview] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const [imageError, setImageError] = useState(false);
 
-	const src = user.profile_picture;
-	const alt = user.name;
+	const src = user?.profile_picture;
+	const alt = user?.name;
 
 	const defaultSrc = '/avatar.svg';
 
@@ -88,7 +88,7 @@ export default function ProfilePicture({ user, diameter, className = '', editabl
 		<div className={`relative ${className} flex items-center justify-center`}>
 			<div
 				className={`relative rounded-full overflow-hidden ${editable ? 'cursor-pointer hover:opacity-90' : ''}`}
-				style={{ width: `${diameter}px`, height: `${diameter}px` }}
+				style={{ width: `${size}px`, height: `${size}px` }}
 				onClick={handleImageClick}
 			>
 				{/* Use key to force re-render when src changes */}
@@ -96,8 +96,8 @@ export default function ProfilePicture({ user, diameter, className = '', editabl
 					key={imageError ? 'default' : preview}
 					src={imageError ? defaultSrc : (preview || defaultSrc)}
 					alt={alt || 'Profile picture'}
-					width={diameter}
-					height={diameter}
+					width={size}
+					height={size}
 					className="object-cover w-full h-full" // Ensure image covers the container completely
 					onError={handleImageError}
 					priority // Add priority to ensure faster loading
