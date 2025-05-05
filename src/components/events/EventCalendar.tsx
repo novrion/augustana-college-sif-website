@@ -67,8 +67,6 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 
 	for (let day = 1; day <= daysInMonth; day++) {
 		const eventsOnDay = getEventsForDay(day);
-		const hasUpcomingEvent = eventsOnDay.some(isEventUpcoming);
-		const hasPastEvent = eventsOnDay.some(event => !isEventUpcoming(event));
 
 		days.push(
 			<div
@@ -86,7 +84,7 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 							: 'bg-gray-700 text-gray-200'
 							}`}
 					>
-						{event.title || `Speaker: ${event.speaker_name}`}
+						{`${event.speaker_name}` || event.title}
 					</div>
 				))}
 			</div>
@@ -105,7 +103,7 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 					</svg>
 				</button>
 
-				<h2 className="text-xl font-semibold">
+				<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-sans)]">
 					{monthName} {currentYear}
 				</h2>
 
@@ -121,17 +119,17 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 
 			<div className="grid grid-cols-7 gap-1 mb-2">
 				{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-					<div key={day} className="text-center text-sm font-semibold">
+					<div key={day} className="text-center text-sm font-semibold font-[family-name:var(--font-geist-sans)]">
 						{day}
 					</div>
 				))}
 			</div>
 
-			<div className="grid grid-cols-7 gap-1">
+			<div className="grid grid-cols-7 gap-1 font-[family-name:var(--font-geist-sans)]">
 				{days}
 			</div>
 
-			<div className="mt-4 flex gap-4">
+			<div className="mt-4 flex gap-4 font-[family-name:var(--font-geist-sans)]">
 				<div className="flex items-center">
 					<div className="w-3 h-3 rounded-full bg-blue-900 mr-2"></div>
 					<span className="text-sm">Upcoming Events</span>

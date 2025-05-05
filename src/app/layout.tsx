@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/components/auth/AuthProvider"
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { TickerProvider } from "@/contexts/TickerContext";
 import { ProtectedClientComponent } from "@/components/auth/ProtectClient";
 import Navbar from "@/components/layout/Navbar";
 import Ticker from "@/components/layout/Ticker";
@@ -20,8 +21,8 @@ export const metadata = {
 	title: "Augie SIF",
 	description: "Augustana College Student Investment Fund Website",
 	icons: {
-		icon: './logo.svg',
-		apple: './logo.svg',
+		icon: '/logo.svg',
+		apple: '/logo.svg',
 	},
 };
 
@@ -31,10 +32,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<AuthProvider>
 					<Navbar />
-					<ProtectedClientComponent>
-						<Ticker />
-					</ProtectedClientComponent>
-					{children}
+					<TickerProvider>
+						<ProtectedClientComponent>
+							<Ticker />
+						</ProtectedClientComponent>
+						{children}
+					</TickerProvider>
 					<Footer />
 				</AuthProvider>
 			</body>

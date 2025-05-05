@@ -63,7 +63,6 @@ export default function NewsletterPage() {
 		fetchNewsletters();
 	}, [currentYear, currentPage]);
 
-	// Handle year filter changes
 	const handleYearChange = (year: string | null) => {
 		setCurrentYear(year);
 		setCurrentPage(1); // Reset to first page when changing year
@@ -119,7 +118,7 @@ export default function NewsletterPage() {
 				)}
 
 				{error && (
-					<div className="bg-red-900 p-4 rounded-md text-red-100 mb-6">
+					<div className="text-center p-4 rounded-md text-red-700 mb-6 font-[family-name:var(--font-geist-mono)]">
 						{error}
 					</div>
 				)}

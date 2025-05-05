@@ -1,39 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { Holding } from "@/lib/types/holding"
+import { useTickerContext } from "@/contexts/TickerContext";
 import "@/styles/ticker.css";
 
 export default function Ticker() {
-	const [holdings, setHoldings] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState(null);
-
-	useEffect(() => {
-		const fetchHoldings = async () => {
-			try {
-				const response = await fetch("/api/holdings");
-				if (!response.ok) {
-					throw new Error(`Failed to fetch holdings (status: ${response.status})`);
-				}
-
-				const holdings: Holding[] = await response.json();
-				const validHoldings: Holding[] = holdings.filter(holding => typeof holding.percent_change === "number");
-				const sortedHoldings: Holding[] = [...validHoldings].sort((a, b) => b.percent_change - a.percent_change);
-				setHoldings(sortedHoldings);
-			} catch (err) {
-				console.error("Error fetching holdings:", err);
-				setError(err.message || "Failed to load stock data");
-				setHoldings([])
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchHoldings();
-		const intervalId = setInterval(fetchHoldings, 60 * 1000);
-		return () => clearInterval(intervalId);
-	}, []);
+	const { holdings, isLoading, error } = useTickerContext();
 
 	if (isLoading) {
 		return <div className="ticker-wrapper " />
@@ -41,14 +12,13 @@ export default function Ticker() {
 
 	if (error) {
 		return <div className="ticker-wrapper ticker-error"><span>Error: {error}</span></div>;
-		// return null; // Alternatively, hide on error
 	}
 
 	if (holdings.length === 0) {
 		return null;
 	}
 
-	const renderHolding = (holding: Holding, index: number, keyPrefix: string) => {
+	const renderHolding = (holding, index, keyPrefix) => {
 		const isPositive = holding.percent_change >= 0;
 		const colorClass = isPositive ? 'positive' : 'negative';
 		const arrow = isPositive ? '▲' : '▼';

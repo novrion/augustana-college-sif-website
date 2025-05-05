@@ -2,9 +2,13 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getNoteById } from '@/lib/api/db';
 
-export default async function NoteDetail({ params }: { params: { id: string } }) {
+export default async function NoteDetail({
+	params
+}: {
+	params: Promise<{ id: string }>
+}) {
 	try {
-		const id = params?.id;
+		const { id } = await params;
 		if (!id) redirect('/notes');
 
 		const note = await getNoteById(id);

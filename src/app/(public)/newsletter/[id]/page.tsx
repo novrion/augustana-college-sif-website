@@ -3,9 +3,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getNewsletterById } from '@/lib/api/db';
 
-export default async function NewsletterDetail({ params }: { params: { id: string } }) {
+export default async function NewsletterDetail({
+	params
+}: {
+	params: Promise<{ id: string }>
+}) {
 	try {
-		const id = params?.id;
+		const { id } = await params;
 		if (!id) redirect('/newsletter');
 
 		const newsletter = await getNewsletterById(id);
@@ -140,8 +144,8 @@ export default async function NewsletterDetail({ params }: { params: { id: strin
 							</div>
 						)}
 					</div>
-				</div >
-			</div >
+				</div>
+			</div>
 		);
 	} catch (error) {
 		console.error('Error loading newsletter:', error);

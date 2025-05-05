@@ -4,12 +4,16 @@ import { getHoldingById, getAllHoldings } from '@/lib/api/db';
 import { getSession } from '@/lib/auth/auth';
 import HoldingDetails from '@/components/holdings/HoldingDetails';
 
-export default async function HoldingDetailPage({ params }: { params: { id: string } }) {
+export default async function HoldingDetailPage({
+	params
+}: {
+	params: Promise<{ id: string }>
+}) {
 	const session = await getSession();
 	if (!session) { redirect('/login?callbackUrl=/holdings'); }
 
 	try {
-		const id = params.id;
+		const { id } = await params;
 		const holding = await getHoldingById(id);
 		if (!holding) { redirect('/holdings'); }
 

@@ -8,8 +8,7 @@ import { Event } from '@/lib/types/event';
 
 export default function EventsPage() {
 	const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-	const [pastEvents, setpastEvents] = useState<Event[]>([]);
-	const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+	const [pastEvents, setPastEvents] = useState<Event[]>([]);
 	const [activeTab, setActiveTab] = useState('upcoming');
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -35,7 +34,7 @@ export default function EventsPage() {
 					throw new Error('Failed to fetch past events');
 				}
 				const pastData = await pastResponse.json();
-				setpastEvents(pastData.data || []);
+				setPastEvents(pastData.data || []);
 				setTotalPages(pastData.totalPages || 1);
 				setTotalEvents(pastData.total || 0);
 			} catch (error) {
@@ -63,7 +62,7 @@ export default function EventsPage() {
 					throw new Error('Failed to fetch past events');
 				}
 				const data = await response.json();
-				setpastEvents(data.data || []);
+				setPastEvents(data.data || []);
 				setTotalPages(data.totalPages || 1);
 				setTotalEvents(data.total || 0);
 			} catch (error) {
@@ -80,10 +79,6 @@ export default function EventsPage() {
 	const handleTabChange = (tab: string) => {
 		setActiveTab(tab);
 		setCurrentPage(1);
-	};
-
-	const handleViewModeChange = (mode: 'list' | 'calendar') => {
-		setViewMode(mode);
 	};
 
 	const handlePageChange = (newPage: number) => {
@@ -104,133 +99,110 @@ export default function EventsPage() {
 					Industry professionals sharing insights with our fund.
 				</p>
 
-				<div className="flex justify-between mb-8">
-					<div className="flex border-b border-white/[.145] font-[family-name:var(--font-geist-mono)]">
-						<button
-							className={`cursor-pointer py-2 px-4 font-medium ${activeTab === 'upcoming'
-								? 'border-b-2 border-blue-500'
-								: 'text-gray-400'
-								}`}
-							onClick={() => handleTabChange('upcoming')}
-						>
-							Upcoming Speakers
-						</button>
-						<button
-							className={`cursor-pointer py-2 px-4 font-medium ${activeTab === 'past'
-								? 'border-b-2 border-blue-500'
-								: 'text-gray-400'
-								}`}
-							onClick={() => handleTabChange('past')}
-						>
-							Past Speakers
-						</button>
-					</div>
-
-					<div className="flex border border-white/[.145] rounded-md overflow-hidden">
-						<button
-							className={`px-3 py-1 ${viewMode === 'list'
-								? 'bg-foreground text-background'
-								: 'hover:bg-[#1a1a1a]'
-								}`}
-							onClick={() => handleViewModeChange('list')}
-						>
-							List
-						</button>
-						<button
-							className={`px-3 py-1 ${viewMode === 'calendar'
-								? 'bg-foreground text-background'
-								: 'hover:bg-[#1a1a1a]'
-								}`}
-							onClick={() => handleViewModeChange('calendar')}
-						>
-							Calendar
-						</button>
-					</div>
+				{/* Calendar */}
+				<div className="mb-10">
+					<EventCalendar
+						upcomingEvents={upcomingEvents}
+						pastEvents={pastEvents}
+					/>
 				</div>
 
-				{isLoading && (
-					<div className="flex justify-center py-12">
-						<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-					</div>
-				)}
-
-				{error && (
-					<div className="bg-red-900 p-4 rounded-md text-red-100 mb-6">
-						{error}
-					</div>
-				)}
-
-				{!isLoading && !error && (
-					<>
-						{/* Show list view based on active tab */}
-						{viewMode === 'list' && (
-							<div className="space-y-6">
-								{eventsToShow.length > 0 ? (
-									eventsToShow.map((event) => (
-										<EventBox key={event.id} event={event} />
-									))
-								) : (
-									<div className="text-center py-8 text-gray-400">
-										No {activeTab} speaker events found.
-									</div>
-								)}
-							</div>
-						)}
-
-						{/* Show calendar view with all events */}
-						{viewMode === 'calendar' && (
-							<EventCalendar
-								upcomingEvents={upcomingEvents}
-								pastEvents={pastEvents}
-							/>
-						)}
-					</>
-				)}
-
-				{/* Pagination controls - Only show for past events in list view */}
-				{viewMode === 'list' && activeTab === 'past' && totalPages > 1 && !isLoading && (
-					<div className="flex justify-center mt-8">
-						<div className="flex items-center gap-2">
+				{/* List view */}
+				<div className="mt-12">
+					<div className="flex justify-between mb-6">
+						<div className="flex border-b border-white/[.145] font-[family-name:var(--font-geist-mono)]">
 							<button
-								onClick={() => handlePageChange(currentPage - 1)}
-								disabled={currentPage === 1}
-								className={`rounded-full border border-solid p-2 ${currentPage === 1
-									? 'border-gray-200 text-gray-400 cursor-not-allowed'
-									: 'border-white/[.145] hover:bg-[#1a1a1a]'
+								className={`py-2 px-4 font-medium ${activeTab === 'upcoming'
+									? 'border-b-2 border-blue-500'
+									: 'text-gray-400'
 									}`}
-								aria-label="Previous page"
+								onClick={() => handleTabChange('upcoming')}
 							>
-								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-									<polyline points="15 18 9 12 15 6"></polyline>
-								</svg>
+								Upcoming Speakers
 							</button>
-
-							<span className="text-sm">
-								Page {currentPage} of {totalPages}
-							</span>
-
 							<button
-								onClick={() => handlePageChange(currentPage + 1)}
-								disabled={currentPage === totalPages}
-								className={`rounded-full border border-solid p-2 ${currentPage === totalPages
-									? 'border-gray-200 text-gray-400 cursor-not-allowed'
-									: 'border-white/[.145] hover:bg-[#1a1a1a]'
+								className={`py-2 px-4 font-medium ${activeTab === 'past'
+									? 'border-b-2 border-blue-500'
+									: 'text-gray-400'
 									}`}
-								aria-label="Next page"
+								onClick={() => handleTabChange('past')}
 							>
-								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-									<polyline points="9 18 15 12 9 6"></polyline>
-								</svg>
+								Past Speakers
 							</button>
 						</div>
 					</div>
-				)}
 
-				{viewMode === 'list' && activeTab === 'past' && totalEvents > 0 && !isLoading && (
-					<div className="mt-4 text-sm text-gray-400 text-center">
-						Showing {pastEvents.length} of {totalEvents} past speakers
-					</div>
-				)}
+					{isLoading && (
+						<div className="flex justify-center py-12">
+							<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+						</div>
+					)}
+
+					{error && (
+						<div className="text-center p-4 rounded-md text-red-700 mb-6 font-[family-name:var(--font-geist-mono)]">
+							{error}
+						</div>
+					)}
+
+					{!isLoading && !error && (
+						<div className="space-y-6">
+							{eventsToShow.length > 0 ? (
+								eventsToShow.map((event) => (
+									<EventBox key={event.id} event={event} />
+								))
+							) : (
+								<div className="text-center py-8 text-gray-400 font-[family-name:var(--font-geist-mono)]">
+									No {activeTab} speaker events found.
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Pagination controls - Only show for past events */}
+					{activeTab === 'past' && totalPages > 1 && !isLoading && (
+						<div className="flex justify-center mt-8">
+							<div className="flex items-center gap-2 font-[family-name:var(--font-geist-mono)]">
+								<button
+									onClick={() => handlePageChange(currentPage - 1)}
+									disabled={currentPage === 1}
+									className={`rounded-full border border-solid p-2 ${currentPage === 1
+										? 'border-gray-200 text-gray-400 cursor-not-allowed'
+										: 'border-white/[.145] hover:bg-[#1a1a1a]'
+										}`}
+									aria-label="Previous page"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+										<polyline points="15 18 9 12 15 6"></polyline>
+									</svg>
+								</button>
+
+								<span className="text-sm">
+									Page {currentPage} of {totalPages}
+								</span>
+
+								<button
+									onClick={() => handlePageChange(currentPage + 1)}
+									disabled={currentPage === totalPages}
+									className={`rounded-full border border-solid p-2 ${currentPage === totalPages
+										? 'border-gray-200 text-gray-400 cursor-not-allowed'
+										: 'border-white/[.145] hover:bg-[#1a1a1a]'
+										}`}
+									aria-label="Next page"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+										<polyline points="9 18 15 12 9 6"></polyline>
+									</svg>
+								</button>
+							</div>
+						</div>
+					)}
+
+					{activeTab === 'past' && totalEvents > 0 && !isLoading && (
+						<div className="mt-4 text-sm text-gray-400 text-center font-[family-name:var(--font-geist-mono)]">
+							Showing {pastEvents.length} of {totalEvents} past speakers
+						</div>
+					)}
+				</div>
 
 				<div className="mt-12 border-t border-white/[.145] pt-8">
 					<h2 className="text-xl font-semibold mb-4 font-[family-name:var(--font-geist-mono)]">
@@ -242,7 +214,7 @@ export default function EventsPage() {
 					</p>
 					<Link
 						href="/contact"
-						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ccc] font-medium text-sm h-10 px-4 w-fit"
+						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ccc] font-medium text-sm h-10 px-4 w-fit font-[family-name:var(--font-geist-mono)]"
 					>
 						Contact Us
 					</Link>

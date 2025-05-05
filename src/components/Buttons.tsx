@@ -16,7 +16,7 @@ export function EmptyButton({ onClick, text, isLoading = false, loadingText = 'L
 			type={type}
 			onClick={onClick}
 			disabled={isLoading}
-			className={`${className} w-full rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4 disabled:opacity-50`}
+			className={`${className} rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4 disabled:opacity-50`}
 		>
 			{isLoading ? loadingText : text}
 		</button>

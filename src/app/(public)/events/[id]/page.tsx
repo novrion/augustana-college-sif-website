@@ -2,9 +2,13 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getEventById } from '@/lib/api/db';
 
-export default async function EventDetail({ params }: { params: { id: string } }) {
+export default async function EventDetail({
+	params
+}: {
+	params: Promise<{ id: string }>
+}) {
 	try {
-		const id = params?.id;
+		const { id } = await params;
 		if (!id) redirect('/events');
 
 		const event = await getEventById(id);

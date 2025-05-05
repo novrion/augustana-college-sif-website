@@ -1,5 +1,5 @@
 import { GalleryImage } from '@/lib/types/gallery';
-import { getAll, getById, create, update, remove, uploadFileToBucket, extractUrl, deleteFileFromBucket } from './common';
+import { getAll, getById, create, update, remove, uploadFileToBucket, extractUrl, deleteFileFromBucket, getPaginated } from './common';
 
 const table = 'gallery_images';
 
@@ -58,9 +58,7 @@ export async function updateGalleryImageOrder(id: string, orderIndex: number): P
 
 export async function reorderGalleryImage(id: string, direction: 'up' | 'down'): Promise<boolean> {
 	const currentImage = await getGalleryImageById(id);
-	if (!currentImage) {
-		return false;
-	}
+	if (!currentImage) { return false; }
 
 	const ordering = direction === 'up' ? false : true;
 	const result = await getAll(
@@ -93,4 +91,17 @@ export async function uploadGalleryImage(file: File): Promise<object | null> {
 	const path = `gallery_images/${fileName}`;
 
 	return await uploadFileToBucket('gallery', path, file, fileName);
+}
+
+export async function getPaginatedGalleryImages(params: {
+	page?: number;
+	pageSize?: number;
+}): Promise<{ data: GalleryImage[]; total: number; totalPages: number }> {
+	return getPaginated<GalleryImage>({
+		table,
+		page: params.page || 1,
+		pageSize: params.pageSize || 12,
+		orderBy: 'order_index',
+		ascending: true
+	});
 }
