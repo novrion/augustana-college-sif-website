@@ -26,7 +26,7 @@ export async function PUT(
 			);
 		}
 
-		const { id } = params;
+		const { id } = await params;
 
 		// Can't change own role
 		if (id === session.user.id) {

@@ -14,7 +14,7 @@ export default async function HoldingsPage() {
 	const holdings = await getAllHoldings();
 	const cashBalance = await getCashBalance();
 
-	const sortedHoldings = [...holdings].sort((a, b) => { return a.current_price * a.share_count - b.current_price * b.share_count; });
+	const sortedHoldings = [...holdings].sort((a, b) => { return b.current_price * b.share_count - a.current_price * a.share_count; });
 
 	const totalPortfolioValue = sortedHoldings.reduce((sum, holding) => {
 		return sum + (holding.current_price * holding.share_count);

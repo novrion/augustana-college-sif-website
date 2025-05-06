@@ -20,8 +20,8 @@ export default async function AdminPage() {
 		},
 		{
 			title: "Portfolio Management",
-			description: "Add, edit, or remove portfolio holdings",
-			href: "/admin/portfolio"
+			description: "Add, edit, or remove holdings",
+			href: "/admin/holdings"
 		},
 		{
 			title: "Newsletter Management",

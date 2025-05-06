@@ -47,14 +47,15 @@ export async function updateCashBalance(amount: number): Promise<boolean> {
 
 	// Update existing cash balance record
 	const { error } = await db
-		.from('cash_balance')
-		.update({ amount })
+		.from(table)
+		.update([{ amount }])
 		.eq('id', id);
 
 	if (error) {
 		console.error('Error updating cash balance:', error);
 		return false;
 	}
+	console.error("ok  here3", amount);
 
 	return true;
 }
