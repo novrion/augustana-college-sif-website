@@ -76,7 +76,7 @@ export default function ProfilePicture({ user, size, className = '', editable = 
 				await onImageChange(file);
 				// We don't update preview here as the parent component will update the src prop
 			} catch (error) {
-				setError('Failed to upload image');
+				setError('Failed to upload image: ' + error);
 				setPreview(src || defaultSrc); // Revert to original on error
 			}
 		}

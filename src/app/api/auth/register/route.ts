@@ -20,7 +20,7 @@ export async function POST(request) {
 		}
 
 		const user = await createUser({ name, email, password, });
-		const { password: _, ...userWithoutPassword } = user;
+		const { password: _password, ...userWithoutPassword } = user;
 
 		return NextResponse.json(
 			{ user: userWithoutPassword, message: 'User registered successfully' },

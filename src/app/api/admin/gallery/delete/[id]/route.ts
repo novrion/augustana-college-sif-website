@@ -5,7 +5,7 @@ import { deleteGalleryImage } from '@/lib/api/db';
 
 export async function DELETE(
 	request: Request,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const session = await getServerSession(authOptions);
@@ -16,7 +16,7 @@ export async function DELETE(
 			);
 		}
 
-		const { id } = params;
+		const { id } = await params;
 		if (!id) {
 			return NextResponse.json(
 				{ error: 'Image ID is required' },

@@ -7,7 +7,7 @@ export default async function ProfilePage() {
 	const session = await getSession();
 	if (!session) { redirect('/login?callbackUrl=/profile'); }
 
-	const userData = await getUserById(session.user.id);
+	const userData = await getUserById(session?.user?.id);
 
 	return (
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">

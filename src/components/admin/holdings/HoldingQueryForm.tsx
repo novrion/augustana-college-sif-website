@@ -13,7 +13,6 @@ interface SearchResult {
 
 export default function HoldingQueryForm() {
 	const [results, setResults] = useState<SearchResult[]>([]);
-	const [resultCount, setResultCount] = useState(0);
 	const [query, setQuery] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -49,8 +48,10 @@ export default function HoldingQueryForm() {
 			}
 
 			const data = await response.json();
-			setResults(data.result || []);
-			setResultCount(data.count || 0);
+
+			const count = data.count || 0;
+			if (count > 10) { setResults(data.result.slice(0, 10)); }
+			else { setResults(data.result || []); }
 		} catch (err) {
 			console.error("Search error:", err);
 			setError(err instanceof Error ? err.message : 'An unexpected error occurred');

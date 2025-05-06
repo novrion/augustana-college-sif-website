@@ -1,6 +1,4 @@
-// page.tsx (in app/admin/gallery directory)
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { hasAdminAccess } from '@/lib/auth/auth';
 import { getPaginatedGalleryImages } from '@/lib/api/db';
 import AdminGalleryList from '@/components/admin/gallery/AdminGalleryList';

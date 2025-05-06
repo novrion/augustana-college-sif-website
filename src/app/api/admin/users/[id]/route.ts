@@ -6,7 +6,7 @@ import { UserRole } from '@/lib/types/user';
 
 export async function GET(
 	request: Request,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const session = await getServerSession(authOptions);
@@ -26,7 +26,7 @@ export async function GET(
 			);
 		}
 
-		const { id } = params;
+		const { id } = await params;
 		const user = await getUserById(id);
 
 		if (!user) {
@@ -48,7 +48,7 @@ export async function GET(
 
 export async function DELETE(
 	request: Request,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
 		const session = await getServerSession(authOptions);
@@ -68,7 +68,7 @@ export async function DELETE(
 			);
 		}
 
-		const { id } = params;
+		const { id } = await params;
 
 		// Cannot delete self
 		if (id === session.user.id) {

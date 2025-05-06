@@ -1,48 +1,48 @@
 'use client'
 
-import React, { useState } from 'react';
+//import React, { useState } from 'react';
 import Image from 'next/image';
-import { EmptyButton, FilledButton, EmptyLinkButton, FilledLinkButton } from '@/components/Buttons';
+//import { EmptyButton, FilledButton, EmptyLinkButton, FilledLinkButton } from '@/components/Buttons';
 
-const boxesData = [
-	{
-		title: "Our Portfolio",
-		description: "View our current holdings and performance metrics.",
-		link: "/portfolio",
-		linkText: "Portfolio Tracker"
-	},
-	{
-		title: "Guest Speakers",
-		description: "Access our upcoming and past industry experts sharing valuable insights.",
-		link: "/calendar",
-		linkText: "Calendar"
-	},
-	{
-		title: "Our Newsletter",
-		description: "Stay informed with our market analyses, investment insights, and fund updates.",
-		link: "/newsletter",
-		linkText: "Newsletter"
-	},
+//const boxesData = [
+//	{
+//		title: "Our Portfolio",
+//		description: "View our current holdings and performance metrics.",
+//		link: "/portfolio",
+//		linkText: "Portfolio Tracker"
+//	},
+//	{
+//		title: "Guest Speakers",
+//		description: "Access our upcoming and past industry experts sharing valuable insights.",
+//		link: "/calendar",
+//		linkText: "Calendar"
+//	},
+//	{
+//		title: "Our Newsletter",
+//		description: "Stay informed with our market analyses, investment insights, and fund updates.",
+//		link: "/newsletter",
+//		linkText: "Newsletter"
+//	},
 
-	{
-		title: "Gallery",
-		description: "Browse photos from stock pitches, events, fund meetings, guest speakers, and more.",
-		link: "/gallery",
-		linkText: "Gallery"
-	},
-	{
-		title: "Meeting Minutes",
-		description: "Access notes and summaries from our weekly meetings.",
-		link: "/meeting-minutes",
-		linkText: "Meeting Minutes"
-	},
-	{
-		title: "About SIF",
-		description: "Learn about our mission, history, and the students who manage the fund.",
-		link: "/about",
-		linkText: "About us"
-	},
-];
+//	{
+//		title: "Gallery",
+//		description: "Browse photos from stock pitches, events, fund meetings, guest speakers, and more.",
+//		link: "/gallery",
+//		linkText: "Gallery"
+//	},
+//	{
+//		title: "Meeting Minutes",
+//		description: "Access notes and summaries from our weekly meetings.",
+//		link: "/meeting-minutes",
+//		linkText: "Meeting Minutes"
+//	},
+//	{
+//		title: "About SIF",
+//		description: "Learn about our mission, history, and the students who manage the fund.",
+//		link: "/about",
+//		linkText: "About us"
+//	},
+//];
 
 export default function Home() {
 	return (

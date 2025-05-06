@@ -37,7 +37,7 @@ export default function LoginForm() {
 				router.refresh();
 			}
 		} catch (error) {
-			setError("An unexpected error has occurred.");
+			setError("An unexpected error has occurred: " + error);
 		} finally {
 			setIsLoading(false);
 		}

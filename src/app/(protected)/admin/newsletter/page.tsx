@@ -20,7 +20,7 @@ export default async function AdminNewsletterPage({
 	const pageSize = 10; // Number of newsletters per page
 
 	// Get paginated newsletters from the database
-	const { data: newsletters, total, totalPages } = await getPaginatedNewsletters({
+	const { data: newsletters } = await getPaginatedNewsletters({
 		page,
 		pageSize,
 		year

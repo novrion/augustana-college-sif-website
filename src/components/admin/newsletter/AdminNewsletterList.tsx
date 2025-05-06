@@ -21,7 +21,7 @@ export default function NewsletterAdminList({
 	const [currentPage, setCurrentPage] = useState(initialPage);
 	const [totalPages, setTotalPages] = useState(Math.ceil(initialNewsletters.length / pageSize));
 	const [error, setError] = useState('');
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [newsletterToDelete, setNewsletterToDelete] = useState<Newsletter | null>(null);

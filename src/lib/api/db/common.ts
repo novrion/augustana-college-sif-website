@@ -249,7 +249,7 @@ export async function getPaginated<T>({
 	};
 }
 
-export async function getYears<T extends Record<string, any>>({
+export async function getYears<T extends Record<string, unknown>>({
 	items,
 	dateField = 'date'
 }: {

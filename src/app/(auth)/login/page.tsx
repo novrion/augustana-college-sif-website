@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from "@/lib/auth/auth"
 import LoginForm from "@/components/auth/LoginForm";
 
-export default async function LogIn({ searchParams }) {
+export default async function LogInPage({ searchParams }: { searchParams: Promise<{ registered?: string }> }) {
 	const session = await getSession();
 	if (session) { redirect('/'); }
 

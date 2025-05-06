@@ -138,7 +138,7 @@ export default function UserRoleModal({
 							</div>
 						) : (
 							<p className="text-center p-2 rounded-md text-yellow-500 font-[family-name:var(--font-geist-mono)]">
-								You don't have permission to assign any roles to this user.
+								You don&apos;t have permission to assign any roles to this user.
 							</p>
 						)}
 					</div>

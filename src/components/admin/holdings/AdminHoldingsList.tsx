@@ -11,7 +11,6 @@ interface AdminHoldingsListProps {
 }
 
 export default function AdminHoldingsList({ holdings }: AdminHoldingsListProps) {
-	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const router = useRouter();
 

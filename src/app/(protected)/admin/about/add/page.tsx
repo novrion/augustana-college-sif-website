@@ -4,7 +4,9 @@ import { hasAdminAccess } from '@/lib/auth/auth';
 import { getAllAboutSections } from '@/lib/api/db';
 import AboutSectionForm from '@/components/admin/about/AboutSectionForm';
 
-export default async function AddAboutSectionPage({ searchParams }: {
+export default async function AddAboutSectionPage({
+	searchParams
+}: {
 	searchParams?: Promise<{ maxOrderParam?: string }>
 }) {
 	const hasAccess = await hasAdminAccess();
