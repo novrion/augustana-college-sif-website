@@ -1,3 +1,4 @@
+// Gallery.tsx (in components/gallery directory)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,10 +21,19 @@ export default function Gallery({
 	totalImages,
 	onPageChange
 }: GalleryProps) {
-	// State for columns
 	const [columns, setColumns] = useState<number>(4);
-	// State for lightbox
 	const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+
+	const formatDate = (dateString: string) => {
+		if (!dateString) return '';
+		const date = new Date(`${dateString}T12:00:00Z`);
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+			timeZone: 'UTC' // Use UTC to avoid timezone shifts
+		});
+	};
 
 	// Update columns based on window width
 	useEffect(() => {
@@ -43,7 +53,6 @@ export default function Gallery({
 		// Initial setup
 		handleResize();
 
-		// Add event listener
 		window.addEventListener('resize', handleResize);
 
 		// Cleanup
@@ -67,17 +76,14 @@ export default function Gallery({
 		};
 	}, [selectedImage]);
 
-	// Handle opening the lightbox
 	const openLightbox = (image: GalleryImage) => {
 		setSelectedImage(image);
 	};
 
-	// Handle closing the lightbox
 	const closeLightbox = () => {
 		setSelectedImage(null);
 	};
 
-	// Distribute images into columns
 	const getColumnImages = (): GalleryImage[][] => {
 		const result = Array.from({ length: columns }, () => [] as GalleryImage[]);
 
@@ -115,6 +121,7 @@ export default function Gallery({
 								<div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end p-4">
 									<div className="text-white w-full min-w-0">
 										<h3 className="font-semibold text-lg font-[family-name:var(--font-geist-mono)]">{image.title}</h3>
+										<p className="text-xs text-gray-300 mb-1 font-[family-name:var(--font-geist-mono)]">{formatDate(image.date)}</p>
 										{image.description && <p className="text-sm break-words font-[family-name:var(--font-geist-sans)]">{image.description}</p>}
 									</div>
 								</div>
@@ -124,7 +131,6 @@ export default function Gallery({
 				))}
 			</div>
 
-			{/* Pagination controls */}
 			{totalPages > 1 && (
 				<div className="mt-8 font-[family-name:var(--font-geist-mono)]">
 					<PaginationControls
@@ -138,7 +144,6 @@ export default function Gallery({
 				</div>
 			)}
 
-			{/* Lightbox Modal */}
 			{selectedImage && (
 				<div
 					className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4 md:p-8"
@@ -174,7 +179,8 @@ export default function Gallery({
 						</div>
 
 						<div className="bg-black bg-opacity-70 p-6 text-white rounded w-full max-w-3xl mx-auto text-center font-[family-name:var(--font-geist-mono)]">
-							<h3 className="font-semibold text-xl mb-2 font-[family-name:var(--font-geist-mono)]">{selectedImage.title}</h3>
+							<h3 className="font-semibold text-xl mb-1 font-[family-name:var(--font-geist-mono)]">{selectedImage.title}</h3>
+							<p className="text-sm text-gray-300 mb-2">{formatDate(selectedImage.date)}</p>
 							{selectedImage.description && <p>{selectedImage.description}</p>}
 						</div>
 					</div>

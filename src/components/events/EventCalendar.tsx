@@ -44,18 +44,28 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 		}
 	};
 
+	// Fixed date handling for event status check
 	const isEventUpcoming = (event: Event): boolean => {
-		const eventDate = new Date(event.date);
-		return eventDate >= new Date();
+		// Parse date with a consistent time (noon UTC) to avoid timezone issues
+		const eventDate = new Date(`${event.date}T12:00:00Z`);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		return eventDate >= today;
 	};
 
+	// Fixed date handling for filtering events by day
 	const getEventsForDay = (day: number): Event[] => {
 		return events.filter(event => {
-			const eventDate = new Date(event.date);
+			// Consistently create date objects with noon UTC time to avoid timezone shifts
+			const eventDate = new Date(`${event.date}T12:00:00Z`);
+			const eventYear = eventDate.getUTCFullYear();
+			const eventMonth = eventDate.getUTCMonth();
+			const eventDay = eventDate.getUTCDate();
+
 			return (
-				eventDate.getFullYear() === currentYear &&
-				eventDate.getMonth() === currentMonth &&
-				eventDate.getDate() === day
+				eventYear === currentYear &&
+				eventMonth === currentMonth &&
+				eventDay === day
 			);
 		});
 	};

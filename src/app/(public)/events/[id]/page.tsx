@@ -15,19 +15,23 @@ export default async function EventDetail({
 		if (!event) redirect('/events');
 
 		const formatDate = (dateString: string): string => {
-			const date = new Date(dateString);
+			// Create date with noon UTC time to ensure consistent date representation
+			const date = new Date(`${dateString}T12:00:00Z`);
 			return date.toLocaleDateString('en-US', {
 				weekday: 'long',
 				year: 'numeric',
 				month: 'long',
-				day: 'numeric'
+				day: 'numeric',
+				timeZone: 'UTC' // Ensure the date is interpreted in UTC
 			});
 		};
 
 		const isPastEvent = (dateString: string): boolean => {
-			const eventDate = new Date(dateString);
-			eventDate.setHours(23, 59, 59);
-			return eventDate < new Date();
+			// Parse date with a fixed time component to avoid timezone issues
+			const eventDate = new Date(`${dateString}T12:00:00Z`);
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			return eventDate < today;
 		};
 
 		const isPast = isPastEvent(event.date);

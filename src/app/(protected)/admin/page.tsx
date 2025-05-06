@@ -31,7 +31,7 @@ export default async function AdminPage() {
 		{
 			title: "Guest Speakers",
 			description: "Manage guest speaker events",
-			href: "/admin/speakers"
+			href: "/admin/events"
 		},
 		{
 			title: "Gallery Management",

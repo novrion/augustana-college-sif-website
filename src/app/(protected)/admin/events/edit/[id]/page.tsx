@@ -1,23 +1,23 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { hasSecretaryAccess } from '@/lib/auth/auth';
-import { getNoteById } from '@/lib/api/db';
-import NoteForm from '@/components/admin/notes/NoteForm';
+import { hasAdminAccess } from '@/lib/auth/auth';
+import { getEventById } from '@/lib/api/db';
+import EventForm from '@/components/admin/events/EventForm';
 
-export default async function EditNotePage({
+export default async function EditEventPage({
 	params
 }: {
 	params: Promise<{ id: string }>
 }) {
-	const hasAccess = await hasSecretaryAccess();
+	const hasAccess = await hasAdminAccess();
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	try {
 		const { id } = await params;
-		const note = await getNoteById(id);
+		const event = await getEventById(id);
 
-		if (!note) {
-			redirect('/admin/notes');
+		if (!event) {
+			redirect('/admin/events');
 		}
 
 		return (
@@ -25,26 +25,26 @@ export default async function EditNotePage({
 				<div className="max-w-4xl mx-auto">
 					<div className="flex justify-between items-center mb-6">
 						<h1 className="text-3xl font-bold">
-							Edit: {note.title}
+							Edit: {event.title || `Speaker: ${event.speaker_name}`}
 						</h1>
 
 						<Link
-							href="/admin/notes"
+							href="/admin/events"
 							className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] font-medium text-sm h-10 px-4"
 						>
-							Back to Minutes Management
+							Back to Event Management
 						</Link>
 					</div>
 
-					<NoteForm
-						initialData={note}
+					<EventForm
+						initialData={event}
 						isEditing={true}
 					/>
 				</div>
 			</div>
 		);
 	} catch (error) {
-		console.error('Error loading note:', error);
-		redirect('/admin/notes');
+		console.error('Error loading event:', error);
+		redirect('/admin/events');
 	}
 }

@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { hasSecretaryAccess } from '@/lib/auth/auth';
-import NoteForm from '@/components/admin/notes/NoteForm';
+import { hasAdminAccess } from '@/lib/auth/auth';
+import GalleryImageForm from '@/components/admin/gallery/GalleryImageForm';
 
-export default async function AddNotePage() {
-	const hasAccess = await hasSecretaryAccess();
+export default async function AddGalleryImagePage() {
+	const hasAccess = await hasAdminAccess();
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	return (
@@ -12,18 +12,18 @@ export default async function AddNotePage() {
 			<div className="max-w-4xl mx-auto">
 				<div className="flex justify-between items-center mb-6">
 					<h1 className="text-3xl font-bold">
-						Add Meeting Minutes
+						Add Gallery Image
 					</h1>
 
 					<Link
-						href="/admin/notes"
+						href="/admin/gallery"
 						className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] font-medium text-sm h-10 px-4"
 					>
-						Back to Minutes Management
+						Back to Gallery Management
 					</Link>
 				</div>
 
-				<NoteForm />
+				<GalleryImageForm />
 			</div>
 		</div>
 	);

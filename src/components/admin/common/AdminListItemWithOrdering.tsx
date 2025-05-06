@@ -14,6 +14,7 @@ interface AdminListItemWithOrderingProps {
 	canMoveUp: boolean;
 	canMoveDown: boolean;
 	isReordering?: boolean;
+	leftComponent?: React.ReactNode;
 }
 
 export default function AdminListItemWithOrdering({
@@ -26,7 +27,8 @@ export default function AdminListItemWithOrdering({
 	onMoveDown,
 	canMoveUp,
 	canMoveDown,
-	isReordering = false
+	isReordering = false,
+	leftComponent
 }: AdminListItemWithOrderingProps) {
 	return (
 		<AdminListItem
@@ -34,6 +36,7 @@ export default function AdminListItemWithOrdering({
 			subtitle={subtitle}
 			className={className}
 			onClick={onClick}
+			leftComponent={leftComponent}
 			actions={
 				<>
 					<div className="flex mr-4">

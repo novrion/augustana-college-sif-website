@@ -4,5 +4,5 @@ export interface GalleryImage {
 	description?: string;
 	src: string;
 	alt?: string;
-	order_index: number;
+	date: string;
 }

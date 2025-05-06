@@ -14,19 +14,23 @@ export default function EventBox({ event }: EventBoxProps) {
 
 	const isPastEvent = (dateString: string): boolean => {
 		if (!dateString) return false;
-		const eventDate = new Date(dateString);
-		eventDate.setHours(23, 59, 59, 999);
-		return eventDate < new Date();
+		// Parse date with a fixed time component to avoid timezone issues
+		const eventDate = new Date(`${dateString}T12:00:00Z`);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		return eventDate < today;
 	};
 
 	const formatDate = (dateString: string): string => {
 		if (!dateString) return 'Date not available';
-		const date = new Date(dateString);
+		// Create date with noon UTC time to ensure consistent date representation
+		const date = new Date(`${dateString}T12:00:00Z`);
 		return date.toLocaleDateString('en-US', {
 			weekday: 'long',
 			year: 'numeric',
 			month: 'long',
-			day: 'numeric'
+			day: 'numeric',
+			timeZone: 'UTC' // Ensure the date is interpreted in UTC
 		});
 	};
 

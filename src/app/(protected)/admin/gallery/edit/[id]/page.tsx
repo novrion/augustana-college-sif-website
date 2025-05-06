@@ -1,23 +1,23 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { hasSecretaryAccess } from '@/lib/auth/auth';
-import { getNoteById } from '@/lib/api/db';
-import NoteForm from '@/components/admin/notes/NoteForm';
+import { hasAdminAccess } from '@/lib/auth/auth';
+import { getGalleryImageById } from '@/lib/api/db';
+import GalleryImageForm from '@/components/admin/gallery/GalleryImageForm';
 
-export default async function EditNotePage({
+export default async function EditGalleryImagePage({
 	params
 }: {
 	params: Promise<{ id: string }>
 }) {
-	const hasAccess = await hasSecretaryAccess();
+	const hasAccess = await hasAdminAccess();
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	try {
 		const { id } = await params;
-		const note = await getNoteById(id);
+		const image = await getGalleryImageById(id);
 
-		if (!note) {
-			redirect('/admin/notes');
+		if (!image) {
+			redirect('/admin/gallery');
 		}
 
 		return (
@@ -25,26 +25,23 @@ export default async function EditNotePage({
 				<div className="max-w-4xl mx-auto">
 					<div className="flex justify-between items-center mb-6">
 						<h1 className="text-3xl font-bold">
-							Edit: {note.title}
+							Edit: {image.title}
 						</h1>
 
 						<Link
-							href="/admin/notes"
+							href="/admin/gallery"
 							className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] font-medium text-sm h-10 px-4"
 						>
-							Back to Minutes Management
+							Back to Gallery Management
 						</Link>
 					</div>
 
-					<NoteForm
-						initialData={note}
-						isEditing={true}
-					/>
+					<GalleryImageForm initialData={image} />
 				</div>
 			</div>
 		);
 	} catch (error) {
-		console.error('Error loading note:', error);
-		redirect('/admin/notes');
+		console.error('Error loading gallery image:', error);
+		redirect('/admin/gallery');
 	}
 }

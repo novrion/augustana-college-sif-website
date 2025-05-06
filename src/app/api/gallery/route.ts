@@ -1,3 +1,4 @@
+// route.ts (in app/api/gallery directory)
 import { NextResponse } from 'next/server';
 import { getPaginatedGalleryImages } from '@/lib/api/db';
 
@@ -6,10 +7,14 @@ export async function GET(request) {
 		const { searchParams } = new URL(request.url);
 		const page = parseInt(searchParams.get('page') || '1');
 		const pageSize = parseInt(searchParams.get('pageSize') || '12');
+		const orderBy = searchParams.get('orderBy') || 'date';
+		const ascending = searchParams.get('ascending') === 'true';
 
 		const result = await getPaginatedGalleryImages({
 			page,
-			pageSize
+			pageSize,
+			orderBy,
+			ascending
 		});
 
 		return NextResponse.json(result);
