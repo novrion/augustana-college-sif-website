@@ -141,15 +141,14 @@ export default function AdminHoldingsList({ holdings }: AdminHoldingsListProps) 
 											<div className="flex justify-end space-x-3">
 												<Link
 													href={`/admin/holdings/edit/${holding.id}`}
-													className="text-blue-500 hover:underline"
+													className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
 													onClick={(e) => e.stopPropagation()}
 												>
 													Edit
 												</Link>
 												<button
 													onClick={(e) => openDeleteModal(holding, e)}
-													disabled={isLoading}
-													className="cursor-pointer text-red-500 hover:underline"
+													className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md"
 												>
 													Delete
 												</button>

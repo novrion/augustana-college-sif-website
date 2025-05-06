@@ -10,6 +10,8 @@ export default async function AdminHoldingsPage() {
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	const holdings = await getAllHoldings();
+	const sortedHoldings = [...holdings].sort((a, b) => { return b.current_price * b.share_count - a.current_price * a.share_count; });
+
 	const cashBalance = await getCashBalance();
 
 	return (
@@ -33,16 +35,14 @@ export default async function AdminHoldingsPage() {
 					</div>
 				</div>
 
-				{/* Cash Balance Management */}
 				<div className="rounded-lg border border-solid border-white/[.145] p-6 mb-8">
 					<h2 className="text-xl font-semibold mb-4">Cash Balance</h2>
 					<CashBalanceForm initialCashBalance={cashBalance} />
 				</div>
 
-				{/* Holdings Management */}
 				<div className="rounded-lg border border-solid border-white/[.145] p-6">
 					<h2 className="text-xl font-semibold mb-4">Current Holdings</h2>
-					<AdminHoldingsList holdings={holdings} />
+					<AdminHoldingsList holdings={sortedHoldings} />
 				</div>
 			</div>
 		</div>

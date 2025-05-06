@@ -101,20 +101,25 @@ export default function AdminGalleryList({
 					<div
 						key={image.id}
 						onClick={() => handleEditImage(image.id)}
-						className="border border-white/[.145] rounded-lg overflow-hidden hover:bg-[#1a1a1a] transition-transform hover:scale-[1.02] cursor-pointer relative"
+						className="relative group overflow-hidden rounded-lg cursor-pointer"
 					>
-						<div className="relative aspect-[4/3] w-full">
+						<div className="relative aspect-[3/4] w-full">
 							<Image
 								src={image.src}
 								alt={image.alt || image.title}
 								fill
-								className="object-cover"
+								quality={90}
+								sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+								className="object-cover transition-transform duration-300 group-hover:scale-105"
 							/>
 						</div>
-						<div className="p-4">
-							<h3 className="font-semibold truncate">{image.title}</h3>
-							<p className="text-xs text-gray-400 mb-1">{formatDate(image.date)}</p>
-							<p className="text-sm text-gray-400 line-clamp-2 h-10 mb-2">{image.description || "No description"}</p>
+
+						<div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end p-4">
+							<div className="text-white w-full min-w-0">
+								<h3 className="font-semibold text-lg font-[family-name:var(--font-geist-mono)]">{image.title}</h3>
+								<p className="text-xs text-gray-300 mb-1 font-[family-name:var(--font-geist-mono)]">{formatDate(image.date)}</p>
+								{image.description && <p className="text-sm break-words font-[family-name:var(--font-geist-sans)]">{image.description}</p>}
+							</div>
 
 							<div className="absolute bottom-3 right-4">
 								<button
