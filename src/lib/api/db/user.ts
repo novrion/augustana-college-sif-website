@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { User, UserRole, UserWithCredentials } from '@/lib/types/user';
+import { User, UserRole, UserWithCredentials, Attachment } from '@/lib/types';
 import { getAll, getById, getByField, create, update, remove, extractUrl, uploadFileToBucket, deleteFileFromBucket } from './common';
 
 const table = 'users';
@@ -19,6 +19,10 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
 export async function getUserByRole(role: UserRole): Promise<User | null> {
 	return (await getByField(table, 'role', role)) as User | null;
+}
+
+export async function getUserCredentialsById(id: string): Promise<UserWithCredentials | null> {
+	return (await getById(table, id)) as UserWithCredentials | null;
 }
 
 export async function getUserCredentialsByEmail(email: string): Promise<UserWithCredentials | null> {
@@ -73,7 +77,7 @@ export async function verifyPassword(plainPassword: string, hashedPassword: stri
 	return await bcrypt.compare(plainPassword, hashedPassword);
 }
 
-export async function uploadProfilePicture(id: string, file: File, oldUrl: string = ''): Promise<object | null> {
+export async function uploadProfilePicture(id: string, file: File, oldUrl: string = ''): Promise<Attachment | null> {
 	try {
 		// Clean up old profile picture if it exists
 		if (oldUrl) {

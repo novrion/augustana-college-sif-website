@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import EventBox from '@/components/events/EventBox';
 import EventCalendar from '@/components/events/EventCalendar';
+import PaginationControls from '@/components/common/PaginationControls';
 import { Event } from '@/lib/types/event';
 
 export default function EventsPage() {
@@ -17,26 +17,24 @@ export default function EventsPage() {
 	const [totalEvents, setTotalEvents] = useState(0);
 
 	useEffect(() => {
-		const fetchAllEvents = async () => {
+		const fetchEvents = async () => {
 			setIsLoading(true);
 			setError(null);
 
 			try {
 				const upcomingResponse = await fetch('/api/events?type=upcoming');
-				if (!upcomingResponse.ok) {
-					throw new Error('Failed to fetch upcoming events');
-				}
+				if (!upcomingResponse.ok) { throw new Error('Failed to fetch upcoming events'); }
 				const upcomingData = await upcomingResponse.json();
 				setUpcomingEvents(upcomingData || []);
 
-				const pastResponse = await fetch(`/api/events?type=past&page=${currentPage}`);
-				if (!pastResponse.ok) {
-					throw new Error('Failed to fetch past events');
+				if (activeTab === 'past') {
+					const pastResponse = await fetch(`/api/events?type=past&page=${currentPage}`);
+					if (!pastResponse.ok) { throw new Error('Failed to fetch past events'); }
+					const pastData = await pastResponse.json();
+					setPastEvents(pastData.data || []);
+					setTotalPages(pastData.totalPages || 1);
+					setTotalEvents(pastData.total || 0);
 				}
-				const pastData = await pastResponse.json();
-				setPastEvents(pastData.data || []);
-				setTotalPages(pastData.totalPages || 1);
-				setTotalEvents(pastData.total || 0);
 			} catch (error) {
 				console.error('Error fetching events:', error);
 				setError('Failed to load events. Please try again later.');
@@ -45,35 +43,7 @@ export default function EventsPage() {
 			}
 		};
 
-		fetchAllEvents();
-	}, [currentPage]);
-
-	// Only update past events when page changes for pagination
-	useEffect(() => {
-		const fetchPastEvents = async () => {
-			if (activeTab !== 'past') return;
-
-			setIsLoading(true);
-			setError(null);
-
-			try {
-				const response = await fetch(`/api/events?type=past&page=${currentPage}`);
-				if (!response.ok) {
-					throw new Error('Failed to fetch past events');
-				}
-				const data = await response.json();
-				setPastEvents(data.data || []);
-				setTotalPages(data.totalPages || 1);
-				setTotalEvents(data.total || 0);
-			} catch (error) {
-				console.error('Error fetching past events:', error);
-				setError('Failed to load past events. Please try again later.');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchPastEvents();
+		fetchEvents();
 	}, [activeTab, currentPage]);
 
 	const handleTabChange = (tab: string) => {
@@ -81,9 +51,9 @@ export default function EventsPage() {
 		setCurrentPage(1);
 	};
 
-	const handlePageChange = (newPage: number) => {
-		if (newPage >= 1 && newPage <= totalPages) {
-			setCurrentPage(newPage);
+	const handlePageChange = (page: number) => {
+		if (page >= 1 && page <= totalPages) {
+			setCurrentPage(page);
 		}
 	};
 
@@ -109,115 +79,68 @@ export default function EventsPage() {
 
 				{/* List view */}
 				<div className="mt-12">
-					<div className="flex justify-between mb-6">
-						<div className="flex border-b border-white/[.145] font-[family-name:var(--font-geist-mono)]">
-							<button
-								className={`py-2 px-4 font-medium ${activeTab === 'upcoming'
-									? 'border-b-2 border-blue-500'
-									: 'text-gray-400'
-									}`}
-								onClick={() => handleTabChange('upcoming')}
-							>
-								Upcoming Speakers
-							</button>
-							<button
-								className={`py-2 px-4 font-medium ${activeTab === 'past'
-									? 'border-b-2 border-blue-500'
-									: 'text-gray-400'
-									}`}
-								onClick={() => handleTabChange('past')}
-							>
-								Past Speakers
-							</button>
-						</div>
+					<div className="flex border-b border-white/[.145] font-[family-name:var(--font-geist-mono)] mb-6">
+						<button
+							className={`py-2 px-4 font-medium ${activeTab === 'upcoming'
+								? 'border-b-2 border-blue-500'
+								: 'text-gray-400'
+								}`}
+							onClick={() => handleTabChange('upcoming')}
+						>
+							Upcoming Speakers
+						</button>
+						<button
+							className={`py-2 px-4 font-medium ${activeTab === 'past'
+								? 'border-b-2 border-blue-500'
+								: 'text-gray-400'
+								}`}
+							onClick={() => handleTabChange('past')}
+						>
+							Past Speakers
+						</button>
 					</div>
 
 					{isLoading && (
-						<div className="flex justify-center py-12">
+						<div className="flex justify-center py-8">
 							<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
 						</div>
 					)}
 
-					{error && (
+					{error && !isLoading && (
 						<div className="text-center p-4 rounded-md text-red-700 mb-6 font-[family-name:var(--font-geist-mono)]">
 							{error}
 						</div>
 					)}
 
 					{!isLoading && !error && (
-						<div className="space-y-6">
+						<>
 							{eventsToShow.length > 0 ? (
-								eventsToShow.map((event) => (
-									<EventBox key={event.id} event={event} />
-								))
+								<div className="space-y-6">
+									{eventsToShow.map((event) => (
+										<EventBox key={event.id} event={event} />
+									))}
+								</div>
 							) : (
 								<div className="text-center py-8 text-gray-400 font-[family-name:var(--font-geist-mono)]">
 									No {activeTab} speaker events found.
 								</div>
 							)}
-						</div>
+
+							{/* Pagination for past events only */}
+							{activeTab === 'past' && totalPages > 1 && (
+								<div className="mt-8">
+									<PaginationControls
+										currentPage={currentPage}
+										totalPages={totalPages}
+										onPageChange={handlePageChange}
+									/>
+									<div className="mt-4 text-sm text-gray-400 text-center font-[family-name:var(--font-geist-mono)]">
+										Showing {pastEvents.length} of {totalEvents} past events
+									</div>
+								</div>
+							)}
+						</>
 					)}
-
-					{/* Pagination controls - Only show for past events */}
-					{activeTab === 'past' && totalPages > 1 && !isLoading && (
-						<div className="flex justify-center mt-8">
-							<div className="flex items-center gap-2 font-[family-name:var(--font-geist-mono)]">
-								<button
-									onClick={() => handlePageChange(currentPage - 1)}
-									disabled={currentPage === 1}
-									className={`rounded-full border border-solid p-2 ${currentPage === 1
-										? 'border-gray-200 text-gray-400 cursor-not-allowed'
-										: 'border-white/[.145] hover:bg-[#1a1a1a]'
-										}`}
-									aria-label="Previous page"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-										<polyline points="15 18 9 12 15 6"></polyline>
-									</svg>
-								</button>
-
-								<span className="text-sm">
-									Page {currentPage} of {totalPages}
-								</span>
-
-								<button
-									onClick={() => handlePageChange(currentPage + 1)}
-									disabled={currentPage === totalPages}
-									className={`rounded-full border border-solid p-2 ${currentPage === totalPages
-										? 'border-gray-200 text-gray-400 cursor-not-allowed'
-										: 'border-white/[.145] hover:bg-[#1a1a1a]'
-										}`}
-									aria-label="Next page"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-										<polyline points="9 18 15 12 9 6"></polyline>
-									</svg>
-								</button>
-							</div>
-						</div>
-					)}
-
-					{activeTab === 'past' && totalEvents > 0 && !isLoading && (
-						<div className="mt-4 text-sm text-gray-400 text-center font-[family-name:var(--font-geist-mono)]">
-							Showing {pastEvents.length} of {totalEvents} past speakers
-						</div>
-					)}
-				</div>
-
-				<div className="mt-12 border-t border-white/[.145] pt-8">
-					<h2 className="text-xl font-semibold mb-4 font-[family-name:var(--font-geist-mono)]">
-						Interested in being a guest speaker?
-					</h2>
-					<p className="mb-6 font-[family-name:var(--font-geist-sans)]">
-						We regularly invite industry professionals to share insights with our student fund members.
-						If you&apos;re interested in speaking at one of our events, please contact us.
-					</p>
-					<Link
-						href="/contact"
-						className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ccc] font-medium text-sm h-10 px-4 w-fit font-[family-name:var(--font-geist-mono)]"
-					>
-						Contact Us
-					</Link>
 				</div>
 			</div>
 		</div>

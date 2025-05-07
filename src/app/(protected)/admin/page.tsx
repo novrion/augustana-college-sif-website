@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { hasAdminAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import AdminDashboardItem from '@/components/admin/AdminDashboardItem';
 
 interface DashboardItem {
@@ -9,7 +9,7 @@ interface DashboardItem {
 }
 
 export default async function AdminPage() {
-	const hasAccess = await hasAdminAccess();
+	const hasAccess = await hasPermission('ADMIN_DASHBOARD');
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	const dashboardItems: DashboardItem[] = [
@@ -53,9 +53,7 @@ export default async function AdminPage() {
 	return (
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
 			<div className="max-w-6xl mx-auto">
-				<h1 className="text-3xl font-bold mb-6">
-					Admin Dashboard
-				</h1>
+				<h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
 					{dashboardItems.map((item, index) => (

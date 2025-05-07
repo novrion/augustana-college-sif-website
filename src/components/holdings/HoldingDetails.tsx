@@ -5,7 +5,10 @@ interface HoldingDetailsProps {
 	totalEquityValue: number;
 }
 
-export default function HoldingDetails({ holding, totalEquityValue }: HoldingDetailsProps) {
+export default function HoldingDetails({
+	holding,
+	totalEquityValue
+}: HoldingDetailsProps) {
 	const marketValue = holding.current_price * holding.share_count;
 	const gainLoss = marketValue - holding.cost_basis;
 	const gainLossPercent = holding.cost_basis > 0 ? (gainLoss / holding.cost_basis) * 100 : 0;
@@ -20,6 +23,16 @@ export default function HoldingDetails({ holding, totalEquityValue }: HoldingDet
 
 	const formatPercent = (value: number) => {
 		return `${value.toFixed(2)}%`;
+	};
+
+	const formatDate = (dateString: string) => {
+		if (!dateString) return 'N/A';
+		return new Date(`${dateString}T12:00:00Z`).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			timeZone: 'UTC'
+		});
 	};
 
 	return (
@@ -68,7 +81,7 @@ export default function HoldingDetails({ holding, totalEquityValue }: HoldingDet
 					<div>{holding.sector || 'N/A'}</div>
 
 					<div className="text-sm text-gray-400">Purchase Date</div>
-					<div>{new Date(holding.purchase_date).toLocaleDateString()}</div>
+					<div>{formatDate(holding.purchase_date)}</div>
 				</div>
 			</div>
 		</>

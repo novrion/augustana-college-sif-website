@@ -1,55 +1,46 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/auth';
+import { Session } from 'next-auth';
 import { uploadGalleryImage, createGalleryImage } from '@/lib/api/db';
+import { withAuth } from '@/lib/api/server/routeHandlers';
 
-export async function POST(request: Request) {
-	try {
-		const session = await getServerSession(authOptions);
-		if (!session) {
-			return NextResponse.json(
-				{ error: 'Not authenticated' },
-				{ status: 401 }
-			);
-		}
+async function uploadGalleryImageHandler(request: Request, _session: Session): Promise<NextResponse> {
+	const formData = await request.formData();
+	const file = formData.get('file') as File;
+	const title = formData.get('title') as string;
+	const description = formData.get('description') as string;
+	const date = formData.get('date') as string;
 
-		const formData = await request.formData();
-		const file = formData.get('file') as File;
-		const title = formData.get('title') as string;
-		const description = formData.get('description') as string;
-		const date = formData.get('date') as string;
-
-		if (!file || !title || !date) {
-			return NextResponse.json(
-				{ error: 'File, title, and date are required' },
-				{ status: 400 }
-			);
-		}
-
-		// Upload image to storage
-		const uploadedImage = await uploadGalleryImage(file);
-		if (!uploadedImage) {
-			return NextResponse.json(
-				{ error: 'Failed to upload image' },
-				{ status: 500 }
-			);
-		}
-
-		// Create gallery image record
-		const galleryImage = await createGalleryImage({
-			title,
-			description: description || '',
-			src: uploadedImage.url,
-			alt: title,
-			date: date
-		});
-
-		return NextResponse.json(galleryImage, { status: 201 });
-	} catch (error) {
-		console.error('Error uploading gallery image:', error);
+	if (!file || !title || !date) {
 		return NextResponse.json(
-			{ error: 'An error occurred while uploading the image' },
+			{ error: 'File, title, and date are required' },
+			{ status: 400 }
+		);
+	}
+
+	const uploadedImage = await uploadGalleryImage(file);
+	if (!uploadedImage) {
+		return NextResponse.json(
+			{ error: 'Failed to upload image' },
 			{ status: 500 }
 		);
 	}
+
+	const galleryImage = await createGalleryImage({
+		title,
+		description: description || '',
+		src: uploadedImage.url,
+		alt: title,
+		date: date
+	});
+
+	if (!galleryImage) {
+		return NextResponse.json(
+			{ error: 'Failed to create image' },
+			{ status: 500 }
+		);
+	}
+
+	return NextResponse.json(galleryImage, { status: 201 });
 }
+
+export const POST = withAuth(uploadGalleryImageHandler, 'SECRETARY');

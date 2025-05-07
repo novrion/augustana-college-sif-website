@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { User, UserRole } from '@/lib/types/user';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { EmptyButton, FilledButton } from "@/components/Buttons";
 import ProfilePicture from '@/components/ProfilePicture';
 
@@ -26,7 +26,6 @@ export default function TransferRoleModal({
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
 
-	// Load eligible users when modal opens
 	useEffect(() => {
 		if (isOpen) {
 			const fetchUsers = async () => {
@@ -36,14 +35,14 @@ export default function TransferRoleModal({
 					if (!response.ok) { throw new Error('Failed to fetch users'); }
 
 					const allUsers = await response.json();
-
-					const eligibleUsers = allUsers.filter(user => {
+					const eligibleUsers = allUsers.filter((user: User) => {
 						if (user.id === session?.user?.id) return false;
 						if (!user.is_active) return false;
 						return !['president', 'vice_president', 'admin'].includes(user.role);
 					});
 
 					setUsers(eligibleUsers);
+					setError('');
 				} catch (err) {
 					console.error('Error fetching users:', err);
 					setError('Failed to load users');
@@ -54,14 +53,12 @@ export default function TransferRoleModal({
 
 			fetchUsers();
 		} else {
-			// Reset state when modal closes
 			setSelectedUserId('');
 			setError('');
 			setSuccess('');
 		}
 	}, [isOpen, session?.user?.id]);
 
-	// Close when Escape is pressed
 	useEffect(() => {
 		const handleEsc = (e: KeyboardEvent) => {
 			if (e.key === 'Escape' && isOpen && !isTransferring) {
@@ -69,16 +66,10 @@ export default function TransferRoleModal({
 			}
 		};
 
-		if (isOpen) {
-			document.addEventListener('keydown', handleEsc);
-		}
-
-		return () => {
-			document.removeEventListener('keydown', handleEsc);
-		};
+		if (isOpen) { document.addEventListener('keydown', handleEsc); }
+		return () => { document.removeEventListener('keydown', handleEsc); };
 	}, [isOpen, onClose, isTransferring]);
 
-	// Close when clicking outside the modal
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (modalRef.current && !modalRef.current.contains(e.target as Node) && !isTransferring) {
@@ -86,13 +77,8 @@ export default function TransferRoleModal({
 			}
 		};
 
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
+		if (isOpen) { document.addEventListener('mousedown', handleClickOutside); }
+		return () => { document.removeEventListener('mousedown', handleClickOutside); };
 	}, [isOpen, onClose, isTransferring]);
 
 	const handleTransfer = async () => {
@@ -125,10 +111,7 @@ export default function TransferRoleModal({
 			setSuccess(`Role transferred successfully!`);
 
 			// Refresh page after a delay to show updated roles
-			setTimeout(() => {
-				window.location.reload();
-			}, 2000);
-
+			setTimeout(() => { window.location.reload(); }, 2000);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'An error occurred');
 		} finally {
@@ -136,7 +119,6 @@ export default function TransferRoleModal({
 		}
 	};
 
-	// Format role for display
 	const formatRole = (userRole: string): string => {
 		return userRole
 			.split('_')

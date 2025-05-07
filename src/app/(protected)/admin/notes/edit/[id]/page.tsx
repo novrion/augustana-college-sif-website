@@ -1,24 +1,21 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { hasSecretaryAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import { getNoteById } from '@/lib/api/db';
 import NoteForm from '@/components/admin/notes/NoteForm';
+import { EmptyLinkButton } from '@/components/Buttons';
 
 export default async function EditNotePage({
 	params
 }: {
 	params: Promise<{ id: string }>
 }) {
-	const hasAccess = await hasSecretaryAccess();
+	const hasAccess = await hasPermission('SECRETARY');
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	try {
 		const { id } = await params;
 		const note = await getNoteById(id);
-
-		if (!note) {
-			redirect('/admin/notes');
-		}
+		if (!note) { redirect('/admin/notes'); }
 
 		return (
 			<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
@@ -28,12 +25,10 @@ export default async function EditNotePage({
 							Edit: {note.title}
 						</h1>
 
-						<Link
+						<EmptyLinkButton
 							href="/admin/notes"
-							className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] font-medium text-sm h-10 px-4"
-						>
-							Back to Minutes Management
-						</Link>
+							text="Back to Minutes Management"
+						/>
 					</div>
 
 					<NoteForm

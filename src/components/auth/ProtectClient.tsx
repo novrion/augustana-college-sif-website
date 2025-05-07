@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth, hasAccess, RequiredRole } from "@/hooks/auth/useAuth";
+import { useAuth, hasAccess, RequiredRole } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 

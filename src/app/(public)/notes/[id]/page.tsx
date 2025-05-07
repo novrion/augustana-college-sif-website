@@ -1,24 +1,20 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { getNoteById } from '@/lib/api/db';
+import { EmptyLinkButton } from '@/components/Buttons';
 
-export default async function NoteDetail({
-	params
-}: {
-	params: Promise<{ id: string }>
-}) {
+export default async function NoteDetail({ params }: { params: Promise<{ id: string }> }) {
 	try {
 		const { id } = await params;
 		if (!id) redirect('/notes');
-
 		const note = await getNoteById(id);
 		if (!note) redirect('/notes');
 
-		const formattedDate = new Date(note.date).toLocaleDateString('en-US', {
+		const formattedDate = new Date(`${note.date}T12:00:00Z`).toLocaleDateString('en-US', {
 			weekday: 'long',
 			year: 'numeric',
 			month: 'long',
-			day: 'numeric'
+			day: 'numeric',
+			timeZone: 'UTC'
 		});
 
 		return (
@@ -29,12 +25,10 @@ export default async function NoteDetail({
 							Meeting Minutes
 						</h1>
 
-						<Link
-							href="/notes"
-							className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4"
-						>
-							Back to All Minutes
-						</Link>
+						<EmptyLinkButton
+							text={"Back to All Minutes"}
+							href={"/notes"}
+						/>
 					</div>
 
 					<div className="rounded-lg border border-solid border-white/[.145] p-6">

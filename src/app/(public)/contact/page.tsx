@@ -1,140 +1,93 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProfilePicture from '@/components/ProfilePicture';
 import { User } from '@/lib/types/user';
 
 interface LeadershipData {
 	president: User | null;
 	vicePresident: User | null;
-	isLoading: boolean;
-	error: string | null;
 }
 
 export default function ContactPage() {
-	const [leadershipData, setLeadershipData] = useState<LeadershipData>({
-		president: null,
-		vicePresident: null,
-		isLoading: true,
-		error: null
-	});
+	const [leadership, setLeadership] = useState<LeadershipData | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		async function fetchLeadershipData() {
+		const fetchLeadership = async () => {
 			try {
 				const response = await fetch('/api/contact/leadership');
-				if (!response.ok) {
-					throw new Error('Failed to fetch leadership data');
-				}
+				if (!response.ok) throw new Error('Failed to fetch leadership data');
 
 				const data = await response.json();
-				setLeadershipData({
-					president: data.president,
-					vicePresident: data.vicePresident,
-					isLoading: false,
-					error: null
-				});
-			} catch (error) {
-				setLeadershipData(prev => ({
-					...prev,
-					isLoading: false,
-					error: error instanceof Error ? error.message : 'Unknown error'
-				}));
+				setLeadership(data);
+				setError(null);
+			} catch (err) {
+				console.error('Error fetching leadership:', err);
+				setError('Failed to load leadership information. Please try again later.');
+			} finally {
+				setIsLoading(false);
 			}
-		}
+		};
 
-		fetchLeadershipData();
+		fetchLeadership();
 	}, []);
 
-	const fallBackData = {
-		id: '',
-		name: '',
-		email: '',
-		role: 'user' as const,
-		is_active: true
-	};
+	const renderContactCard = (user: User | null | undefined, role: string) => {
+		if (!user) return null;
 
-	const president = leadershipData.president || fallBackData;
-	const vicePresident = leadershipData.vicePresident || fallBackData;
+		return (
+			<div className="rounded-lg border border-solid border-white/[.145] p-6">
+				<div className="flex flex-col items-center mb-6">
+					<ProfilePicture user={user} size={120} />
+					<h2 className="text-xl font-semibold mt-4">{role}</h2>
+				</div>
+				<div className="flex flex-col gap-2">
+					<p className="font-bold">{user.name}</p>
+					{user.email && (
+						<p className="text-sm">
+							<span className="inline-block w-20">Email:</span>
+							<a href={`mailto:${user.email}`} className="text-blue-500 hover:underline">
+								{user.email}
+							</a>
+						</p>
+					)}
+					{user.phone && (
+						<p className="text-sm">
+							<span className="inline-block w-20">Phone:</span>
+							<a href={`tel:${user.phone}`} className="hover:underline">
+								{user.phone}
+							</a>
+						</p>
+					)}
+				</div>
+			</div>
+		);
+	};
 
 	return (
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
 			<div className="max-w-4xl mx-auto">
-				<h1 className="text-3xl font-bold mb-8">
-					Contact Us
-				</h1>
+				<h1 className="text-3xl font-bold mb-8">Contact Us</h1>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-					{/* President Contact Info */}
-					<div className="rounded-lg border border-solid border-white/[.145] p-6">
-						<div className="flex flex-col items-center mb-6">
-							<ProfilePicture
-								user={president}
-								size={120}
-							/>
-							<h2 className="text-xl font-semibold mt-4">
-								President
-							</h2>
-						</div>
-						<div className="flex flex-col gap-2">
-							<p className="font-bold">{president.name}</p>
-							{president.email && (
-								<p className="text-sm">
-									<span className="inline-block w-20">Email:</span>
-									<a href={`mailto:${president.email}`} className="text-blue-500 hover:underline">
-										{president.email}
-									</a>
-								</p>
-							)}
-							{president.phone && (
-								<p className="text-sm">
-									<span className="inline-block w-20">Phone:</span>
-									<a href={`tel:${president.phone}`} className="hover:underline">
-										{president.phone}
-									</a>
-								</p>
-							)}
-						</div>
+				{isLoading ? (
+					<div className="flex justify-center py-8">
+						<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
 					</div>
-
-					{/* Vice President Contact Info */}
-					<div className="rounded-lg border border-solid border-white/[.145] p-6">
-						<div className="flex flex-col items-center mb-6">
-							<ProfilePicture
-								user={vicePresident}
-								size={120}
-							/>
-							<h2 className="text-xl font-semibold mt-4">
-								Vice President
-							</h2>
-						</div>
-						<div className="flex flex-col gap-2">
-							<p className="font-bold">{vicePresident.name}</p>
-							{vicePresident.email && (
-								<p className="text-sm">
-									<span className="inline-block w-20">Email:</span>
-									<a href={`mailto:${vicePresident.email}`} className="text-blue-500 hover:underline">
-										{vicePresident.email}
-									</a>
-								</p>
-							)}
-							{vicePresident.phone && (
-								<p className="text-sm">
-									<span className="inline-block w-20">Phone:</span>
-									<a href={`tel:${vicePresident.phone}`} className="hover:underline">
-										{vicePresident.phone}
-									</a>
-								</p>
-							)}
-						</div>
+				) : error ? (
+					<div className="text-center p-4 rounded-md text-red-700 mb-6">
+						{error}
 					</div>
-				</div>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+						{renderContactCard(leadership?.president, 'President')}
+						{renderContactCard(leadership?.vicePresident, 'Vice President')}
+					</div>
+				)}
 
-				{/* Social Media Section */}
 				<div className="rounded-lg border border-solid border-white/[.145] p-6 mt-8">
-					<h2 className="text-xl font-semibold mb-4">
-						Follow Us
-					</h2>
+					<h2 className="text-xl font-semibold mb-4">Follow Us</h2>
 					<div className="flex items-center gap-4">
 						<a
 							href="https://www.instagram.com/augieinvestmentfund/"
@@ -152,6 +105,6 @@ export default function ContactPage() {
 					</div>
 				</div>
 			</div>
-		</div >
+		</div>
 	);
 }

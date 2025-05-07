@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { User, UserRole } from '@/lib/types/user';
 import { AdminList, AdminListItem, DeleteConfirmationModal } from '@/components/admin/common';
 import PaginationControls from '@/components/common/PaginationControls';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import UserRoleModal from './UserRoleModal';
 import ProfilePicture from '@/components/ProfilePicture';
 
@@ -25,27 +25,17 @@ export default function AdminUsersList({
 	const [allUsers, setAllUsers] = useState(initialUsers);
 	const [currentPage, setCurrentPage] = useState(initialPage);
 	const [totalPages, setTotalPages] = useState(Math.ceil(initialUsers.length / pageSize));
+	const [paginatedUsers, setPaginatedUsers] = useState<User[]>([]);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
-
-	const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
 	const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
-	const [paginatedUsers, setPaginatedUsers] = useState<User[]>([]);
-
-	useEffect(() => {
-		const startIndex = (currentPage - 1) * pageSize;
-		const endIndex = startIndex + pageSize;
-		setPaginatedUsers(allUsers.slice(startIndex, endIndex));
-		setTotalPages(Math.ceil(allUsers.length / pageSize));
-	}, [currentPage, allUsers, pageSize]);
-
-	// Role hierarchy for permission checks
 	const roleHierarchy: { [key in UserRole]: number } = {
 		'admin': 4,
 		'president': 3,
@@ -56,27 +46,30 @@ export default function AdminUsersList({
 		'user': 0
 	};
 
-	// Check if current user can edit another user's role
+	useEffect(() => {
+		const startIndex = (currentPage - 1) * pageSize;
+		const endIndex = startIndex + pageSize;
+		setPaginatedUsers(allUsers.slice(startIndex, endIndex));
+		setTotalPages(Math.ceil(allUsers.length / pageSize));
+	}, [currentPage, allUsers, pageSize]);
+
 	const canEditUserRole = (user: User): boolean => {
 		if (!currentUser) return false;
 		if (user.id === currentUser.id) return false; // Can't edit own role
 
-		const currentUserRank = roleHierarchy[currentUser.role];
+		const currentUserRank = roleHierarchy[currentUser.role as UserRole];
 		const targetUserRank = roleHierarchy[user.role];
 
-		// Can only edit roles of users lower in hierarchy
 		return currentUserRank > targetUserRank;
 	};
 
-	// Check if current user can delete another user
 	const canDeleteUser = (user: User): boolean => {
 		if (!currentUser) return false;
-		if (user.id === currentUser.id) return false; // Can't delete self
+		if (user.id === currentUser.id) return false;
 
-		const currentUserRank = roleHierarchy[currentUser.role];
+		const currentUserRank = roleHierarchy[currentUser.role as UserRole];
 		const targetUserRank = roleHierarchy[user.role];
 
-		// Can only delete users lower in hierarchy
 		return currentUserRank > targetUserRank;
 	};
 
@@ -93,6 +86,21 @@ export default function AdminUsersList({
 	const closeDeleteModal = () => {
 		setIsDeleteModalOpen(false);
 		setUserToDelete(null);
+	};
+
+	const openRoleModal = (user: User, e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (!canEditUserRole(user)) {
+			setError(`You don't have permission to change ${user.name}'s role`);
+			return;
+		}
+		setUserToEdit(user);
+		setIsRoleModalOpen(true);
+	};
+
+	const closeRoleModal = () => {
+		setIsRoleModalOpen(false);
+		setUserToEdit(null);
 	};
 
 	const confirmDelete = async () => {
@@ -114,7 +122,7 @@ export default function AdminUsersList({
 			setAllUsers(updatedUsers);
 			setSuccess(`${userToDelete.name} has been deleted successfully`);
 
-			// Update page if necessary (if we deleted the last item on a page)
+			// Update page if necessary
 			if (paginatedUsers.length === 1 && currentPage > 1) {
 				setCurrentPage(currentPage - 1);
 			}
@@ -128,21 +136,6 @@ export default function AdminUsersList({
 		}
 	};
 
-	const openRoleModal = (user: User, e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (!canEditUserRole(user)) {
-			setError(`You don't have permission to change ${user.name}'s role`);
-			return;
-		}
-		setUserToEdit(user);
-		setIsRoleModalOpen(true);
-	};
-
-	const closeRoleModal = () => {
-		setIsRoleModalOpen(false);
-		setUserToEdit(null);
-	};
-
 	const handleRoleChange = async (newRole: UserRole) => {
 		if (!userToEdit) return;
 
@@ -150,9 +143,7 @@ export default function AdminUsersList({
 		try {
 			const response = await fetch(`/api/admin/users/${userToEdit.id}/role`, {
 				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ role: newRole }),
 			});
 
@@ -166,7 +157,7 @@ export default function AdminUsersList({
 				user.id === userToEdit.id ? { ...user, role: newRole } : user
 			);
 			setAllUsers(updatedUsers);
-			setSuccess(`${userToEdit.name}'s role has been updated to ${newRole}`);
+			setSuccess(`${userToEdit.name}'s role has been updated to ${formatRole(newRole)}`);
 
 			closeRoleModal();
 		} catch (err) {
@@ -187,9 +178,7 @@ export default function AdminUsersList({
 		try {
 			const response = await fetch(`/api/admin/users/${user.id}/status`, {
 				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ isActive: !user.is_active }),
 			});
 
@@ -215,7 +204,6 @@ export default function AdminUsersList({
 		setCurrentPage(page);
 	};
 
-	// Helper to format role for display
 	const formatRole = (role: UserRole): string => {
 		return role
 			.split('_')

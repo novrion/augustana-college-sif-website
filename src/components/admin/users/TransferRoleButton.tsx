@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { FilledButton } from "@/components/Buttons";
 import TransferRoleModal from './TransferRoleModal';
 

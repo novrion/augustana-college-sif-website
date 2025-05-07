@@ -20,18 +20,15 @@ export default function GalleryPage() {
 			setError(null);
 
 			try {
-				// Build query string
-				const params = new URLSearchParams();
-				params.set('page', currentPage.toString());
-				params.set('pageSize', '12'); // 12 images per page works well with the grid layout
-				params.set('orderBy', 'date'); // Sort by date
-				params.set('ascending', 'false'); // Newest first
+				const params = new URLSearchParams({
+					page: currentPage.toString(),
+					pageSize: '12',
+					orderBy: 'date',
+					ascending: 'false'
+				});
 
 				const response = await fetch(`/api/gallery?${params.toString()}`);
-
-				if (!response.ok) {
-					throw new Error('Failed to fetch gallery images');
-				}
+				if (!response.ok) { throw new Error('Failed to fetch gallery images'); }
 
 				const data = await response.json();
 				setGalleryImages(data.data || []);

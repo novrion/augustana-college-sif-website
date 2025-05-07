@@ -1,16 +1,15 @@
 import { redirect } from 'next/navigation';
-import { hasAdminAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import { getAllUsers } from '@/lib/api/db';
 import AdminUsersList from '@/components/admin/users/AdminUsersList';
-import { User } from '@/lib/types/user';
 import { EmptyLinkButton } from "@/components/Buttons";
 import TransferRoleButton from '@/components/admin/users/TransferRoleButton';
 
 export default async function AdminUsersPage() {
-	const hasAccess = await hasAdminAccess();
+	const hasAccess = await hasPermission('ADMIN');
 	if (!hasAccess) { redirect('/unauthorized'); }
 
-	const users: User[] = await getAllUsers();
+	const users = await getAllUsers();
 
 	return (
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
@@ -21,8 +20,8 @@ export default async function AdminUsersPage() {
 					<div className="flex gap-3">
 						<TransferRoleButton />
 						<EmptyLinkButton
-							href={"/admin"}
-							text={"Back to Admin"}
+							href="/admin"
+							text="Back to Admin"
 						/>
 					</div>
 				</div>

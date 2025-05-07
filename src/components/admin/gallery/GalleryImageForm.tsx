@@ -9,12 +9,12 @@ import { GalleryImage } from '@/lib/types/gallery';
 
 interface GalleryImageFormProps {
 	initialData?: GalleryImage;
+	isEditing?: boolean;
 }
 
-export default function GalleryImageForm({ initialData }: GalleryImageFormProps) {
+export default function GalleryImageForm({ initialData, isEditing = false }: GalleryImageFormProps) {
 	const router = useRouter();
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const isEditing = !!initialData;
 
 	const getTodayLocalDate = () => {
 		const now = new Date();
@@ -24,11 +24,9 @@ export default function GalleryImageForm({ initialData }: GalleryImageFormProps)
 		return `${year}-${month}-${day}`;
 	};
 
-	// Format date for the input field, ensuring it displays correctly
 	const formatDateForInput = (dateString?: string) => {
 		if (!dateString) return getTodayLocalDate();
 
-		// Create a date object with noon UTC time to avoid timezone issues
 		const date = new Date(`${dateString}T12:00:00Z`);
 		const year = date.getUTCFullYear();
 		const month = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -64,7 +62,6 @@ export default function GalleryImageForm({ initialData }: GalleryImageFormProps)
 
 		const file = files[0];
 
-		// Validate file type
 		const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
 		if (!validTypes.includes(file.type)) {
 			setError('Please select a valid image file (JPEG, PNG, or GIF)');
@@ -96,34 +93,18 @@ export default function GalleryImageForm({ initialData }: GalleryImageFormProps)
 		setSuccess('');
 
 		try {
-			// Validate form data
-			if (!formData.title) {
-				throw new Error('Title is required');
-			}
+			if (!formData.title) { throw new Error('Title is required'); }
+			if (!isEditing && !selectedFile) { throw new Error('Please select an image to upload'); }
 
-			if (!isEditing && !selectedFile) {
-				throw new Error('Please select an image to upload');
-			}
-
-			// Create FormData object for file upload
 			const formDataObj = new FormData();
-
-			if (selectedFile) {
-				formDataObj.append('file', selectedFile);
-			}
-
+			if (selectedFile) { formDataObj.append('file', selectedFile); }
 			formDataObj.append('title', formData.title);
 			formDataObj.append('description', formData.description || '');
 			formDataObj.append('date', formData.date);
 
-			if (isEditing && initialData) {
-				formDataObj.append('id', initialData.id);
-			}
-
-			const endpoint = isEditing ? '/api/admin/gallery/update' : '/api/admin/gallery/upload';
-
+			const endpoint = isEditing ? `/api/admin/gallery/${initialData?.id}` : '/api/admin/gallery/upload';
 			const response = await fetch(endpoint, {
-				method: 'POST',
+				method: isEditing ? 'PUT' : 'POST',
 				body: formDataObj,
 			});
 

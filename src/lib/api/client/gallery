@@ -1,0 +1,59 @@
+import { GalleryImage } from '@/lib/types';
+import { apiFetch } from './fetch';
+
+interface GalleryResponse {
+	message: string;
+}
+
+interface PaginatedGalleryResponse {
+	data: GalleryImage[];
+	total: number;
+	totalPages: number;
+}
+
+export const galleryApi = {
+	getPaginatedImages: (page = 1, pageSize = 12, orderBy = 'date', ascending = false) => {
+		const params = new URLSearchParams();
+		params.set('page', page.toString());
+		params.set('pageSize', pageSize.toString());
+		params.set('orderBy', orderBy);
+		params.set('ascending', ascending.toString());
+
+		return apiFetch<PaginatedGalleryResponse>(`gallery?${params.toString()}`);
+	},
+
+	getImageById: (id: string) =>
+		apiFetch<GalleryImage>(`admin/gallery/${id}`),
+
+	uploadImage: (file: File, title: string, description: string, date: string) => {
+		const formData = new FormData();
+		formData.append('file', file);
+		formData.append('title', title);
+		formData.append('description', description || '');
+		formData.append('date', date);
+
+		return apiFetch<GalleryImage>('admin/gallery/upload', {
+			method: 'POST',
+			formData
+		});
+	},
+
+	updateImage: (id: string, file: File | null, title: string, description: string, date: string) => {
+		const formData = new FormData();
+		if (file) formData.append('file', file);
+		formData.append('title', title);
+		formData.append('description', description || '');
+		formData.append('date', date);
+		formData.append('id', id);
+
+		return apiFetch<GalleryResponse>('admin/gallery/update', {
+			method: 'POST',
+			formData
+		});
+	},
+
+	deleteImage: (id: string) =>
+		apiFetch<GalleryResponse>(`admin/gallery/delete/${id}`, {
+			method: 'DELETE'
+		})
+};

@@ -20,10 +20,8 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 
 	const currentYear = currentDate.getFullYear();
 	const currentMonth = currentDate.getMonth();
-
 	const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 	const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-
 	const monthName = currentDate.toLocaleString('default', { month: 'long' });
 
 	const handlePrevMonth = () => {
@@ -36,7 +34,6 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 
 	const handleDayClick = (day: number) => {
 		const eventsOnDay = getEventsForDay(day);
-
 		if (eventsOnDay.length === 1) {
 			router.push(`/events/${eventsOnDay[0].id}`);
 		} else if (eventsOnDay.length > 1) {
@@ -44,62 +41,62 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 		}
 	};
 
-	// Fixed date handling for event status check
 	const isEventUpcoming = (event: Event): boolean => {
-		// Parse date with a consistent time (noon UTC) to avoid timezone issues
 		const eventDate = new Date(`${event.date}T12:00:00Z`);
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 		return eventDate >= today;
 	};
 
-	// Fixed date handling for filtering events by day
 	const getEventsForDay = (day: number): Event[] => {
 		return events.filter(event => {
-			// Consistently create date objects with noon UTC time to avoid timezone shifts
 			const eventDate = new Date(`${event.date}T12:00:00Z`);
-			const eventYear = eventDate.getUTCFullYear();
-			const eventMonth = eventDate.getUTCMonth();
-			const eventDay = eventDate.getUTCDate();
-
 			return (
-				eventYear === currentYear &&
-				eventMonth === currentMonth &&
-				eventDay === day
+				eventDate.getUTCFullYear() === currentYear &&
+				eventDate.getUTCMonth() === currentMonth &&
+				eventDate.getUTCDate() === day
 			);
 		});
 	};
 
-	const days = [];
-	for (let i = 0; i < firstDayOfMonth; i++) {
-		days.push(<div key={`empty-${i}`} className="p-2"></div>);
-	}
+	const renderCalendarDays = () => {
+		const days = [];
 
-	for (let day = 1; day <= daysInMonth; day++) {
-		const eventsOnDay = getEventsForDay(day);
+		// Empty cells for days before the first of the month
+		for (let i = 0; i < firstDayOfMonth; i++) {
+			days.push(<div key={`empty-${i}`} className="p-2"></div>);
+		}
 
-		days.push(
-			<div
-				key={day}
-				onClick={() => handleDayClick(day)}
-				className={`p-2 border border-white/[.145] min-h-[80px] ${eventsOnDay.length > 0 ? 'cursor-pointer hover:bg-[#1a1a1a]' : ''
-					}`}
-			>
-				<div className="text-sm font-semibold mb-1">{day}</div>
-				{eventsOnDay.map(event => (
-					<div
-						key={event.id}
-						className={`text-xs p-1 rounded-md mb-1 truncate ${isEventUpcoming(event)
-							? 'bg-blue-900 text-blue-200'
-							: 'bg-gray-700 text-gray-200'
-							}`}
-					>
-						{`${event.speaker_name}` || event.title}
-					</div>
-				))}
-			</div>
-		);
-	}
+		// Cells for each day of the month
+		for (let day = 1; day <= daysInMonth; day++) {
+			const eventsOnDay = getEventsForDay(day);
+			const hasEvents = eventsOnDay.length > 0;
+
+			days.push(
+				<div
+					key={day}
+					onClick={() => hasEvents && handleDayClick(day)}
+					className={`p-2 border border-white/[.145] min-h-[80px] ${hasEvents ? 'cursor-pointer hover:bg-[#1a1a1a]' : ''
+						}`}
+				>
+					<div className="text-sm font-semibold mb-1">{day}</div>
+					{eventsOnDay.map(event => (
+						<div
+							key={event.id}
+							className={`text-xs p-1 rounded-md mb-1 truncate ${isEventUpcoming(event)
+								? 'bg-blue-900 text-blue-200'
+								: 'bg-gray-700 text-gray-200'
+								}`}
+						>
+							{event.speaker_name || event.title}
+						</div>
+					))}
+				</div>
+			);
+		}
+
+		return days;
+	};
 
 	return (
 		<div className="rounded-lg border border-solid border-white/[.145] p-6">
@@ -107,6 +104,7 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 				<button
 					onClick={handlePrevMonth}
 					className="rounded-full border border-solid p-2 border-white/[.145] hover:bg-[#1a1a1a]"
+					aria-label="Previous month"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 						<polyline points="15 18 9 12 15 6"></polyline>
@@ -120,6 +118,7 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 				<button
 					onClick={handleNextMonth}
 					className="rounded-full border border-solid p-2 border-white/[.145] hover:bg-[#1a1a1a]"
+					aria-label="Next month"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 						<polyline points="9 18 15 12 9 6"></polyline>
@@ -136,7 +135,7 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 			</div>
 
 			<div className="grid grid-cols-7 gap-1 font-[family-name:var(--font-geist-sans)]">
-				{days}
+				{renderCalendarDays()}
 			</div>
 
 			<div className="mt-4 flex gap-4 font-[family-name:var(--font-geist-sans)]">

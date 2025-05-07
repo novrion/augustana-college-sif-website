@@ -5,9 +5,10 @@ import Link from "next/link"
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/hooks/auth/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { HoldingsLinkButton, LogInLinkButton, SignOutButton } from "@/components/Buttons";
 import ProfilePicture from "@/components/ProfilePicture";
+import { User } from '@/lib/types';
 
 export default function Navbar() {
 	const pathName = usePathname();
@@ -59,7 +60,7 @@ export default function Navbar() {
 							className="flex items-center gap-2"
 						>
 							<ProfilePicture
-								user={session.user}
+								user={session?.user as User}
 								size={50}
 								className="cursor-pointer"
 							/>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import NewsletterBox from '@/components/newsletter/NewsletterBox';
+import YearFilter from '@/components/common/YearFilter';
 import PaginationControls from '@/components/common/PaginationControls';
 import { Newsletter } from '@/lib/types/newsletter';
 import { useSearchParams } from 'next/navigation';
@@ -66,11 +67,19 @@ export default function NewsletterPage() {
 	const handleYearChange = (year: string | null) => {
 		setCurrentYear(year);
 		setCurrentPage(1); // Reset to first page when changing year
+
+		// Update URL without page reload
+		const url = new URL(window.location.href);
+		url.searchParams.set('page', '1');
+		if (year) url.searchParams.set('year', year);
+		else url.searchParams.delete('year');
+		window.history.pushState({}, '', url.toString());
 	};
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page);
 
+		// Update URL without page reload
 		const url = new URL(window.location.href);
 		url.searchParams.set('page', page.toString());
 		if (currentYear) url.searchParams.set('year', currentYear);
@@ -85,30 +94,11 @@ export default function NewsletterPage() {
 				</h1>
 
 				<div className="mb-6">
-					<div className="flex flex-wrap gap-2">
-						<button
-							onClick={() => handleYearChange(null)}
-							className={`px-3 py-1 rounded-md text-sm ${!currentYear
-								? 'bg-foreground text-background'
-								: 'border border-white/[.145] hover:bg-[#1a1a1a]'
-								}`}
-						>
-							All
-						</button>
-
-						{years.map((year) => (
-							<button
-								key={year}
-								onClick={() => handleYearChange(year.toString())}
-								className={`px-3 py-1 rounded-md text-sm ${currentYear === year.toString()
-									? 'bg-foreground text-background'
-									: 'border border-white/[.145] hover:bg-[#1a1a1a]'
-									}`}
-							>
-								{year}
-							</button>
-						))}
-					</div>
+					<YearFilter
+						years={years}
+						currentYear={currentYear}
+						onChange={handleYearChange}
+					/>
 				</div>
 
 				{isLoading && (
@@ -117,40 +107,39 @@ export default function NewsletterPage() {
 					</div>
 				)}
 
-				{error && (
-					<div className="text-center p-4 rounded-md text-red-700 mb-6 font-[family-name:var(--font-geist-mono)]">
+				{error && !isLoading && (
+					<div className="text-center p-4 rounded-md text-red-700 mb-6">
 						{error}
 					</div>
 				)}
 
 				{!isLoading && !error && (
-					<div className="flex flex-col gap-4">
+					<>
 						{newsletters.length > 0 ? (
-							newsletters.map((newsletter) => (
-								<NewsletterBox key={newsletter.id} newsletter={newsletter} />
-							))
+							<div className="flex flex-col gap-4">
+								{newsletters.map((newsletter) => (
+									<NewsletterBox key={newsletter.id} newsletter={newsletter} />
+								))}
+							</div>
 						) : (
 							<div className="text-center py-8 text-gray-400">
 								No newsletters available for the selected criteria.
 							</div>
 						)}
-					</div>
-				)}
 
-				{totalPages > 1 && !isLoading && (
-					<div className="mt-8">
-						<PaginationControls
-							currentPage={currentPage}
-							totalPages={totalPages}
-							onPageChange={handlePageChange}
-						/>
-					</div>
-				)}
-
-				{!isLoading && (
-					<div className="mt-4 text-sm text-gray-400 text-center">
-						Showing {newsletters.length} of {totalNewsletters} newsletters
-					</div>
+						{totalPages > 1 && (
+							<div className="mt-8">
+								<PaginationControls
+									currentPage={currentPage}
+									totalPages={totalPages}
+									onPageChange={handlePageChange}
+								/>
+								<div className="mt-4 text-sm text-gray-400 text-center">
+									Showing {newsletters.length} of {totalNewsletters} newsletters
+								</div>
+							</div>
+						)}
+					</>
 				)}
 			</div>
 		</div>

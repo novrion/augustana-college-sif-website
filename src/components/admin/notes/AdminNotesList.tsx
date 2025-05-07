@@ -34,14 +34,13 @@ export default function AdminNotesList({
 		setTotalPages(Math.ceil(allNotes.length / pageSize));
 	}, [currentPage, allNotes, pageSize]);
 
-	const formatDate = (dateString: string) => {
+	const formatDate = (dateString: string): string => {
 		const date = new Date(`${dateString}T12:00:00Z`);
-
 		return date.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
-			timeZone: 'UTC' // Use UTC to avoid timezone shifts
+			timeZone: 'UTC'
 		});
 	};
 

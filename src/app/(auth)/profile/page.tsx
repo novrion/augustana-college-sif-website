@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/auth';
 import { getUserById } from '@/lib/api/db';
 import ProfileForm from '@/components/auth/ProfileForm';
+import { User } from '@/lib/types';
 
 export default async function ProfilePage() {
 	const session = await getSession();
@@ -17,7 +18,7 @@ export default async function ProfilePage() {
 				</h1>
 
 				<ProfileForm
-					initialUserData={userData}
+					initialUserData={userData as User}
 					session={session}
 				/>
 			</div>

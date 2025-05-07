@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { getHoldingById, getAllHoldings } from '@/lib/api/db';
 import { getSession } from '@/lib/auth/auth';
 import HoldingDetails from '@/components/holdings/HoldingDetails';
+import { EmptyLinkButton } from '@/components/Buttons';
 
 export default async function HoldingDetailPage({
 	params
@@ -14,13 +14,15 @@ export default async function HoldingDetailPage({
 
 	try {
 		const { id } = await params;
+		if (!id) redirect('/holdings');
+
 		const holding = await getHoldingById(id);
-		if (!holding) { redirect('/holdings'); }
+		if (!holding) redirect('/holdings');
 
 		const holdings = await getAllHoldings();
-		const totalEquityValue = holdings.reduce((sum, holding) => {
-			return sum + (holding.current_price * holding.share_count);
-		}, 0);
+		const totalEquityValue = holdings.reduce((sum, h) =>
+			sum + (h.current_price * h.share_count), 0
+		);
 
 		return (
 			<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
@@ -30,12 +32,10 @@ export default async function HoldingDetailPage({
 							{holding.company_name} ({holding.ticker})
 						</h1>
 
-						<Link
+						<EmptyLinkButton
 							href="/holdings"
-							className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4"
-						>
-							Back to Portfolio
-						</Link>
+							text="Back to Portfolio"
+						/>
 					</div>
 
 					<HoldingDetails

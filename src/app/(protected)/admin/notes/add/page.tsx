@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { hasSecretaryAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import NoteForm from '@/components/admin/notes/NoteForm';
+import { EmptyLinkButton } from '@/components/Buttons';
 
 export default async function AddNotePage() {
-	const hasAccess = await hasSecretaryAccess();
+	const hasAccess = await hasPermission('SECRETARY');
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	return (
@@ -15,12 +15,10 @@ export default async function AddNotePage() {
 						Add Meeting Minutes
 					</h1>
 
-					<Link
+					<EmptyLinkButton
 						href="/admin/notes"
-						className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] font-medium text-sm h-10 px-4"
-					>
-						Back to Minutes Management
-					</Link>
+						text="Back to Minutes Management"
+					/>
 				</div>
 
 				<NoteForm />

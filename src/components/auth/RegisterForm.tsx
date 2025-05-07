@@ -1,51 +1,58 @@
 'use client'
 
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Form from "@/components/Form"
 import { FilledButton } from "@/components/Buttons";
 
 export default function RegisterForm() {
-	const [name, setName] = useState('');
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
+	const [formData, setFormData] = useState({
+		name: '',
+		email: '',
+		password: '',
+		confirmPassword: ''
+	});
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 
 	const router = useRouter();
 
-	const handleSubmit = async (e) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target;
+		setFormData(prev => ({ ...prev, [name]: value }));
+	};
+
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setIsLoading(true);
 		setError('');
 
-		if (password !== confirmPassword) {
+		if (formData.password !== formData.confirmPassword) {
 			setError('Passwords do not match');
-			setIsLoading(false);
 			return;
 		}
+
+		setIsLoading(true);
 
 		try {
 			const response = await fetch('/api/auth/register', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					name,
-					email,
-					password,
+					name: formData.name,
+					email: formData.email,
+					password: formData.password,
 				}),
 			});
 
 			const data = await response.json();
-			if (!response.ok) { throw new Error(data.error || 'Failed to register'); }
+			if (!response.ok) {
+				throw new Error(data.error || 'Failed to register');
+			}
 
 			router.push('/login?registered=true');
 		} catch (error) {
-			setError(error.message);
+			setError(error instanceof Error ? error.message : 'Registration failed');
 		} finally {
 			setIsLoading(false);
 		}
@@ -55,7 +62,7 @@ export default function RegisterForm() {
 		<div className="font-[family-name:var(--font-geist-mono)]">
 			<Form
 				onSubmit={handleSubmit}
-				title={"Sign Up"}
+				title="Sign Up"
 				error={error}
 			>
 				<div className="mb-4">
@@ -64,9 +71,10 @@ export default function RegisterForm() {
 					</label>
 					<input
 						id="name"
+						name="name"
 						type="text"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
+						value={formData.name}
+						onChange={handleChange}
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
@@ -78,9 +86,10 @@ export default function RegisterForm() {
 					</label>
 					<input
 						id="email"
+						name="email"
 						type="email"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
+						value={formData.email}
+						onChange={handleChange}
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
@@ -92,23 +101,25 @@ export default function RegisterForm() {
 					</label>
 					<input
 						id="password"
+						name="password"
 						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						value={formData.password}
+						onChange={handleChange}
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>
 
 				<div className="mb-4">
-					<label className="block text-sm font-medium mb-1 font-[family-name:var(--font-geist-mono)]" htmlFor="confirmPassword">
+					<label className="block text-sm font-medium mb-1" htmlFor="confirmPassword">
 						Confirm Password
 					</label>
 					<input
 						id="confirmPassword"
+						name="confirmPassword"
 						type="password"
-						value={confirmPassword}
-						onChange={(e) => setConfirmPassword(e.target.value)}
+						value={formData.confirmPassword}
+						onChange={handleChange}
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
@@ -116,11 +127,11 @@ export default function RegisterForm() {
 
 				<div>
 					<FilledButton
-						type={"submit"}
-						text={"Sign Up"}
-						loadingText={"Creating account..."}
+						type="submit"
+						text="Sign Up"
+						loadingText="Creating account..."
 						isLoading={isLoading}
-						className={"w-full"}
+						className="w-full"
 					/>
 				</div>
 
@@ -133,6 +144,6 @@ export default function RegisterForm() {
 					</p>
 				</div>
 			</Form>
-		</div >
+		</div>
 	);
 }

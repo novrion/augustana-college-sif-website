@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { getEventById } from '@/lib/api/db';
+import { EmptyLinkButton } from '@/components/Buttons';
 
 export default async function EventDetail({
 	params
@@ -15,19 +15,17 @@ export default async function EventDetail({
 		if (!event) redirect('/events');
 
 		const formatDate = (dateString: string): string => {
-			// Create date with noon UTC time to ensure consistent date representation
 			const date = new Date(`${dateString}T12:00:00Z`);
 			return date.toLocaleDateString('en-US', {
 				weekday: 'long',
 				year: 'numeric',
 				month: 'long',
 				day: 'numeric',
-				timeZone: 'UTC' // Ensure the date is interpreted in UTC
+				timeZone: 'UTC'
 			});
 		};
 
 		const isPastEvent = (dateString: string): boolean => {
-			// Parse date with a fixed time component to avoid timezone issues
 			const eventDate = new Date(`${dateString}T12:00:00Z`);
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
@@ -44,12 +42,10 @@ export default async function EventDetail({
 							Event Details
 						</h1>
 
-						<Link
+						<EmptyLinkButton
 							href="/events"
-							className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4"
-						>
-							Back to All Events
-						</Link>
+							text="Back to All Events"
+						/>
 					</div>
 
 					<div className="rounded-lg border border-solid border-white/[.145] p-6">
@@ -61,16 +57,11 @@ export default async function EventDetail({
 							<span className="mb-1">{formatDate(event.date)}</span>
 							<span>
 								{event.speaker_name}
-								{event.role && event.company && (
-									<span>, {event.role} at {event.company}</span>
-								)}
-								{event.role && !event.company && (
-									<span>, {event.role}</span>
-								)}
-								{!event.role && event.company && (
-									<span>, {event.company}</span>
-								)}
+								{event.role && event.company && <span>, {event.role} at {event.company}</span>}
+								{event.role && !event.company && <span>, {event.role}</span>}
+								{!event.role && event.company && <span>, {event.company}</span>}
 							</span>
+
 							{!isPast && (
 								<span className="inline-block mt-2 px-3 py-1 bg-blue-900 text-blue-200 rounded-full text-xs font-semibold w-fit">
 									Upcoming

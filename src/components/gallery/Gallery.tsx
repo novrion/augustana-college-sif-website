@@ -1,4 +1,3 @@
-// Gallery.tsx (in components/gallery directory)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,44 +23,20 @@ export default function Gallery({
 	const [columns, setColumns] = useState<number>(4);
 	const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
 
-	const formatDate = (dateString: string) => {
-		if (!dateString) return '';
-		const date = new Date(`${dateString}T12:00:00Z`);
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			timeZone: 'UTC' // Use UTC to avoid timezone shifts
-		});
-	};
-
-	// Update columns based on window width
 	useEffect(() => {
 		const handleResize = () => {
 			const width = window.innerWidth;
-			if (width < 640) {
-				setColumns(1);
-			} else if (width < 768) {
-				setColumns(2);
-			} else if (width < 1024) {
-				setColumns(3);
-			} else {
-				setColumns(4);
-			}
+			if (width < 640) setColumns(1);
+			else if (width < 768) setColumns(2);
+			else if (width < 1024) setColumns(3);
+			else setColumns(4);
 		};
 
-		// Initial setup
-		handleResize();
-
+		handleResize(); // Initial setup
 		window.addEventListener('resize', handleResize);
-
-		// Cleanup
-		return () => {
-			window.removeEventListener('resize', handleResize);
-		};
+		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
-	// Add ESC key event listener for lightbox
 	useEffect(() => {
 		const handleEscKey = (e: KeyboardEvent) => {
 			if (e.key === 'Escape' && selectedImage !== null) {
@@ -70,27 +45,25 @@ export default function Gallery({
 		};
 
 		window.addEventListener('keydown', handleEscKey);
-
-		return () => {
-			window.removeEventListener('keydown', handleEscKey);
-		};
+		return () => window.removeEventListener('keydown', handleEscKey);
 	}, [selectedImage]);
 
-	const openLightbox = (image: GalleryImage) => {
-		setSelectedImage(image);
-	};
-
-	const closeLightbox = () => {
-		setSelectedImage(null);
+	const formatDate = (dateString: string) => {
+		if (!dateString) return '';
+		const date = new Date(`${dateString}T12:00:00Z`);
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+			timeZone: 'UTC'
+		});
 	};
 
 	const getColumnImages = (): GalleryImage[][] => {
 		const result = Array.from({ length: columns }, () => [] as GalleryImage[]);
-
 		images.forEach((image, index) => {
 			result[index % columns].push(image);
 		});
-
 		return result;
 	};
 
@@ -99,13 +72,13 @@ export default function Gallery({
 			<div className="flex gap-4">
 				{getColumnImages().map((columnImages, columnIndex) => (
 					<div key={columnIndex} className="flex-1 flex flex-col gap-4">
-						{columnImages.map((image, imageIndex) => (
+						{columnImages.map((image) => (
 							<div
-								key={image.id || imageIndex}
+								key={image.id}
 								className="relative group overflow-hidden rounded-lg"
-								onClick={() => openLightbox(image)}
+								onClick={() => setSelectedImage(image)}
 							>
-								{/* Use a wrapper div with aspect ratio for image container */}
+								{/* Wrapper div with aspect ratio for image container */}
 								<div className="relative aspect-[3/4] w-full">
 									<Image
 										src={image.src}
@@ -117,7 +90,7 @@ export default function Gallery({
 									/>
 								</div>
 
-								{/* Overlay with description - appears on hover */}
+								{/* Overlay */}
 								<div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end p-4">
 									<div className="text-white w-full min-w-0">
 										<h3 className="font-semibold text-lg font-[family-name:var(--font-geist-mono)]">{image.title}</h3>
@@ -147,7 +120,7 @@ export default function Gallery({
 			{selectedImage && (
 				<div
 					className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4 md:p-8"
-					onClick={closeLightbox}
+					onClick={() => setSelectedImage(null)}
 				>
 					<div
 						className="relative max-w-5xl w-full flex flex-col items-center justify-center px-8 md:px-16"
@@ -156,7 +129,7 @@ export default function Gallery({
 						<div className="relative w-full flex items-center justify-center mb-4">
 							<button
 								className="absolute -top-12 right-0 z-10 w-10 h-10 flex items-center justify-center text-white bg-black bg-opacity-60 rounded-full hover:bg-opacity-80 transition-all duration-300 ease-in-out opacity-70 hover:opacity-100"
-								onClick={closeLightbox}
+								onClick={() => setSelectedImage(null)}
 								aria-label="Close lightbox"
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

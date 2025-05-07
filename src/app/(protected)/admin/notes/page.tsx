@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation';
-import { hasSecretaryAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import { getAllNotes } from '@/lib/api/db';
-import NotesAdminList from '@/components/admin/notes/AdminNotesList';
+import AdminNotesList from '@/components/admin/notes/AdminNotesList';
 import { Note } from '@/lib/types/note';
 import { EmptyLinkButton, FilledLinkButton } from "@/components/Buttons";
 
 export default async function AdminNotesPage() {
-	const hasAccess = await hasSecretaryAccess();
+	const hasAccess = await hasPermission('SECRETARY');
 	if (!hasAccess) { redirect('/unauthorized'); }
 
 	const notes: Note[] = await getAllNotes();
@@ -21,22 +21,14 @@ export default async function AdminNotesPage() {
 					<h1 className="text-3xl font-bold">Meeting Minutes Management</h1>
 
 					<div className="flex gap-3">
-						<EmptyLinkButton
-							href={"/admin"}
-							text={"Back to Admin"}
-						/>
-
-						<FilledLinkButton
-							href={`/admin/notes/add`}
-							text={"Add New Minutes"}
-						/>
+						<EmptyLinkButton href="/admin" text="Back to Admin" />
+						<FilledLinkButton href="/admin/notes/add" text="Add New Minutes" />
 					</div>
 				</div>
 
-				{/* Notes List */}
 				<div className="rounded-lg border border-solid border-white/[.145] p-6">
 					<h2 className="text-xl font-semibold mb-4">Meeting Minutes</h2>
-					<NotesAdminList notes={sortedNotes} />
+					<AdminNotesList notes={sortedNotes} />
 				</div>
 			</div>
 		</div>

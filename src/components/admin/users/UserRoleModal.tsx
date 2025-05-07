@@ -28,12 +28,10 @@ export default function UserRoleModal({
 	const modalRef = useRef<HTMLDivElement>(null);
 	const [selectedRole, setSelectedRole] = useState<UserRole>(currentRole);
 
-	// Reset selected role when modal opens or current role changes
 	useEffect(() => {
 		setSelectedRole(currentRole);
 	}, [isOpen, currentRole]);
 
-	// Close when Escape is pressed
 	useEffect(() => {
 		const handleEsc = (e: KeyboardEvent) => {
 			if (e.key === 'Escape' && isOpen && !isLoading) {
@@ -41,16 +39,10 @@ export default function UserRoleModal({
 			}
 		};
 
-		if (isOpen) {
-			document.addEventListener('keydown', handleEsc);
-		}
-
-		return () => {
-			document.removeEventListener('keydown', handleEsc);
-		};
+		if (isOpen) { document.addEventListener('keydown', handleEsc); }
+		return () => { document.removeEventListener('keydown', handleEsc); };
 	}, [isOpen, onClose, isLoading]);
 
-	// Close when clicking outside the modal
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (modalRef.current && !modalRef.current.contains(e.target as Node) && !isLoading) {
@@ -58,18 +50,11 @@ export default function UserRoleModal({
 			}
 		};
 
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
+		if (isOpen) { document.addEventListener('mousedown', handleClickOutside); }
+		return () => { document.removeEventListener('mousedown', handleClickOutside); };
 	}, [isOpen, onClose, isLoading]);
 
-	// Get available roles based on current user's role
 	const getAvailableRoles = (): UserRole[] => {
-		// Role hierarchy (higher number = higher rank)
 		const roleRanks: { [key in UserRole]: number } = {
 			'admin': 4,
 			'president': 3,
@@ -82,22 +67,16 @@ export default function UserRoleModal({
 
 		const currentUserRank = currentUserRole ? roleRanks[currentUserRole] : 0;
 
-		// Filter roles that are below the current user's rank
 		return Object.keys(roleRanks)
 			.filter(role => roleRanks[role as UserRole] < currentUserRank)
 			.map(role => role as UserRole);
 	};
 
-	// Format role for display
 	const formatRoleName = (role: string): string => {
 		return role
 			.split('_')
 			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
 			.join(' ');
-	};
-
-	const handleConfirm = () => {
-		onConfirm(selectedRole);
 	};
 
 	if (!isOpen) return null;
@@ -151,7 +130,7 @@ export default function UserRoleModal({
 							type="button"
 						/>
 						<FilledButton
-							onClick={handleConfirm}
+							onClick={() => onConfirm(selectedRole)}
 							text="Update Role"
 							loadingText="Updating..."
 							isLoading={isLoading}

@@ -20,11 +20,20 @@ export default function NoteForm({
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
 
-	const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+	const formatDateForInput = (dateString?: string) => {
+		if (!dateString) return new Date().toISOString().split('T')[0];
+
+		const date = new Date(`${dateString}T12:00:00Z`);
+		const year = date.getUTCFullYear();
+		const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+		const day = String(date.getUTCDate()).padStart(2, '0');
+
+		return `${year}-${month}-${day}`;
+	};
 
 	const [formData, setFormData] = useState({
 		title: initialData?.title || '',
-		date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : today,
+		date: formatDateForInput(initialData?.date),
 		author: initialData?.author || '',
 		content: initialData?.content || '',
 	});

@@ -1,6 +1,7 @@
 import { Newsletter } from '@/lib/types/newsletter';
 import { db } from './supabase';
 import { getAll, getById, create, update, remove, uploadFileToBucket, deleteFileFromBucket, getPaginated, getYears } from './common';
+import { Attachment } from '@/lib/types';
 
 const table = 'newsletters';
 
@@ -25,7 +26,7 @@ export async function deleteNewsletter(id: string): Promise<boolean> {
 	return await remove(table, id);
 }
 
-export async function getNewsletterAttachments(id: string): Promise<object[]> {
+export async function getNewsletterAttachments(id: string): Promise<Attachment[]> {
 	const { data, error } = await db.storage
 		.from('attachments')
 		.list(`newsletter_attachments/${id}`);

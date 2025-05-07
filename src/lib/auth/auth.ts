@@ -1,9 +1,12 @@
+import { JWT } from "next-auth/jwt";
+import { Session, AuthOptions } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { UserWithCredentials, UserRole } from "@/lib/types/user"
+import { UserWithCredentials, User, UserRole } from "@/lib/types"
 import { getUserCredentialsByEmail, verifyPassword } from "@/lib/api/db";
+import { PermissionKey, PERMISSIONS } from "@/lib/types/auth";
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
 	providers: [
 		CredentialsProvider({
 			name: "credentials",
@@ -33,7 +36,7 @@ export const authOptions = {
 		})
 	],
 	callbacks: {
-		async jwt({ token, user, trigger, session }) {
+		async jwt({ token, user, trigger, session }: { token: JWT; user: User; trigger: "signIn" | "signUp" | "update"; session: Session; }) {
 			if (trigger === 'update' && session?.user) {
 				token.name = session.user.name;
 				token.profile_picture = session.user.profile_picture;
@@ -47,7 +50,7 @@ export const authOptions = {
 			}
 			return token;
 		},
-		async session({ session, token }) {
+		async session({ session, token }: { session: Session; token: JWT; }) {
 			if (token) {
 				session.user.id = token.id as string;
 				session.user.role = token.role as UserRole;
@@ -58,7 +61,7 @@ export const authOptions = {
 		}
 	},
 	session: {
-		strategy: "jwt",
+		strategy: "jwt" as const,
 		maxAge: 24 * 60 * 60,
 	},
 	secret: process.env.NEXTAUTH_SECRET,
@@ -67,52 +70,19 @@ export const authOptions = {
 	},
 };
 
+export function getSession(): Promise<Session | null> {
+	return getServerSession(authOptions);
+}
 
-export const getSession = () => getServerSession(authOptions);
+export async function hasPermission(permissionKey: PermissionKey): Promise<boolean> {
+	const session = await getSession();
+	if (!session) return false;
+
+	const roles = PERMISSIONS[permissionKey];
+	return roles.includes(session.user.role);
+}
 
 export const isAuthenticated = async (): Promise<boolean> => {
 	const session = await getSession();
 	return !!session;
 }
-
-
-const hasAccess = async (roles: UserRole[]): Promise<boolean> => {
-	const session = await getSession();
-	return !!session && roles.includes(session.user.role);
-}
-
-export const hasHoldingsReadAccess = async (): Promise<boolean> => {
-	const roles: UserRole[] = ['admin', 'president', 'vice_president', 'secretary', 'holdings_write', 'holdings_read'];
-	return hasAccess(roles);
-}
-
-export const hasHoldingsWriteAccess = async (): Promise<boolean> => {
-	const roles: UserRole[] = ['admin', 'president', 'vice_president', 'holdings_write'];
-	return hasAccess(roles);
-}
-
-export const hasSecretaryAccess = async (): Promise<boolean> => {
-	const roles: UserRole[] = ['admin', 'president', 'vice_president', 'secretary'];
-	return hasAccess(roles);
-}
-
-export const hasAdminAccess = async (): Promise<boolean> => {
-	const roles: UserRole[] = ['admin', 'president', 'vice_president'];
-	return hasAccess(roles);
-};
-
-
-export const isVicePresident = async (): Promise<boolean> => {
-	const roles: UserRole[] = ['vice_president'];
-	return hasAccess(roles);
-};
-
-export const isPresident = async (): Promise<boolean> => {
-	const roles: UserRole[] = ['president'];
-	return hasAccess(roles);
-};
-
-export const isSuperAdmin = async (): Promise<boolean> => {
-	const roles: UserRole[] = ['admin'];
-	return hasAccess(roles);
-};

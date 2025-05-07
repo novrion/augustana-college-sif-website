@@ -1,0 +1,11 @@
+1. Code clean up + ESlint errors
+	- admin/about
+	- admin/events
+	- admin/gallery
+	- admin/holdings
+	- adming/newsletter
+	- just general components and common components
+	- remove the lib/api/client folder apiFetch stuff.
+	
+2. Stock pitches
+3. Google @augustana.edu domain authentication

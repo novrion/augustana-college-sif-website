@@ -1,4 +1,4 @@
-import { GalleryImage } from '@/lib/types/gallery';
+import { GalleryImage, Attachment } from '@/lib/types';
 import { getAll, getById, create, update, remove, uploadFileToBucket, extractUrl, deleteFileFromBucket, getPaginated } from './common';
 
 const table = 'gallery_images';
@@ -34,7 +34,7 @@ export async function deleteGalleryImage(id: string): Promise<boolean> {
 	return await remove(table, id);
 }
 
-export async function uploadGalleryImage(file: File): Promise<object | null> {
+export async function uploadGalleryImage(file: File): Promise<Attachment | null> {
 	const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 	const path = `gallery_images/${fileName}`;
 

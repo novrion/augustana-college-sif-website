@@ -1,3 +1,5 @@
+import { Attachment } from './attachment';
+
 export interface Newsletter {
 	id: string;
 	title: string;
@@ -5,13 +7,4 @@ export interface Newsletter {
 	author: string;
 	content: string;
 	attachments?: Attachment[];
-}
-
-export interface Attachment {
-	name: string;
-	originalName?: string;
-	url: string;
-	path: string;
-	type: string;
-	size: number;
 }

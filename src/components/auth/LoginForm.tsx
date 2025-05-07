@@ -1,8 +1,8 @@
 'use client'
 
-import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Form from "@/components/Form"
 import { FilledButton } from "@/components/Buttons";
@@ -17,7 +17,7 @@ export default function LoginForm() {
 	const searchParams = useSearchParams();
 	const callbackUrl = searchParams.get('callbackUrl') || '/';
 
-	const handleSubmit = async (e) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setError('');
 		setIsLoading(true);
@@ -36,8 +36,8 @@ export default function LoginForm() {
 				router.push(callbackUrl);
 				router.refresh();
 			}
-		} catch (error) {
-			setError("An unexpected error has occurred: " + error);
+		} catch (_error) {
+			setError("An unexpected error occurred");
 		} finally {
 			setIsLoading(false);
 		}
@@ -47,7 +47,7 @@ export default function LoginForm() {
 		<div className="font-[family-name:var(--font-geist-mono)]">
 			<Form
 				onSubmit={handleSubmit}
-				title={"Log In"}
+				title="Log In"
 				error={error}
 			>
 				<div className="mb-4">
@@ -80,11 +80,11 @@ export default function LoginForm() {
 
 				<div className="flex justify-center">
 					<FilledButton
-						type={"submit"}
-						text={"Log In"}
-						loadingText={"Logging in..."}
+						type="submit"
+						text="Log In"
+						loadingText="Logging in..."
 						isLoading={isLoading}
-						className={"w-full"}
+						className="w-full"
 					/>
 				</div>
 
@@ -97,6 +97,6 @@ export default function LoginForm() {
 					</p>
 				</div>
 			</Form>
-		</div >
+		</div>
 	);
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { useAuth } from "@/hooks/auth/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Footer() {
 	const { isAuthenticated } = useAuth();
