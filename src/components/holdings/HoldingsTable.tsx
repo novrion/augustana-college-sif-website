@@ -35,6 +35,7 @@ export default function HoldingsTable({
 						const equityPercent = (marketValue / totalEquityValue) * 100;
 						const gainLoss = marketValue - holding.cost_basis;
 						const gainLossPercent = holding.cost_basis > 0 ? (gainLoss / holding.cost_basis) * 100 : 0;
+						const companyName = holding.company_name.length > 37 ? holding.company_name.slice(0, 37).trim() + '...' : holding.company_name;
 
 						return (
 							<tr
@@ -43,7 +44,7 @@ export default function HoldingsTable({
 								className="hover:bg-[#1a1a1a] cursor-pointer"
 							>
 								<td className="px-4 py-3 whitespace-nowrap">{holding.ticker}</td>
-								<td className="px-4 py-3 whitespace-nowrap">{holding.company_name}</td>
+								<td className="px-4 py-3 whitespace-nowrap">{companyName}</td>
 								<td className="px-4 py-3 whitespace-nowrap text-right">{holding.share_count.toLocaleString()}</td>
 								<td className="px-4 py-3 whitespace-nowrap text-right">{formatCurrency(holding.current_price)}</td>
 								<td className="px-4 py-3 whitespace-nowrap text-right">{formatCurrency(marketValue)}</td>
