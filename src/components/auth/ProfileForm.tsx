@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { Session } from 'next-auth';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import ProfilePicture from '@/components/ProfilePicture';
 import Form from "@/components/Form";
 import { useAuth } from "@/hooks/useAuth";
 import { FilledButton } from '@/components/Buttons';
 import { User } from '@/lib/types/user';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 
 interface ProfileFormProps {
 	initialUserData: User;
@@ -37,6 +39,12 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 	const [isChangingPassword, setIsChangingPassword] = useState(false);
 	const [passwordError, setPasswordError] = useState('');
 	const [passwordSuccess, setPasswordSuccess] = useState('');
+
+	// Delete account state
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [deletePassword, setDeletePassword] = useState('');
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [deleteError, setDeleteError] = useState('');
 
 	const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const { name, value } = e.target;
@@ -151,6 +159,44 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 		}
 	};
 
+	const handleDeleteAccount = async () => {
+		if (!deletePassword) {
+			setDeleteError('Please enter your password');
+			return;
+		}
+
+		setIsDeleting(true);
+		setDeleteError('');
+
+		try {
+			const response = await fetch('/api/auth/delete-account', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					password: deletePassword,
+				}),
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || 'Failed to delete account');
+			}
+
+			// Sign out and redirect to home
+			await signOut({ callbackUrl: '/' });
+		} catch (error) {
+			setDeleteError(error instanceof Error ? error.message : 'Failed to delete account');
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
+	const openDeleteModal = () => {
+		setDeletePassword('');
+		setDeleteError('');
+		setIsDeleteModalOpen(true);
+	};
+
 	return (
 		<div className="space-y-8">
 			<Form
@@ -240,7 +286,6 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 				</div>
 			</Form>
 
-
 			<Form
 				onSubmit={handlePasswordUpdate}
 				title="Change Password"
@@ -301,6 +346,51 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 					/>
 				</div>
 			</Form>
+
+			{/* Danger Zone - Delete Account */}
+			<div className="mt-12">
+				<div className="rounded-lg border border-red-800 p-6">
+					<h2 className="text-xl font-semibold text-red-500 mb-2">
+						Danger Zone
+					</h2>
+					<p className="text-sm text-gray-400 mb-4">
+						Once you delete your account, there is no going back. Please be certain.
+					</p>
+					<div className="flex justify-start">
+						<button
+							onClick={openDeleteModal}
+							className="px-3 py-1 text-sm bg-red-600 hover:bg-red-800 text-white rounded-md transition-colors"
+						>
+							Delete My Account
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<DeleteConfirmationModal
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				onConfirm={handleDeleteAccount}
+				isLoading={isDeleting}
+				title="Delete Account"
+				message="This action cannot be undone. All your data will be permanently deleted."
+			>
+				<div className="my-4">
+					<label className="block text-sm font-medium mb-1">
+						Enter your password to confirm:
+					</label>
+					<input
+						type="password"
+						value={deletePassword}
+						onChange={(e) => setDeletePassword(e.target.value)}
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						placeholder="Password"
+					/>
+					{deleteError && (
+						<p className="mt-2 text-sm text-red-500">{deleteError}</p>
+					)}
+				</div>
+			</DeleteConfirmationModal>
 		</div>
 	);
 }

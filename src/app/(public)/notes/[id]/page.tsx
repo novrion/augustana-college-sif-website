@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getNoteById } from '@/lib/api/db';
 import { EmptyLinkButton } from '@/components/Buttons';
+import { formatDateForDisplay } from '@/lib/utils';
 
 export default async function NoteDetail({ params }: { params: Promise<{ id: string }> }) {
 	try {
@@ -8,14 +9,6 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
 		if (!id) redirect('/notes');
 		const note = await getNoteById(id);
 		if (!note) redirect('/notes');
-
-		const formattedDate = new Date(`${note.date}T12:00:00Z`).toLocaleDateString('en-US', {
-			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			timeZone: 'UTC'
-		});
 
 		return (
 			<div className="min-h-screen p-8 sm:p-20">
@@ -37,7 +30,7 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
 						</h2>
 
 						<div className="flex flex-col mb-6 text-sm text-gray-400 font-[family-name:var(--font-geist-mono)]">
-							<span className="mb-1">{formattedDate}</span>
+							<span className="mb-1">{formatDateForDisplay(note.date, { includeWeekday: true })}</span>
 							<span>{note.author}</span>
 						</div>
 

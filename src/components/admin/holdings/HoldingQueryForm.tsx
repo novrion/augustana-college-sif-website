@@ -33,14 +33,8 @@ export default function HoldingQueryForm() {
 		}
 
 		try {
-			const url = `/api/admin/holdings/query-holding?query=${encodeURIComponent(query)}`;
-
-			const response = await fetch(url, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
+			const url = `/api/admin/holdings/query?query=${encodeURIComponent(query)}`;
+			const response = await fetch(url);
 
 			if (!response.ok) {
 				const data = await response.json();
@@ -49,9 +43,9 @@ export default function HoldingQueryForm() {
 
 			const data = await response.json();
 
+			// Limit results to first 10 if more are returned
 			const count = data.count || 0;
-			if (count > 10) { setResults(data.result.slice(0, 10)); }
-			else { setResults(data.result || []); }
+			setResults(count > 10 ? data.result.slice(0, 10) : data.result || []);
 		} catch (err) {
 			console.error("Search error:", err);
 			setError(err instanceof Error ? err.message : 'An unexpected error occurred');
@@ -70,7 +64,7 @@ export default function HoldingQueryForm() {
 			<div className="space-y-6">
 				<div>
 					<label className="block text-sm font-medium mb-1" htmlFor="query">
-						Search for a company or ticker symbol
+						Search for a company or symbol
 					</label>
 					<input
 						id="query"

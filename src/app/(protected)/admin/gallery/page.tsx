@@ -1,16 +1,12 @@
 import { redirect } from 'next/navigation';
-import { hasAdminAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import { getPaginatedGalleryImages } from '@/lib/api/db';
 import AdminGalleryList from '@/components/admin/gallery/AdminGalleryList';
 import { EmptyLinkButton, FilledLinkButton } from "@/components/Buttons";
 
-export default async function AdminGalleryPage({
-	searchParams
-}: {
-	searchParams?: Promise<{ page?: string }>
-}) {
-	const hasAccess = await hasAdminAccess();
-	if (!hasAccess) { redirect('/unauthorized'); }
+export default async function AdminGalleryPage({ searchParams }: { searchParams?: Promise<{ page?: string }> }) {
+	const hasAccess = await hasPermission('SECRETARY');
+	if (!hasAccess) redirect('/unauthorized');
 
 	const { page: pageParam } = await searchParams || {};
 	const page = pageParam ? parseInt(pageParam) : 1;
@@ -28,17 +24,9 @@ export default async function AdminGalleryPage({
 			<div className="max-w-6xl mx-auto">
 				<div className="flex justify-between items-center mb-6">
 					<h1 className="text-3xl font-bold">Gallery Management</h1>
-
 					<div className="flex gap-3">
-						<EmptyLinkButton
-							href={"/admin"}
-							text={"Back to Admin"}
-						/>
-
-						<FilledLinkButton
-							href={`/admin/gallery/add`}
-							text={"Add New Image"}
-						/>
+						<EmptyLinkButton href="/admin" text="Back to Admin" />
+						<FilledLinkButton href="/admin/gallery/add" text="Add New Image" />
 					</div>
 				</div>
 

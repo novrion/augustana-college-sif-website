@@ -1,4 +1,5 @@
 import { Holding } from '@/lib/types/holding';
+import { formatCurrency, formatPercent } from '@/lib/utils';
 
 interface HoldingsSummaryProps {
 	holdings: Holding[];
@@ -17,17 +18,6 @@ export default function HoldingsSummary({
 	const costBasis = holdings.reduce((sum, holding) => sum + holding.cost_basis, 0);
 	const totalGainLoss = equity - costBasis;
 	const totalGainLossPercent = costBasis > 0 ? (totalGainLoss / costBasis) * 100 : 0;
-
-	const formatCurrency = (value: number) => {
-		return new Intl.NumberFormat('en-US', {
-			style: 'currency',
-			currency: 'USD'
-		}).format(value);
-	};
-
-	const formatPercent = (value: number) => {
-		return `${value.toFixed(2)}%`;
-	};
 
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

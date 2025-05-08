@@ -1,12 +1,9 @@
 import { redirect } from 'next/navigation';
 import { getEventById } from '@/lib/api/db';
 import { EmptyLinkButton } from '@/components/Buttons';
+import { formatDateForDisplay, isPastDate } from '@/lib/utils';
 
-export default async function EventDetail({
-	params
-}: {
-	params: Promise<{ id: string }>
-}) {
+export default async function EventDetail({ params }: { params: Promise<{ id: string }> }) {
 	try {
 		const { id } = await params;
 		if (!id) redirect('/events');
@@ -14,25 +11,7 @@ export default async function EventDetail({
 		const event = await getEventById(id);
 		if (!event) redirect('/events');
 
-		const formatDate = (dateString: string): string => {
-			const date = new Date(`${dateString}T12:00:00Z`);
-			return date.toLocaleDateString('en-US', {
-				weekday: 'long',
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric',
-				timeZone: 'UTC'
-			});
-		};
-
-		const isPastEvent = (dateString: string): boolean => {
-			const eventDate = new Date(`${dateString}T12:00:00Z`);
-			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-			return eventDate < today;
-		};
-
-		const isPast = isPastEvent(event.date);
+		const isPast = isPastDate(event.date);
 
 		return (
 			<div className="min-h-screen p-8 sm:p-20">
@@ -54,7 +33,7 @@ export default async function EventDetail({
 						</h2>
 
 						<div className="flex flex-col mb-6 text-sm text-gray-400 font-[family-name:var(--font-geist-mono)]">
-							<span className="mb-1">{formatDate(event.date)}</span>
+							<span className="mb-1">{formatDateForDisplay(event.date, { includeWeekday: true })}</span>
 							<span>
 								{event.speaker_name}
 								{event.role && event.company && <span>, {event.role} at {event.company}</span>}

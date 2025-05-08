@@ -2,7 +2,7 @@ import { JWT } from "next-auth/jwt";
 import { Session, AuthOptions } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { UserWithCredentials, User, UserRole } from "@/lib/types"
+import { UserWithCredentials, UserRole } from "@/lib/types"
 import { getUserCredentialsByEmail, verifyPassword } from "@/lib/api/db";
 import { PermissionKey, PERMISSIONS } from "@/lib/types/auth";
 
@@ -36,7 +36,7 @@ export const authOptions: AuthOptions = {
 		})
 	],
 	callbacks: {
-		async jwt({ token, user, trigger, session }: { token: JWT; user: User; trigger: "signIn" | "signUp" | "update"; session: Session; }) {
+		async jwt({ token, user, trigger, session }) {
 			if (trigger === 'update' && session?.user) {
 				token.name = session.user.name;
 				token.profile_picture = session.user.profile_picture;

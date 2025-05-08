@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Note } from '@/lib/types/note';
-import { AdminList, AdminListItem, DeleteConfirmationModal } from '@/components/admin/common';
+import { AdminList, AdminListItem } from '@/components/admin/common';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import PaginationControls from '@/components/common/PaginationControls';
+import { EditLinkButton, DeleteButton } from '@/components/Buttons';
+import { formatDateForDisplay } from '@/lib/utils';
 
 interface NotesAdminListProps {
 	notes: Note[];
@@ -33,16 +35,6 @@ export default function AdminNotesList({
 		setPaginatedNotes(allNotes.slice(startIndex, endIndex));
 		setTotalPages(Math.ceil(allNotes.length / pageSize));
 	}, [currentPage, allNotes, pageSize]);
-
-	const formatDate = (dateString: string): string => {
-		const date = new Date(`${dateString}T12:00:00Z`);
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			timeZone: 'UTC'
-		});
-	};
 
 	const openDeleteModal = (note: Note, e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -107,29 +99,22 @@ export default function AdminNotesList({
 					<AdminListItem
 						key={note.id}
 						title={note.title}
-						subtitle={`${formatDate(note.date)} - ${note.author}`}
+						subtitle={`${formatDateForDisplay(note.date)} - ${note.author}`}
 						onClick={() => handleNoteClick(note.id)}
 						actions={
 							<>
-								<Link
+								<EditLinkButton
 									href={`/admin/notes/edit/${note.id}`}
-									className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
 									onClick={(e) => e.stopPropagation()}
-								>
-									Edit
-								</Link>
-								<button
+								/>
+								<DeleteButton
 									onClick={(e) => openDeleteModal(note, e)}
-									className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md"
-								>
-									Delete
-								</button>
+								/>
 							</>
 						}
 					/>
 				))}
 
-				{/* Pagination */}
 				{totalPages > 1 && (
 					<div className="mt-6">
 						<PaginationControls

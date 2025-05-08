@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Holding } from '@/lib/types/holding';
+import { formatCurrency, formatPercent } from '@/lib/utils';
 
 interface HoldingsTableProps {
 	holdings: Holding[];
@@ -13,17 +14,6 @@ export default function HoldingsTable({
 	totalEquityValue
 }: HoldingsTableProps) {
 	const router = useRouter();
-
-	const formatCurrency = (value: number) => {
-		return new Intl.NumberFormat('en-US', {
-			style: 'currency',
-			currency: 'USD'
-		}).format(value);
-	};
-
-	const formatPercent = (value: number) => {
-		return `${value.toFixed(2)}%`;
-	};
 
 	return (
 		<div className="overflow-x-auto">

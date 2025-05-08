@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { User, UserRole } from '@/lib/types/user';
-import { AdminList, AdminListItem, DeleteConfirmationModal } from '@/components/admin/common';
+import { AdminList, AdminListItem } from '@/components/admin/common';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import PaginationControls from '@/components/common/PaginationControls';
 import { useAuth } from '@/hooks/useAuth';
 import UserRoleModal from './UserRoleModal';
 import ProfilePicture from '@/components/ProfilePicture';
+import { DeleteButton } from '@/components/Buttons';
+import StatusMessage from '@/components/common/StatusMessage';
+import { formatRole } from '@/lib/utils';
 
 interface AdminUsersListProps {
 	users: User[];
@@ -204,26 +208,14 @@ export default function AdminUsersList({
 		setCurrentPage(page);
 	};
 
-	const formatRole = (role: UserRole): string => {
-		return role
-			.split('_')
-			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-			.join(' ');
+	const handleUserClick = (_userId: string) => {
+		// Navigate to user details or edit page
 	};
 
 	return (
 		<>
-			{error && (
-				<div className="text-center p-4 rounded-md text-red-700 mb-4 font-[family-name:var(--font-geist-mono)]">
-					{error}
-				</div>
-			)}
-
-			{success && (
-				<div className="text-center p-4 rounded-md text-green-500 mb-4 font-[family-name:var(--font-geist-mono)]">
-					{success}
-				</div>
-			)}
+			{error && <StatusMessage type="error" message={error} />}
+			{success && <StatusMessage type="success" message={success} />}
 
 			<AdminList
 				error={error}
@@ -257,6 +249,7 @@ export default function AdminUsersList({
 							</div>
 						}
 						className="hover:bg-[#1a1a1a]"
+						onClick={() => handleUserClick(user.id)}
 						actions={
 							<div className="flex items-center gap-2">
 								{canEditUserRole(user) && (
@@ -276,12 +269,7 @@ export default function AdminUsersList({
 									</>
 								)}
 								{canDeleteUser(user) && (
-									<button
-										onClick={(e) => openDeleteModal(user, e)}
-										className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md"
-									>
-										Delete
-									</button>
+									<DeleteButton onClick={(e) => openDeleteModal(user, e)} />
 								)}
 							</div>
 						}

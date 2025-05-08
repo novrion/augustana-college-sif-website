@@ -5,41 +5,18 @@ import { useRouter } from 'next/navigation';
 import { Event } from '@/lib/types/event';
 import Form from "@/components/Form";
 import { FilledButton } from "@/components/Buttons";
+import { formatDateForInput } from '@/lib/utils';
 
 interface EventFormProps {
 	initialData?: Event;
 	isEditing?: boolean;
 }
 
-export default function EventForm({
-	initialData,
-	isEditing = false
-}: EventFormProps) {
+export default function EventForm({ initialData, isEditing = false }: EventFormProps) {
 	const router = useRouter();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
-
-	const getTodayLocalDate = () => {
-		const now = new Date();
-		const year = now.getFullYear();
-		const month = String(now.getMonth() + 1).padStart(2, '0');
-		const day = String(now.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
-	};
-
-	// Format date for the input field, ensuring it displays correctly
-	const formatDateForInput = (dateString?: string) => {
-		if (!dateString) return getTodayLocalDate();
-
-		// Create a date object with noon UTC time to avoid timezone issues
-		const date = new Date(`${dateString}T12:00:00Z`);
-		const year = date.getUTCFullYear();
-		const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-		const day = String(date.getUTCDate()).padStart(2, '0');
-
-		return `${year}-${month}-${day}`;
-	};
 
 	const [formData, setFormData] = useState({
 		title: initialData?.title || '',
@@ -65,10 +42,7 @@ export default function EventForm({
 		setSuccess('');
 
 		try {
-			const endpoint = isEditing
-				? `/api/admin/events/${initialData?.id}`
-				: '/api/admin/events';
-
+			const endpoint = isEditing ? `/api/admin/events/${initialData?.id}` : '/api/admin/events';
 			const method = isEditing ? 'PUT' : 'POST';
 
 			const response = await fetch(endpoint, {
@@ -84,7 +58,7 @@ export default function EventForm({
 
 			setSuccess(isEditing ? 'Event updated successfully!' : 'Event created successfully!');
 
-			// Redirect after a short delay
+			// Redirect after short delay
 			setTimeout(() => {
 				router.push('/admin/events');
 				router.refresh();
@@ -114,7 +88,7 @@ export default function EventForm({
 						type="text"
 						value={formData.title}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 					/>
 				</div>
 
@@ -128,7 +102,7 @@ export default function EventForm({
 						type="text"
 						value={formData.speaker_name}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>
@@ -144,7 +118,7 @@ export default function EventForm({
 							type="text"
 							value={formData.role}
 							onChange={handleChange}
-							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 					<div>
@@ -157,7 +131,7 @@ export default function EventForm({
 							type="text"
 							value={formData.company}
 							onChange={handleChange}
-							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 				</div>
@@ -173,7 +147,7 @@ export default function EventForm({
 							type="date"
 							value={formData.date}
 							onChange={handleChange}
-							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
 						/>
 					</div>
@@ -188,7 +162,7 @@ export default function EventForm({
 							value={formData.time}
 							onChange={handleChange}
 							placeholder="e.g., 7:00 PM"
-							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
 						/>
 					</div>
@@ -205,7 +179,7 @@ export default function EventForm({
 						value={formData.location}
 						onChange={handleChange}
 						placeholder="e.g., Gerber Center, Room 123"
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>
@@ -221,7 +195,7 @@ export default function EventForm({
 						value={formData.contact}
 						onChange={handleChange}
 						placeholder="e.g., Email or phone number for questions"
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 					/>
 				</div>
 
@@ -235,7 +209,7 @@ export default function EventForm({
 						rows={5}
 						value={formData.description}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent font-[family-name:var(--font-geist-sans)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent font-[family-name:var(--font-geist-sans)] focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>

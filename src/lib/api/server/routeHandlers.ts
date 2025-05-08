@@ -59,14 +59,16 @@ export function withAuth(
 export function withAuthParam(
 	handler: RouteHandlerWithParams,
 	permissionKey?: PermissionKey
-): (request: Request, params: Promise<{ id: string }>) => Promise<NextResponse> {
-	return async (request: Request, params: Promise<{ id: string }>) => {
+): (request: Request, context: { params: Promise<{ id: string }> }) => Promise<NextResponse> {
+	return async (request: Request, context: { params: Promise<{ id: string }> }) => {
 		try {
 			const session = await getSession();
 			const authError = checkAuth(session, permissionKey);
 			if (authError) return authError;
 
-			return await handler(request, session!, params);
+			const paramsPromise = context.params;
+
+			return await handler(request, session!, paramsPromise);
 		} catch (error) {
 			console.error(`Error in route handler:`, error);
 			return NextResponse.json(

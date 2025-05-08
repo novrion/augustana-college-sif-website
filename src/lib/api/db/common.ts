@@ -1,111 +1,168 @@
 import { db } from './supabase';
+import { getYearFromDate } from '@/lib/utils';
+import { User, Holding, Newsletter, Note, AboutSection, Event, GalleryImage, Attachment } from '@/lib/types';
 
-export async function getAll(
-	table: string,
+export interface Database {
+	users: User;
+	holdings: Holding;
+	newsletters: Newsletter;
+	notes: Note;
+	about_sections: AboutSection;
+	events: Event;
+	gallery_images: GalleryImage;
+	cash: { id: string; amount: number };
+}
+
+type Tables = keyof Database;
+type TableRow<T extends Tables> = Database[T];
+
+interface QueryResult<T> {
+	data: T[];
+	count?: number | null;
+}
+
+export async function getAll<T extends Tables>(
+	table: T,
 	orderColumn?: string,
 	ascending: boolean = false,
-	gte?: { column: string, cmp: string | number | boolean },
-	lt?: { column: string, cmp: string | number | boolean },
-	paginationRange?: { l: number, r: number },
-	count?: string,
-): Promise<{ data: unknown[], count?: number }> {
-	let query = db.from(table);
+	gte?: { column: string; cmp: string | number | boolean },
+	lt?: { column: string; cmp: string | number | boolean },
+	paginationRange?: { l: number; r: number },
+	count?: "exact" | "planned" | "estimated"
+): Promise<QueryResult<TableRow<T>>> {
+	try {
+		let query = db.from(table).select('*', { count: count ? count : undefined });
+		if (orderColumn) { query = query.order(orderColumn, { ascending }); }
+		if (gte) { query = query.gte(gte.column, gte.cmp); }
+		if (lt) { query = query.lt(lt.column, lt.cmp); }
+		if (paginationRange) { query = query.range(paginationRange.l, paginationRange.r); }
 
-	if (count) {
-		query = query.select('*', { count: count });
-	} else {
-		query = query.select('*');
-	}
+		const response = await query;
 
-	if (orderColumn) { query = query.order(orderColumn, { ascending: ascending }); }
-	if (gte) { query = query.gte(gte.column, gte.cmp); }
-	if (lt) { query = query.lt(lt.column, lt.cmp); }
-	if (paginationRange) { query = query.range(paginationRange.l, paginationRange.r); }
+		if (response.error) {
+			console.error(`Error fetching ${table}:`, response.error);
+			return { data: [] };
+		}
 
-	const response = await query;
+		if (!Array.isArray(response.data)) { return { data: [] }; }
+		const validData = response.data.filter(item =>
+			item !== null &&
+			typeof item === 'object' &&
+			!('error' in item)
+		);
 
-	if (response.error) {
-		console.error(`Error fetching ${table}:`, response.error);
-		return { data: [] };
-	}
-
-	if (count) {
 		return {
-			data: response.data || [],
+			data: validData as TableRow<T>[],
 			count: response.count
 		};
+	} catch (error) {
+		console.error(`Error in getAll for ${table}:`, error);
+		return { data: [] };
 	}
-
-	return { data: response.data || [] };
 }
 
-export async function getByField(
-	table: string,
+export async function getByField<T extends Tables>(
+	table: T,
 	field: string,
 	value: string | number | boolean
-): Promise<unknown | null> {
-	const { data, error } = await db
-		.from(table)
-		.select('*')
-		.eq(field, value)
-		.single();
+): Promise<TableRow<T> | null> {
+	try {
+		const { data, error } = await db
+			.from(table)
+			.select('*')
+			.eq(field, value)
+			.single();
 
-	if (error) {
-		console.error(`Error fetching ${table} by ${field}:`, error);
+		if (error) {
+			console.error(`Error fetching ${table} by ${field}:`, error);
+			return null;
+		}
+
+		return data;
+	} catch (error) {
+		console.error(`Error in getByField for ${table}:`, error);
 		return null;
 	}
-
-	return data;
 }
 
-export async function getById(table: string, id: string): Promise<unknown | null> {
+export async function getById<T extends Tables>(
+	table: T,
+	id: string
+): Promise<TableRow<T> | null> {
 	return await getByField(table, 'id', id);
 }
 
-export async function create(table: string, item: Record<string, unknown>): Promise<unknown | null> {
-	const { data, error } = await db
-		.from(table)
-		.insert([item])
-		.select()
-		.single();
+export async function create<T extends Tables>(
+	table: T,
+	item: Record<string, unknown>
+): Promise<TableRow<T> | null> {
+	try {
+		const { data, error } = await db
+			.from(table)
+			.insert([item])
+			.select()
+			.single();
 
-	if (error) {
-		console.error(`Error creating ${table}:`, error);
+		if (error) {
+			console.error(`Error creating ${table}:`, error);
+			return null;
+		}
+
+		return data;
+	} catch (error) {
+		console.error(`Error in create for ${table}:`, error);
 		return null;
 	}
-
-	return data;
 }
 
-export async function update(table: string, id: string, item: Record<string, unknown>): Promise<boolean> {
-	const { error } = await db
-		.from(table)
-		.update(item)
-		.eq('id', id);
+export async function update<T extends Tables>(
+	table: T,
+	id: string,
+	item: Record<string, unknown>
+): Promise<boolean> {
+	try {
+		const { error } = await db
+			.from(table)
+			.update(item)
+			.eq('id', id);
 
-	if (error) {
-		console.error(`Error updating ${table}:`, error);
+		if (error) {
+			console.error(`Error updating ${table}:`, error);
+			return false;
+		}
+
+		return true;
+	} catch (error) {
+		console.error(`Error in update for ${table}:`, error);
 		return false;
 	}
-
-	return true;
 }
 
-export async function remove(table: string, id: string): Promise<boolean> {
-	const { error } = await db
-		.from(table)
-		.delete()
-		.eq('id', id);
+export async function remove<T extends Tables>(
+	table: T,
+	id: string
+): Promise<boolean> {
+	try {
+		const { error } = await db
+			.from(table)
+			.delete()
+			.eq('id', id);
 
-	if (error) {
-		console.error(`Error deleting from ${table}:`, error);
+		if (error) {
+			console.error(`Error deleting from ${table}:`, error);
+			return false;
+		}
+
+		return true;
+	} catch (error) {
+		console.error(`Error in remove for ${table}:`, error);
 		return false;
 	}
-
-	return true;
 }
 
-export async function extractUrl(url: string): Promise<{ bucket: string, path: string } | null> {
+export async function extractUrl(
+	url: string
+): Promise<{ bucket: string; path: string } | null> {
 	try {
 		if (!url) return null;
 
@@ -126,7 +183,10 @@ export async function extractUrl(url: string): Promise<{ bucket: string, path: s
 	}
 }
 
-export async function deleteFileFromBucket(bucket: string, path: string): Promise<boolean> {
+export async function deleteFileFromBucket(
+	bucket: string,
+	path: string
+): Promise<boolean> {
 	try {
 		const { error } = await db.storage
 			.from(bucket)
@@ -149,14 +209,7 @@ export async function uploadFileToBucket(
 	path: string,
 	file: File,
 	fileName: string
-): Promise<{
-	name: string,
-	originalName: string,
-	url: string,
-	path: string,
-	type: string,
-	size: number
-} | null> {
+): Promise<Attachment | null> {
 	try {
 		const { error } = await db.storage
 			.from(bucket)
@@ -185,19 +238,7 @@ export async function uploadFileToBucket(
 	}
 }
 
-
-
-export async function getPaginated<T>({
-	table,
-	page = 1,
-	pageSize = 10,
-	year = null,
-	search = null,
-	dateField = 'date',
-	searchFields = ['title', 'content'],
-	orderBy = 'date',
-	ascending = false
-}: {
+interface PaginationParams {
 	table: string;
 	page?: number;
 	pageSize?: number;
@@ -207,63 +248,93 @@ export async function getPaginated<T>({
 	searchFields?: string[];
 	orderBy?: string;
 	ascending?: boolean;
-}): Promise<{ data: T[]; total: number; totalPages: number }> {
-	const offset = (page - 1) * pageSize;
-	let gteParam = undefined;
-	let ltParam = undefined;
-
-	if (year) {
-		const startDate = `${year}-01-01`;
-		const endDate = `${year}-12-31`;
-		gteParam = { column: dateField, cmp: startDate };
-		ltParam = { column: dateField, cmp: endDate };
-	}
-
-	const result = await getAll(
-		table,
-		orderBy,
-		ascending,
-		gteParam,
-		ltParam,
-		{ l: offset, r: offset + pageSize - 1 },
-		'exact'
-	);
-
-	let data = result.data as T[];
-
-	// Search filter
-	if (search) {
-		const searchLower = search.toLowerCase();
-		data = data.filter(item => {
-			return searchFields.some(field => {
-				const value = item[field]?.toLowerCase();
-				return value && value.includes(searchLower);
-			});
-		});
-	}
-
-	return {
-		data,
-		total: result.count || data.length,
-		totalPages: Math.ceil((result.count || data.length) / pageSize)
-	};
 }
 
-export async function getYears<T extends Record<string, unknown>>({
+export async function getPaginated<T extends Record<string, unknown>>({
+	table,
+	page = 1,
+	pageSize = 10,
+	year = null,
+	search = null,
+	dateField = 'date',
+	searchFields = ['title', 'content'],
+	orderBy = 'date',
+	ascending = false
+}: PaginationParams): Promise<{ data: T[]; total: number; totalPages: number }> {
+	try {
+		const offset = (page - 1) * pageSize;
+		let gteParam = undefined;
+		let ltParam = undefined;
+
+		if (year) {
+			const startDate = `${year}-01-01`;
+			const endDate = `${year}-12-31`;
+			gteParam = { column: dateField, cmp: startDate };
+			ltParam = { column: dateField, cmp: endDate };
+		}
+
+		const result = await getAll(
+			table as Tables,
+			orderBy,
+			ascending,
+			gteParam,
+			ltParam,
+			{ l: offset, r: offset + pageSize - 1 },
+			'exact'
+		);
+
+		// Fixed type conversion by using unknown as intermediate type
+		let data = result.data as unknown as T[];
+
+		// Search filter
+		if (search) {
+			const searchLower = search.toLowerCase();
+			data = data.filter(item => {
+				return searchFields.some(field => {
+					// Safe check for string values before calling toLowerCase
+					const value = item[field];
+					return typeof value === 'string' && value.toLowerCase().includes(searchLower);
+				});
+			});
+		}
+
+		return {
+			data,
+			total: result.count || data.length,
+			totalPages: Math.ceil((result.count || data.length) / pageSize)
+		};
+	} catch (error) {
+		console.error(`Error in getPaginated for ${table}:`, error);
+		return {
+			data: [],
+			total: 0,
+			totalPages: 0
+		};
+	}
+}
+
+interface YearsParams {
+	items: Record<string, unknown>[];
+	dateField?: string;
+}
+
+export async function getYears({
 	items,
 	dateField = 'date'
-}: {
-	items: T[];
-	dateField?: string;
-}): Promise<number[]> {
-	const years = [...new Set(
-		items
-			.map(item => {
-				const date = item[dateField];
-				return date ? new Date(date).getFullYear() : null;
-			})
-			.filter(year => year !== null)
-	)].sort((a, b) => b - a);
+}: YearsParams): Promise<number[]> {
+	try {
+		const years = [...new Set(
+			items
+				.map(item => {
+					const date = item[dateField];
+					return typeof date === 'string' ? getYearFromDate(date) : null;
+				})
+				.filter((year): year is number => year !== null)
+		)].sort((a, b) => b - a);
 
-	return years;
+		return years;
+	} catch (error) {
+		console.error('Error in getYears:', error);
+		return [];
+	}
 }

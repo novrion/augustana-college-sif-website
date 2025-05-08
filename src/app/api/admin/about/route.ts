@@ -14,6 +14,13 @@ async function createAboutSectionHandler(request: Request, _session: Session): P
 
 	if (!data.order_index) {
 		const aboutSections = await getAllAboutSections();
+		if (!aboutSections) {
+			return NextResponse.json(
+				{ error: 'Could not calculate max order index for about section' },
+				{ status: 500 }
+			);
+		}
+
 		data.order_index = aboutSections.length > 0
 			? Math.max(...aboutSections.map(section => section.order_index)) + 1
 			: 1;

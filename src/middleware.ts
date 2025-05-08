@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { PERMISSIONS } from '@/lib/types/auth';
 
-const ROUTE_PERMISSIONS = {
-	"/admin": ["admin", "president", "vice_president", "secretary", "holdings_write"],
-	"/admin/holdings": ["admin", "president", "vice_president", "holdings_write"],
-	"/admin/notes": ["admin", "president", "vice_president", "secretary"],
-	"/admin/gallery": ["admin", "president", "vice_president", "secretary"],
+type PermissionKey = keyof typeof PERMISSIONS;
 
-	"admin_default": ["admin", "president", "vice_president"],
-
-	"holdings": ["admin", "president", "vice_president", "secretary", "holdings_write", "holdings_read"]
+const PROTECTED_ROUTES: Record<string, PermissionKey> = {
+	"/holdings": "HOLDINGS_READ",
+	"/admin": "ADMIN_DASHBOARD",
+	"/admin/holdings": "HOLDINGS_WRITE",
+	"/admin/notes": "SECRETARY",
+	"/admin/gallery": "SECRETARY",
 };
 
 export async function middleware(request: NextRequest) {
@@ -28,30 +28,19 @@ export async function middleware(request: NextRequest) {
 
 	const userRole = token.role as string;
 
-	if (pathname.startsWith("/holdings")) {
-		if (!ROUTE_PERMISSIONS.holdings.includes(userRole)) {
-			return NextResponse.redirect(new URL("/unauthorized", request.url));
-		}
-	} else if (pathname.startsWith("/admin")) {
-		let hasAccess = false;
+	// Find the most specific route match
+	let requiredPermission: PermissionKey | null = null;
+	let longestMatch = 0;
 
-		for (const [route, roles] of Object.entries(ROUTE_PERMISSIONS)) {
-			if (route.startsWith("/admin/") && pathname.startsWith(route)) {
-				hasAccess = roles.includes(userRole);
-				break;
-			}
+	for (const [route, permission] of Object.entries(PROTECTED_ROUTES)) {
+		if (pathname.startsWith(route) && route.length > longestMatch) {
+			requiredPermission = permission;
+			longestMatch = route.length;
 		}
+	}
 
-		// Default admin permissions
-		if (!hasAccess && !pathname.startsWith("/admin/holdings") &&
-			!pathname.startsWith("/admin/notes") &&
-			!pathname.startsWith("/admin/gallery")) {
-			hasAccess = ROUTE_PERMISSIONS.admin_default.includes(userRole);
-		}
-
-		if (!hasAccess) {
-			return NextResponse.redirect(new URL("/unauthorized", request.url));
-		}
+	if (requiredPermission && !PERMISSIONS[requiredPermission].includes(userRole)) {
+		return NextResponse.redirect(new URL("/unauthorized", request.url));
 	}
 
 	return NextResponse.next();

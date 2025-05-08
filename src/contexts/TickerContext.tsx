@@ -32,11 +32,12 @@ export function TickerProvider({ children }: { children: React.ReactNode }) {
 
 				const holdings: Holding[] = await response.json();
 				const validHoldings: Holding[] = holdings.filter(holding => typeof holding.percent_change === "number");
-				const sortedHoldings: Holding[] = [...validHoldings].sort((a, b) => b.percent_change - a.percent_change);
+				const sortedHoldings: Holding[] = [...validHoldings].sort((a, b) => b.percent_change! - a.percent_change!);
 				setHoldings(sortedHoldings);
-			} catch (err) {
+			} catch (err: unknown) {
 				console.error("Error fetching holdings:", err);
-				setError(err.message || "Failed to load stock data");
+				if (err instanceof Error) { setError(err.message); }
+				else { setError("Failed to load stock data"); }
 				setHoldings([])
 			} finally {
 				setIsLoading(false);

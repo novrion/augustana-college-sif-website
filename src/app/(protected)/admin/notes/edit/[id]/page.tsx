@@ -4,11 +4,7 @@ import { getNoteById } from '@/lib/api/db';
 import NoteForm from '@/components/admin/notes/NoteForm';
 import { EmptyLinkButton } from '@/components/Buttons';
 
-export default async function EditNotePage({
-	params
-}: {
-	params: Promise<{ id: string }>
-}) {
+export default async function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
 	const hasAccess = await hasPermission('SECRETARY');
 	if (!hasAccess) { redirect('/unauthorized'); }
 

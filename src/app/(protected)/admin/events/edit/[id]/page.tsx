@@ -1,24 +1,17 @@
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { hasAdminAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import { getEventById } from '@/lib/api/db';
 import EventForm from '@/components/admin/events/EventForm';
+import { EmptyLinkButton } from "@/components/Buttons";
 
-export default async function EditEventPage({
-	params
-}: {
-	params: Promise<{ id: string }>
-}) {
-	const hasAccess = await hasAdminAccess();
-	if (!hasAccess) { redirect('/unauthorized'); }
+export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
+	const hasAccess = await hasPermission('ADMIN');
+	if (!hasAccess) redirect('/unauthorized');
 
 	try {
 		const { id } = await params;
 		const event = await getEventById(id);
-
-		if (!event) {
-			redirect('/admin/events');
-		}
+		if (!event) redirect('/admin/events');
 
 		return (
 			<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
@@ -27,19 +20,9 @@ export default async function EditEventPage({
 						<h1 className="text-3xl font-bold">
 							Edit: {event.title || `Speaker: ${event.speaker_name}`}
 						</h1>
-
-						<Link
-							href="/admin/events"
-							className="rounded-full border border-solid border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#1a1a1a] font-medium text-sm h-10 px-4"
-						>
-							Back to Event Management
-						</Link>
+						<EmptyLinkButton href="/admin/events" text="Back to Event Management" />
 					</div>
-
-					<EventForm
-						initialData={event}
-						isEditing={true}
-					/>
+					<EventForm initialData={event} isEditing={true} />
 				</div>
 			</div>
 		);

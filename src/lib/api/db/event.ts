@@ -1,5 +1,6 @@
 import { Event } from '@/lib/types/event';
 import { getAll, getById, create, update, remove } from './common';
+import { formatDateForInput } from '@/lib/utils';
 
 const table = 'events';
 
@@ -25,7 +26,7 @@ export async function deleteEvent(id: string): Promise<boolean> {
 }
 
 export async function getUpcomingEvents(): Promise<Event[]> {
-	const todayString: string = new Date().toISOString().split('T')[0];
+	const todayString: string = formatDateForInput();
 
 	const result = await getAll(
 		table,
@@ -39,7 +40,7 @@ export async function getUpcomingEvents(): Promise<Event[]> {
 }
 
 export async function getPastEvents(page: number = 1, pageSize: number = 10): Promise<{ data: Event[], total: number, totalPages: number }> {
-	const todayString: string = new Date().toISOString().split('T')[0];
+	const todayString: string = formatDateForInput();
 	const offset: number = (page - 1) * pageSize;
 
 	const result = await getAll(

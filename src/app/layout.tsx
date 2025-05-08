@@ -32,12 +32,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<AuthProvider>
 					<Navbar />
-					<TickerProvider>
-						<ProtectedClientComponent>
+					<ProtectedClientComponent>
+						<TickerProvider>
 							<Ticker />
-						</ProtectedClientComponent>
-						{children}
-					</TickerProvider>
+						</TickerProvider>
+					</ProtectedClientComponent>
+					{children}
 					<Footer />
 				</AuthProvider>
 			</body>

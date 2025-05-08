@@ -1,48 +1,18 @@
 'use client'
 
-import { useAuth, hasAccess, RequiredRole } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-export function ProtectedClientPage({
-	children,
-	requiredRole = 'holdings_read' as RequiredRole
-}: {
-	children: React.ReactNode,
-	requiredRole?: RequiredRole
-}) {
-	const { status, role } = useAuth();
-	const router = useRouter();
-
-	useEffect(() => {
-		if (status === 'unauthenticated') {
-			router.push('/login');
-		} else if (status === 'authenticated' && !hasAccess(role, requiredRole)) {
-			router.push('/unauthorized');
-		}
-	}, [status, role, router, requiredRole]);
-
-	if (status === 'loading') {
-		return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-	}
-
-	if (status === 'authenticated' && hasAccess(role, requiredRole)) {
-		return <>{children}</>;
-	}
-
-	return null;
-}
+import { useAuth } from "@/hooks/useAuth";
+import { PermissionKey } from "@/lib/types/auth";
 
 export function ProtectedClientComponent({
 	children,
-	requiredRole = 'holdings_read' as RequiredRole
+	requiredRole = 'HOLDINGS_READ' as PermissionKey
 }: {
 	children: React.ReactNode,
-	requiredRole?: RequiredRole
+	requiredRole?: PermissionKey
 }) {
-	const { status, role } = useAuth();
+	const { status, hasPermission } = useAuth();
 
-	if (status === 'authenticated' && hasAccess(role, requiredRole)) {
+	if (status === 'authenticated' && hasPermission(requiredRole)) {
 		return <>{children}</>;
 	} else {
 		return null;

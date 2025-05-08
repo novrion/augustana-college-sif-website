@@ -4,11 +4,7 @@ import { getSession } from '@/lib/auth/auth';
 import HoldingDetails from '@/components/holdings/HoldingDetails';
 import { EmptyLinkButton } from '@/components/Buttons';
 
-export default async function HoldingDetailPage({
-	params
-}: {
-	params: Promise<{ id: string }>
-}) {
+export default async function HoldingDetailPage({ params }: { params: Promise<{ id: string }> }) {
 	const session = await getSession();
 	if (!session) { redirect('/login?callbackUrl=/holdings'); }
 

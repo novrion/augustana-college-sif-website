@@ -124,6 +124,7 @@ export function LogInLinkButton() {
 	);
 }
 
+
 interface SignOutButtonProps {
 	onClick: () => void;
 }
@@ -136,4 +137,40 @@ export function SignOutButton({ onClick }: SignOutButtonProps) {
 		>
 			Sign out
 		</button>);
+}
+
+
+interface EditLinkButtonProps {
+	href: string;
+	onClick?: (e: React.MouseEvent) => void;
+	className?: string;
+}
+
+export function EditLinkButton({ href, onClick, className = '' }: EditLinkButtonProps) {
+	return (
+		<Link
+			href={href}
+			className={`px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md ${className}`}
+			onClick={onClick}
+		>
+			Edit
+		</Link>
+	);
+}
+
+
+interface DeleteButtonProps {
+	onClick: (e: React.MouseEvent) => void;
+	className?: string;
+}
+
+export function DeleteButton({ onClick, className = '' }: DeleteButtonProps) {
+	return (
+		<button
+			onClick={onClick}
+			className={`px-3 py-1 text-sm bg-red-600 hover:bg-red-800 text-white rounded-md ${className}`}
+		>
+			Delete
+		</button>
+	);
 }

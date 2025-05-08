@@ -2,24 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { UserRole } from '@/lib/types/user';
-
-export const PERMISSIONS = {
-	'holdings_read': ['admin', 'president', 'vice_president', 'secretary', 'holdings_write', 'holdings_read'],
-	'admin_dashboard': ['admin', 'president', 'vice_president', 'secretary', 'holdings_write'],
-	'holdings_write': ['admin', 'president', 'vice_president', 'holdings_write'],
-	'secretary': ['admin', 'president', 'vice_president', 'secretary'],
-	'president': ['president'],
-	'vice_president': ['vice_president'],
-	'admin': ['admin', 'president', 'vice_president'],
-	'super_admin': ['admin'],
-};
-
-export type RequiredRole = keyof typeof PERMISSIONS;
-
-export function hasAccess(userRole: UserRole | undefined, requiredRole: RequiredRole): boolean {
-	if (!userRole) return false;
-	return PERMISSIONS[requiredRole].includes(userRole);
-}
+import { PermissionKey, PERMISSIONS } from "@/lib/types/auth";
 
 export function useAuth() {
 	const { data: session, update: updateSession, status } = useSession();
@@ -28,16 +11,17 @@ export function useAuth() {
 	const isLoading = status === 'loading';
 	const role = session?.user?.role as UserRole | undefined;
 
-	const checkAccess = (requiredRole: RequiredRole) => {
-		return hasAccess(role, requiredRole);
+	function hasPermission(permissionKey: PermissionKey): boolean {
+		if (!role) return false;
+		return PERMISSIONS[permissionKey].includes(role);
 	};
 
-	const hasHoldingsReadAccess = () => checkAccess('holdings_read');
-	const hasAdminDashboardAccess = () => checkAccess('admin_dashboard');
-	const hasHoldingsWriteAccess = () => checkAccess('holdings_write');
-	const hasSecretaryAccess = () => checkAccess('secretary');
-	const hasAdminAccess = () => checkAccess('admin');
-	const hasSuperAdminAccess = () => checkAccess('super_admin');
+	// Convenience methods for common permission checks
+	const hasHoldingsReadAccess = () => hasPermission('HOLDINGS_READ');
+	const hasHoldingsWriteAccess = () => hasPermission('HOLDINGS_WRITE');
+	const hasAdminDashboardAccess = () => hasPermission('ADMIN_DASHBOARD');
+	const hasSecretaryAccess = () => hasPermission('SECRETARY');
+	const hasAdminAccess = () => hasPermission('ADMIN');
 
 	return {
 		session,
@@ -46,12 +30,11 @@ export function useAuth() {
 		isAuthenticated,
 		isLoading,
 		role,
-		checkAccess,
+		hasPermission,
 		hasHoldingsReadAccess,
-		hasAdminDashboardAccess,
 		hasHoldingsWriteAccess,
+		hasAdminDashboardAccess,
 		hasSecretaryAccess,
 		hasAdminAccess,
-		hasSuperAdminAccess,
 	};
 }

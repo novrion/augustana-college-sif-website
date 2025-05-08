@@ -1,37 +1,40 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { AboutSection } from '@/lib/types/about';
-import { AdminList, AdminListItemWithOrdering, DeleteConfirmationModal } from '@/components/admin/common';
+import { AdminList, AdminListItemWithOrdering } from '@/components/admin/common';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
+import { EditLinkButton, DeleteButton } from '@/components/Buttons';
 
 interface AdminAboutSectionsListProps {
 	aboutSections: AboutSection[];
 }
 
 export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSectionsListProps) {
+	const router = useRouter();
 	const [sections, setSections] = useState(aboutSections);
 	const [isReordering, setIsReordering] = useState(false);
 	const [error, setError] = useState('');
-
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [sectionToDelete, setSectionToDelete] = useState<AboutSection | null>(null);
 
 	const handleReorder = async (id: string, direction: 'up' | 'down') => {
+		// Find current section position
 		const currentIndex = sections.findIndex(section => section.id === id);
-		if (
-			(direction === 'up' && currentIndex === 0) ||
-			(direction === 'down' && currentIndex === sections.length - 1)
-		) {
-			return; // Can't move further in this direction
+		if ((direction === 'up' && currentIndex === 0) ||
+			(direction === 'down' && currentIndex === sections.length - 1)) {
+			return; // Already at boundary
 		}
 
+		// Calculate new position and update UI optimistically
 		const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
 		const newSections = [...sections];
 		const [movedSection] = newSections.splice(currentIndex, 1);
 		newSections.splice(newIndex, 0, movedSection);
 
+		// Update order indexes
 		const updatedSections = newSections.map((section, index) => ({
 			...section,
 			order_index: index + 1
@@ -55,7 +58,7 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to update section order');
-			setSections(aboutSections); // Revert to original order
+			setSections(aboutSections); // Revert to original order on error
 		} finally {
 			setIsReordering(false);
 		}
@@ -65,11 +68,6 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 		e.stopPropagation();
 		setSectionToDelete(section);
 		setIsDeleteModalOpen(true);
-	};
-
-	const closeDeleteModal = () => {
-		setIsDeleteModalOpen(false);
-		setSectionToDelete(null);
 	};
 
 	const confirmDelete = async () => {
@@ -86,7 +84,6 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 				throw new Error(data.error || 'Failed to delete section');
 			}
 
-			// Remove section from state
 			setSections(sections.filter(section => section.id !== sectionToDelete.id));
 			setIsDeleteModalOpen(false);
 			setSectionToDelete(null);
@@ -95,10 +92,6 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 		} finally {
 			setIsDeleting(false);
 		}
-	};
-
-	const handleSectionClick = (sectionId: string) => {
-		window.location.href = `/admin/about/edit/${sectionId}`;
 	};
 
 	return (
@@ -114,7 +107,7 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 					<AdminListItemWithOrdering
 						key={section.id}
 						title={section.title}
-						onClick={() => handleSectionClick(section.id)}
+						onClick={() => router.push(`/admin/about/edit/${section.id}`)}
 						onMoveUp={() => handleReorder(section.id, 'up')}
 						onMoveDown={() => handleReorder(section.id, 'down')}
 						canMoveUp={index !== 0}
@@ -122,19 +115,13 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 						isReordering={isReordering}
 						actions={
 							<>
-								<Link
+								<EditLinkButton
 									href={`/admin/about/edit/${section.id}`}
-									className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
 									onClick={(e) => e.stopPropagation()}
-								>
-									Edit
-								</Link>
-								<button
+								/>
+								<DeleteButton
 									onClick={(e) => openDeleteModal(section, e)}
-									className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md"
-								>
-									Delete
-								</button>
+								/>
 							</>
 						}
 					/>
@@ -143,7 +130,7 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 
 			<DeleteConfirmationModal
 				isOpen={isDeleteModalOpen}
-				onClose={closeDeleteModal}
+				onClose={() => setIsDeleteModalOpen(false)}
 				onConfirm={confirmDelete}
 				isLoading={isDeleting}
 				title="Delete Section"

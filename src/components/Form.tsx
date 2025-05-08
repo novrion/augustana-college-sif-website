@@ -1,6 +1,8 @@
+import StatusMessage from "@/components/common/StatusMessage";
+
 interface FormProps {
-	children;
-	onSubmit: (e) => void;
+	children: React.ReactNode;
+	onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 	title: string;
 	error: string;
 	success?: string;
@@ -14,17 +16,8 @@ export default function Form({ children, onSubmit, title, error, success = '', c
 				{title}
 			</h2>
 
-			{error && (
-				<div className="text-center mb-4 p-3 text-red-700 rounded-md font-[family-name:var(--font-geist-mono)]">
-					{error}
-				</div>
-			)}
-
-			{success && (
-				<div className="text-center mb-4 p-3 text-green-500 rounded-md font-[family-name:var(--font-geist-mono)]">
-					{success}
-				</div>
-			)}
+			{error && <StatusMessage type="error" message={error} />}
+			{success && <StatusMessage type="success" message={success} />}
 
 			<form
 				onSubmit={onSubmit}

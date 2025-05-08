@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import PaginationControls from '@/components/common/PaginationControls';
 import { GalleryImage } from '@/lib/types/gallery';
+import { formatDateForDisplay } from '@/lib/utils';
 
 interface GalleryProps {
 	images: GalleryImage[];
@@ -48,17 +49,6 @@ export default function Gallery({
 		return () => window.removeEventListener('keydown', handleEscKey);
 	}, [selectedImage]);
 
-	const formatDate = (dateString: string) => {
-		if (!dateString) return '';
-		const date = new Date(`${dateString}T12:00:00Z`);
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			timeZone: 'UTC'
-		});
-	};
-
 	const getColumnImages = (): GalleryImage[][] => {
 		const result = Array.from({ length: columns }, () => [] as GalleryImage[]);
 		images.forEach((image, index) => {
@@ -94,7 +84,7 @@ export default function Gallery({
 								<div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end p-4">
 									<div className="text-white w-full min-w-0">
 										<h3 className="font-semibold text-lg font-[family-name:var(--font-geist-mono)]">{image.title}</h3>
-										<p className="text-xs text-gray-300 mb-1 font-[family-name:var(--font-geist-mono)]">{formatDate(image.date)}</p>
+										<p className="text-xs text-gray-300 mb-1 font-[family-name:var(--font-geist-mono)]">{formatDateForDisplay(image.date)}</p>
 										{image.description && <p className="text-sm break-words font-[family-name:var(--font-geist-sans)]">{image.description}</p>}
 									</div>
 								</div>
@@ -153,7 +143,7 @@ export default function Gallery({
 
 						<div className="bg-black bg-opacity-70 p-6 text-white rounded w-full max-w-3xl mx-auto text-center font-[family-name:var(--font-geist-mono)]">
 							<h3 className="font-semibold text-xl mb-1 font-[family-name:var(--font-geist-mono)]">{selectedImage.title}</h3>
-							<p className="text-sm text-gray-300 mb-2">{formatDate(selectedImage.date)}</p>
+							<p className="text-sm text-gray-300 mb-2">{formatDateForDisplay(selectedImage.date)}</p>
 							{selectedImage.description && <p>{selectedImage.description}</p>}
 						</div>
 					</div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Holding } from '@/lib/types/holding';
 import Form from "@/components/Form";
 import { FilledButton, EmptyButton } from "@/components/Buttons";
+import { formatDateForInput } from '@/lib/utils';
 
 interface HoldingFormProps {
 	initialData?: Holding | null;
@@ -21,9 +22,7 @@ export default function HoldingForm({ initialData }: HoldingFormProps) {
 		share_count: initialData?.share_count || '',
 		cost_basis: initialData?.cost_basis || '',
 		current_price: initialData?.current_price || '',
-		purchase_date: initialData?.purchase_date
-			? new Date(initialData.purchase_date).toISOString().split('T')[0]
-			: new Date().toISOString().split('T')[0],
+		purchase_date: formatDateForInput(initialData?.purchase_date),
 	});
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -56,16 +55,18 @@ export default function HoldingForm({ initialData }: HoldingFormProps) {
 				current_price: parseFloat(formData.current_price.toString()),
 			};
 
-			const url = isEditing
-				? `/api/admin/holdings/update-holding`
-				: `/api/admin/holdings/add-holding`;
+			const endpoint = isEditing
+				? `/api/admin/holdings/${initialData.id}`
+				: `/api/admin/holdings`;
+
+			const method = isEditing ? 'PUT' : 'POST';
 
 			const body = isEditing
 				? { ...submitData, id: initialData.id }
 				: submitData;
 
-			const response = await fetch(url, {
-				method: 'POST',
+			const response = await fetch(endpoint, {
+				method,
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -102,7 +103,7 @@ export default function HoldingForm({ initialData }: HoldingFormProps) {
 			<div className="space-y-6">
 				<div>
 					<label className="block text-sm font-medium mb-1" htmlFor="ticker">
-						Ticker Symbol *
+						Symbol *
 					</label>
 					<input
 						id="ticker"

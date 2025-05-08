@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Newsletter } from '@/lib/types/newsletter';
-import { AdminList, AdminListItem, DeleteConfirmationModal } from '@/components/admin/common';
+import { AdminList, AdminListItem } from '@/components/admin/common';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import PaginationControls from '@/components/common/PaginationControls';
+import { EditLinkButton, DeleteButton } from "@/components/Buttons";
+import { formatDateForDisplay } from '@/lib/utils';
 
 interface NewsletterAdminListProps {
 	newsletters: Newsletter[];
@@ -12,20 +15,21 @@ interface NewsletterAdminListProps {
 	pageSize?: number;
 }
 
-export default function NewsletterAdminList({
+export default function AdminNewsletterList({
 	newsletters: initialNewsletters,
 	initialPage = 1,
 	pageSize = 10
 }: NewsletterAdminListProps) {
+	const router = useRouter();
 	const [allNewsletters, setAllNewsletters] = useState(initialNewsletters);
 	const [currentPage, setCurrentPage] = useState(initialPage);
 	const [totalPages, setTotalPages] = useState(Math.ceil(initialNewsletters.length / pageSize));
 	const [error, setError] = useState('');
-	const [isLoading] = useState(false);
+	const [paginatedNewsletters, setPaginatedNewsletters] = useState<Newsletter[]>([]);
+
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [newsletterToDelete, setNewsletterToDelete] = useState<Newsletter | null>(null);
-	const [paginatedNewsletters, setPaginatedNewsletters] = useState<Newsletter[]>([]);
 
 	useEffect(() => {
 		const startIndex = (currentPage - 1) * pageSize;
@@ -34,15 +38,8 @@ export default function NewsletterAdminList({
 		setTotalPages(Math.ceil(allNewsletters.length / pageSize));
 	}, [currentPage, allNewsletters, pageSize]);
 
-	const formatDate = (dateString: string) => {
-		const date = new Date(`${dateString}T12:00:00Z`);
-
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			timeZone: 'UTC' // Use UTC to avoid timezone shifts
-		});
+	const hasAttachments = (newsletter: Newsletter): boolean => {
+		return (newsletter.attachments && newsletter.attachments.length > 0) as boolean;
 	};
 
 	const openDeleteModal = (newsletter: Newsletter, e: React.MouseEvent) => {
@@ -70,17 +67,18 @@ export default function NewsletterAdminList({
 				throw new Error(data.error || 'Failed to delete newsletter');
 			}
 
-			// Remove newsletter from state
-			const updatedNewsletters = allNewsletters.filter(newsletter => newsletter.id !== newsletterToDelete.id);
+			// Update state after successful delete
+			const updatedNewsletters = allNewsletters.filter(
+				newsletter => newsletter.id !== newsletterToDelete.id
+			);
 			setAllNewsletters(updatedNewsletters);
 
-			// Update page if necessary (if we deleted the last item on a page)
+			// Handle pagination edge case
 			if (paginatedNewsletters.length === 1 && currentPage > 1) {
 				setCurrentPage(currentPage - 1);
 			}
 
-			setIsDeleteModalOpen(false);
-			setNewsletterToDelete(null);
+			closeDeleteModal();
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to delete newsletter');
 		} finally {
@@ -89,22 +87,13 @@ export default function NewsletterAdminList({
 	};
 
 	const handleNewsletterClick = (newsletterId: string) => {
-		window.location.href = `/admin/newsletter/edit/${newsletterId}`;
-	};
-
-	const handlePageChange = (page: number) => {
-		setCurrentPage(page);
-	};
-
-	const hasAttachments = (newsletter: Newsletter) => {
-		return newsletter.attachments && newsletter.attachments.length > 0;
+		router.push(`/admin/newsletter/edit/${newsletterId}`);
 	};
 
 	return (
 		<>
 			<AdminList
 				error={error}
-				isLoading={isLoading}
 				isEmpty={allNewsletters.length === 0}
 				emptyMessage="No newsletters found. Add your first newsletter to get started."
 			>
@@ -114,7 +103,7 @@ export default function NewsletterAdminList({
 						title={newsletter.title}
 						subtitle={
 							<div className="flex items-center gap-4">
-								<span>{formatDate(newsletter.date)} - {newsletter.author}</span>
+								<span>{formatDateForDisplay(newsletter.date)} - {newsletter.author}</span>
 								{hasAttachments(newsletter) && (
 									<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-900 text-blue-200">
 										<svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -128,31 +117,24 @@ export default function NewsletterAdminList({
 						onClick={() => handleNewsletterClick(newsletter.id)}
 						actions={
 							<>
-								<Link
+								<EditLinkButton
 									href={`/admin/newsletter/edit/${newsletter.id}`}
-									className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
 									onClick={(e) => e.stopPropagation()}
-								>
-									Edit
-								</Link>
-								<button
+								/>
+								<DeleteButton
 									onClick={(e) => openDeleteModal(newsletter, e)}
-									className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md"
-								>
-									Delete
-								</button>
+								/>
 							</>
 						}
 					/>
 				))}
 
-				{/* Pagination */}
 				{totalPages > 1 && (
 					<div className="mt-6">
 						<PaginationControls
 							currentPage={currentPage}
 							totalPages={totalPages}
-							onPageChange={handlePageChange}
+							onPageChange={setCurrentPage}
 						/>
 						<div className="mt-2 text-sm text-gray-400 text-center">
 							Showing {paginatedNewsletters.length} of {allNewsletters.length} newsletters

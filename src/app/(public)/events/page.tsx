@@ -5,6 +5,7 @@ import EventBox from '@/components/events/EventBox';
 import EventCalendar from '@/components/events/EventCalendar';
 import PaginationControls from '@/components/common/PaginationControls';
 import { Event } from '@/lib/types/event';
+import StatusMessage from '@/components/common/StatusMessage';
 
 export default function EventsPage() {
 	const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
@@ -22,11 +23,15 @@ export default function EventsPage() {
 			setError(null);
 
 			try {
-				const upcomingResponse = await fetch('/api/events?type=upcoming');
-				if (!upcomingResponse.ok) { throw new Error('Failed to fetch upcoming events'); }
-				const upcomingData = await upcomingResponse.json();
-				setUpcomingEvents(upcomingData || []);
+				// Only fetch upcoming events if we're on the upcoming tab
+				if (activeTab === 'upcoming') {
+					const upcomingResponse = await fetch('/api/events?type=upcoming');
+					if (!upcomingResponse.ok) { throw new Error('Failed to fetch upcoming events'); }
+					const upcomingData = await upcomingResponse.json();
+					setUpcomingEvents(upcomingData || []);
+				}
 
+				// Only fetch past events if we're on the past tab
 				if (activeTab === 'past') {
 					const pastResponse = await fetch(`/api/events?type=past&page=${currentPage}`);
 					if (!pastResponse.ok) { throw new Error('Failed to fetch past events'); }
@@ -69,15 +74,10 @@ export default function EventsPage() {
 					Industry professionals sharing insights with our fund.
 				</p>
 
-				{/* Calendar */}
 				<div className="mb-10">
-					<EventCalendar
-						upcomingEvents={upcomingEvents}
-						pastEvents={pastEvents}
-					/>
+					<EventCalendar />
 				</div>
 
-				{/* List view */}
 				<div className="mt-12">
 					<div className="flex border-b border-white/[.145] font-[family-name:var(--font-geist-mono)] mb-6">
 						<button
@@ -106,11 +106,7 @@ export default function EventsPage() {
 						</div>
 					)}
 
-					{error && !isLoading && (
-						<div className="text-center p-4 rounded-md text-red-700 mb-6 font-[family-name:var(--font-geist-mono)]">
-							{error}
-						</div>
-					)}
+					{error && !isLoading && (<StatusMessage type="error" message={error} />)}
 
 					{!isLoading && !error && (
 						<>
@@ -126,7 +122,6 @@ export default function EventsPage() {
 								</div>
 							)}
 
-							{/* Pagination for past events only */}
 							{activeTab === 'past' && totalPages > 1 && (
 								<div className="mt-8">
 									<PaginationControls

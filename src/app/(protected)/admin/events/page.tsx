@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation';
-import { hasAdminAccess } from '@/lib/auth/auth';
+import { hasPermission } from '@/lib/auth/auth';
 import { getAllEvents } from '@/lib/api/db';
 import AdminEventsList from '@/components/admin/events/AdminEventsList';
 import { Event } from '@/lib/types/event';
 import { EmptyLinkButton, FilledLinkButton } from "@/components/Buttons";
 
 export default async function AdminEventsPage() {
-	const hasAccess = await hasAdminAccess();
-	if (!hasAccess) { redirect('/unauthorized'); }
+	const hasAccess = await hasPermission('ADMIN');
+	if (!hasAccess) redirect('/unauthorized');
 
 	const events: Event[] = await getAllEvents();
 	const sortedEvents = [...events].sort((a, b) =>
@@ -19,17 +19,9 @@ export default async function AdminEventsPage() {
 			<div className="max-w-6xl mx-auto">
 				<div className="flex justify-between items-center mb-6">
 					<h1 className="text-3xl font-bold">Event Management</h1>
-
 					<div className="flex gap-3">
-						<EmptyLinkButton
-							href={"/admin"}
-							text={"Back to Admin"}
-						/>
-
-						<FilledLinkButton
-							href={`/admin/events/add`}
-							text={"Add New Event"}
-						/>
+						<EmptyLinkButton href="/admin" text="Back to Admin" />
+						<FilledLinkButton href="/admin/events/add" text="Add New Event" />
 					</div>
 				</div>
 

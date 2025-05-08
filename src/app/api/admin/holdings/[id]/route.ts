@@ -70,5 +70,5 @@ async function deleteHoldingHandler(request: Request, _session: Session, params:
 	});
 }
 
-export const PUT = withAuthParam(updateHoldingHandler, 'HOLDINGS_WRITE', true);
-export const DELETE = withAuthParam(deleteHoldingHandler, 'HOLDINGS_WRITE', true);
+export const PUT = withAuthParam(updateHoldingHandler, 'HOLDINGS_WRITE');
+export const DELETE = withAuthParam(deleteHoldingHandler, 'HOLDINGS_WRITE');

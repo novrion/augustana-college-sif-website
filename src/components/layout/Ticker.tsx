@@ -1,6 +1,7 @@
 'use client'
 
 import { useTickerContext } from "@/contexts/TickerContext";
+import { Holding } from '@/lib/types';
 import "@/styles/ticker.css";
 
 export default function Ticker() {
@@ -18,14 +19,14 @@ export default function Ticker() {
 		return null;
 	}
 
-	const renderHolding = (holding, index, keyPrefix) => {
-		const isPositive = holding.percent_change >= 0;
+	const renderHolding = (holding: Holding, index: number, keyPrefix: string) => {
+		const isPositive = holding.percent_change! >= 0;
 		const colorClass = isPositive ? 'positive' : 'negative';
 		const arrow = isPositive ? '▲' : '▼';
 		return (
 			<span key={`${keyPrefix}-${holding.ticker}-${index}`} className="ticker-item">
 				<span className={`ticker-symbol ${colorClass}`}>{holding.ticker}</span>
-				<span className={`ticker-change ${colorClass}`}>{arrow}{Math.abs(holding.percent_change).toFixed(2)}</span>
+				<span className={`ticker-change ${colorClass}`}>{arrow}{Math.abs(holding.percent_change!).toFixed(2)}</span>
 			</span>
 		);
 	};

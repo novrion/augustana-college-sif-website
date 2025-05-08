@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import StatusMessage from '@/components/common/StatusMessage';
 
 interface AdminListProps {
 	children: React.ReactNode;
@@ -25,11 +26,7 @@ export default function AdminList({
 		<div className="space-y-4">
 			{title && <h2 className="text-xl font-semibold mb-4">{title}</h2>}
 
-			{error && (
-				<div className="text-center p-4 rounded-md text-red-700 mb-2">
-					{error}
-				</div>
-			)}
+			{error && <StatusMessage type="error" message={error} />}
 
 			{isLoading && (
 				<div className="text-center p-4 text-blue-500 rounded-md mb-2">

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Event } from '@/lib/types/event';
+import { isPastDate, formatDateForDisplay } from '@/lib/utils';
 
 interface EventBoxProps {
 	event: Event;
@@ -9,32 +10,8 @@ interface EventBoxProps {
 
 export default function EventBox({ event }: EventBoxProps) {
 	const router = useRouter();
-
-	const formatDate = (dateString: string): string => {
-		if (!dateString) return 'Date not available';
-		const date = new Date(`${dateString}T12:00:00Z`);
-		return date.toLocaleDateString('en-US', {
-			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			timeZone: 'UTC'
-		});
-	};
-
-	const isPastEvent = (dateString: string): boolean => {
-		if (!dateString) return false;
-		const eventDate = new Date(`${dateString}T12:00:00Z`);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		return eventDate < today;
-	};
-
-	const handleClick = () => {
-		router.push(`/events/${event.id}`);
-	};
-
-	const isPast = isPastEvent(event.date);
+	const handleClick = () => { router.push(`/events/${event.id}`); };
+	const isPast = isPastDate(event.date);
 
 	return (
 		<div
@@ -55,7 +32,7 @@ export default function EventBox({ event }: EventBoxProps) {
 				</p>
 
 				<div className="flex flex-wrap items-center gap-3 mt-2">
-					<p className="text-sm text-gray-400">{formatDate(event.date)}</p>
+					<p className="text-sm text-gray-400">{formatDateForDisplay(event.date, { includeWeekday: true })}</p>
 					<p className="text-sm text-gray-400">{event.time}</p>
 					<p className="text-sm text-gray-400">{event.location}</p>
 

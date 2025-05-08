@@ -3,17 +3,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FilledButton } from "@/components/Buttons";
+import StatusMessage from '@/components/common/StatusMessage';
 
 interface CashBalanceFormProps {
 	initialCashBalance: number;
 }
 
 export default function CashBalanceForm({ initialCashBalance }: CashBalanceFormProps) {
+	const router = useRouter();
 	const [cashBalance, setCashBalance] = useState(initialCashBalance);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
-	const router = useRouter();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -22,8 +23,8 @@ export default function CashBalanceForm({ initialCashBalance }: CashBalanceFormP
 		setSuccess('');
 
 		try {
-			const response = await fetch('/api/admin/holdings/update-cash', {
-				method: 'POST',
+			const response = await fetch('/api/admin/holdings/cash', {
+				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -48,17 +49,8 @@ export default function CashBalanceForm({ initialCashBalance }: CashBalanceFormP
 
 	return (
 		<div>
-			{error && (
-				<div className="mb-4 p-3 text-red-700 rounded-md font-[family-name:var(--font-geist-mono)]">
-					{error}
-				</div>
-			)}
-
-			{success && (
-				<div className="mb-4 p-3 text-green-500 rounded-md font-[family-name:var(--font-geist-mono)]">
-					{success}
-				</div>
-			)}
+			{error && <StatusMessage type="error" message={error} />}
+			{success && <StatusMessage type="success" message={success} />}
 
 			<form onSubmit={handleSubmit} className="flex items-end gap-4">
 				<div className="flex-1">

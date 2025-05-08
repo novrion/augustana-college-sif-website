@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Newsletter } from '@/lib/types/newsletter';
+import { formatDateForDisplay } from '@/lib/utils';
 
 interface NewsletterBoxProps {
 	newsletter: Newsletter;
@@ -10,17 +11,6 @@ interface NewsletterBoxProps {
 export default function NewsletterBox({ newsletter }: NewsletterBoxProps) {
 	const router = useRouter();
 
-	const formatDate = (dateString: string): string => {
-		if (!dateString) return 'Date not available';
-		const date = new Date(`${dateString}T12:00:00Z`);
-		return date.toLocaleDateString('en-US', {
-			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			timeZone: 'UTC'
-		});
-	};
 	const excerpt = newsletter.content.length > 150
 		? `${newsletter.content.substring(0, newsletter.content.substring(0, 150).lastIndexOf(' ') || 150)}...`
 		: newsletter.content;
@@ -38,7 +28,7 @@ export default function NewsletterBox({ newsletter }: NewsletterBoxProps) {
 			</h2>
 
 			<div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-400 mb-3">
-				<span className="mr-4">{formatDate(newsletter.date)}</span>
+				<span className="mr-4">{formatDateForDisplay(newsletter.date, { includeWeekday: true })}</span>
 				<span>{newsletter.author}</span>
 				{hasAttachments && (
 					<span className="mt-1 sm:mt-0 sm:ml-4 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-900 text-blue-200">

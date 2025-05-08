@@ -30,15 +30,21 @@ export async function getPaginatedNotes(params: {
 	year?: string | null;
 	search?: string | null;
 }): Promise<{ data: Note[]; total: number; totalPages: number }> {
-	return getPaginated<Note>({
+	const result = await getPaginated<Record<string, unknown>>({
 		table,
 		...params
 	});
+
+	return {
+		data: result.data as unknown as Note[],
+		total: result.total,
+		totalPages: result.totalPages
+	};
 }
 
 export async function getNotesYears(): Promise<number[]> {
 	const notes = await getAllNotes();
-	return getYears<Note>({
-		items: notes
+	return getYears({
+		items: notes as unknown as Record<string, unknown>[]
 	});
 }

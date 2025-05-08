@@ -4,36 +4,21 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Form from "@/components/Form";
-import { FilledButton } from "@/components/Buttons";
+import { FilledButton, EmptyButton } from "@/components/Buttons";
 import { GalleryImage } from '@/lib/types/gallery';
+import { formatDateForInput } from '@/lib/utils';
 
 interface GalleryImageFormProps {
 	initialData?: GalleryImage;
 	isEditing?: boolean;
 }
 
-export default function GalleryImageForm({ initialData, isEditing = false }: GalleryImageFormProps) {
+export default function GalleryImageForm({
+	initialData,
+	isEditing = false
+}: GalleryImageFormProps) {
 	const router = useRouter();
 	const fileInputRef = useRef<HTMLInputElement>(null);
-
-	const getTodayLocalDate = () => {
-		const now = new Date();
-		const year = now.getFullYear();
-		const month = String(now.getMonth() + 1).padStart(2, '0');
-		const day = String(now.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
-	};
-
-	const formatDateForInput = (dateString?: string) => {
-		if (!dateString) return getTodayLocalDate();
-
-		const date = new Date(`${dateString}T12:00:00Z`);
-		const year = date.getUTCFullYear();
-		const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-		const day = String(date.getUTCDate()).padStart(2, '0');
-
-		return `${year}-${month}-${day}`;
-	};
 
 	const [formData, setFormData] = useState({
 		title: initialData?.title || '',
@@ -102,7 +87,10 @@ export default function GalleryImageForm({ initialData, isEditing = false }: Gal
 			formDataObj.append('description', formData.description || '');
 			formDataObj.append('date', formData.date);
 
-			const endpoint = isEditing ? `/api/admin/gallery/${initialData?.id}` : '/api/admin/gallery/upload';
+			const endpoint = isEditing ?
+				`/api/admin/gallery/${initialData?.id}` :
+				'/api/admin/gallery/upload';
+
 			const response = await fetch(endpoint, {
 				method: isEditing ? 'PUT' : 'POST',
 				body: formDataObj,
@@ -220,7 +208,13 @@ export default function GalleryImageForm({ initialData, isEditing = false }: Gal
 				</div>
 			</div>
 
-			<div className="flex justify-end mt-6">
+			<div className="flex justify-end gap-3 mt-6">
+				<EmptyButton
+					onClick={() => router.push('/admin/gallery')}
+					text="Cancel"
+					isLoading={false}
+					type="button"
+				/>
 				<FilledButton
 					type="submit"
 					text={isEditing ? 'Update Image' : 'Upload Image'}

@@ -3,26 +3,15 @@ import Image from 'next/image';
 import { getNewsletterById } from '@/lib/api/db';
 import { Attachment } from '@/lib/types';
 import { EmptyLinkButton } from '@/components/Buttons';
+import { formatDateForDisplay, formatFileSize } from '@/lib/utils';
 
-export default async function NewsletterDetail({
-	params
-}: {
-	params: Promise<{ id: string }>
-}) {
+export default async function NewsletterDetail({ params }: { params: Promise<{ id: string }> }) {
 	try {
 		const { id } = await params;
 		if (!id) redirect('/newsletter');
 
 		const newsletter = await getNewsletterById(id);
 		if (!newsletter) redirect('/newsletter');
-
-		const formattedDate = new Date(`${newsletter.date}T12:00:00Z`).toLocaleDateString('en-US', {
-			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			timeZone: 'UTC'
-		});
 
 		return (
 			<div className="min-h-screen p-8 sm:p-20">
@@ -44,7 +33,7 @@ export default async function NewsletterDetail({
 						</h2>
 
 						<div className="flex flex-col mb-6 text-sm text-gray-400 font-[family-name:var(--font-geist-mono)]">
-							<span className="mb-1">{formattedDate}</span>
+							<span className="mb-1">{formatDateForDisplay(newsletter.date, { includeWeekday: true })}</span>
 							<span>{newsletter.author}</span>
 						</div>
 
@@ -150,19 +139,4 @@ function renderFileAttachments(attachments: Attachment[]) {
 function isImageAttachment(attachment: Attachment): boolean {
 	const type = attachment?.type || '';
 	return type.startsWith('image/');
-}
-
-function formatFileSize(bytes: number): string {
-	if (!bytes) return '';
-
-	const units = ['B', 'KB', 'MB', 'GB'];
-	let size = bytes;
-	let unitIndex = 0;
-
-	while (size >= 1024 && unitIndex < units.length - 1) {
-		size /= 1024;
-		unitIndex++;
-	}
-
-	return `${size.toFixed(1)} ${units[unitIndex]}`;
 }

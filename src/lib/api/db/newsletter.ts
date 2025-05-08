@@ -67,15 +67,21 @@ export async function getPaginatedNewsletters(params: {
 	year?: string | null;
 	search?: string | null;
 }): Promise<{ data: Newsletter[]; total: number; totalPages: number }> {
-	return getPaginated<Newsletter>({
+	const result = await getPaginated<Record<string, unknown>>({
 		table,
 		...params
 	});
+
+	return {
+		data: result.data as unknown as Newsletter[],
+		total: result.total,
+		totalPages: result.totalPages
+	};
 }
 
 export async function getNewsletterYears(): Promise<number[]> {
 	const newsletters = await getAllNewsletters();
-	return getYears<Newsletter>({
-		items: newsletters
+	return getYears({
+		items: newsletters as unknown as Record<string, unknown>[]
 	});
 }

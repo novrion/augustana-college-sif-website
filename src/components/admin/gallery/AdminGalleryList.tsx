@@ -5,7 +5,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { GalleryImage } from '@/lib/types/gallery';
 import PaginationControls from '@/components/common/PaginationControls';
-import { DeleteConfirmationModal } from '@/components/admin/common';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
+import { EditLinkButton, DeleteButton } from '@/components/Buttons';
+import StatusMessage from '@/components/common/StatusMessage';
+import { formatDateForDisplay } from '@/lib/utils';
 
 interface AdminGalleryListProps {
 	images: GalleryImage[];
@@ -25,17 +28,6 @@ export default function AdminGalleryList({
 	const [imageToDelete, setImageToDelete] = useState<GalleryImage | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [error, setError] = useState('');
-
-	const formatDate = (dateString: string) => {
-		if (!dateString) return '';
-		const date = new Date(`${dateString}T12:00:00Z`);
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			timeZone: 'UTC' // Use UTC to avoid timezone shifts
-		});
-	};
 
 	const handlePageChange = (page: number) => {
 		router.push(`/admin/gallery?page=${page}`);
@@ -61,7 +53,7 @@ export default function AdminGalleryList({
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(`/api/admin/gallery/delete/${imageToDelete.id}`, {
+			const response = await fetch(`/api/admin/gallery/${imageToDelete.id}`, {
 				method: 'DELETE'
 			});
 
@@ -70,7 +62,7 @@ export default function AdminGalleryList({
 				throw new Error(data.error || 'Failed to delete image');
 			}
 
-			// Close modal and refresh
+			// Close modal and refresh the page
 			closeDeleteModal();
 			router.refresh();
 		} catch (err) {
@@ -90,18 +82,14 @@ export default function AdminGalleryList({
 
 	return (
 		<>
-			{error && (
-				<div className="text-center p-4 rounded-md text-red-700 mb-4">
-					{error}
-				</div>
-			)}
+			{error && <StatusMessage type="error" message={error} />}
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 				{images.map((image) => (
 					<div
 						key={image.id}
-						onClick={() => handleEditImage(image.id)}
 						className="relative group overflow-hidden rounded-lg cursor-pointer"
+						onClick={() => handleEditImage(image.id)}
 					>
 						<div className="relative aspect-[3/4] w-full">
 							<Image
@@ -114,26 +102,24 @@ export default function AdminGalleryList({
 							/>
 						</div>
 
-						<div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end p-4">
+						<div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex p-4">
 							<div className="text-white w-full min-w-0">
 								<h3 className="font-semibold text-lg font-[family-name:var(--font-geist-mono)]">{image.title}</h3>
-								<p className="text-xs text-gray-300 mb-1 font-[family-name:var(--font-geist-mono)]">{formatDate(image.date)}</p>
-								{image.description && <p className="text-sm break-words font-[family-name:var(--font-geist-sans)]">{image.description}</p>}
+								<p className="text-xs text-gray-300 mb-1 font-[family-name:var(--font-geist-mono)]">{formatDateForDisplay(image.date)}</p>
 							</div>
+						</div>
 
-							<div className="absolute bottom-3 right-4">
-								<button
+						<div className="absolute bottom-3 right-4 flex gap-2 z-10">
+							<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+								<EditLinkButton
+									href={`/admin/gallery/edit/${image.id}`}
+									onClick={(e) => e.stopPropagation()}
+								/>
+							</div>
+							<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+								<DeleteButton
 									onClick={(e) => openDeleteModal(image, e)}
-									className="text-sm text-red-500 hover:text-red-400 p-1 rounded-full"
-									title="Delete image"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-										<path d="M3 6h18"></path>
-										<path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-										<line x1="10" y1="11" x2="10" y2="17"></line>
-										<line x1="14" y1="11" x2="14" y2="17"></line>
-									</svg>
-								</button>
+								/>
 							</div>
 						</div>
 					</div>

@@ -1,29 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Holding } from '@/lib/types/holding';
-import { DeleteConfirmationModal } from '@/components/admin/common';
+import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
+import { EditLinkButton, DeleteButton } from "@/components/Buttons";
+import StatusMessage from '@/components/common/StatusMessage';
+import { formatCurrency } from '@/lib/utils';
 
 interface AdminHoldingsListProps {
 	holdings: Holding[];
 }
 
 export default function AdminHoldingsList({ holdings }: AdminHoldingsListProps) {
-	const [error, setError] = useState('');
 	const router = useRouter();
+	const [error, setError] = useState('');
 
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [holdingToDelete, setHoldingToDelete] = useState<Holding | null>(null);
-
-	const formatCurrency = (value: number) => {
-		return new Intl.NumberFormat('en-US', {
-			style: 'currency',
-			currency: 'USD'
-		}).format(value);
-	};
 
 	const openDeleteModal = (holding: Holding, e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -41,14 +36,8 @@ export default function AdminHoldingsList({ holdings }: AdminHoldingsListProps) 
 
 		setIsDeleting(true);
 		try {
-			const response = await fetch(`/api/admin/holdings/delete-holding`, {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					holdingId: holdingToDelete.id,
-				}),
+			const response = await fetch(`/api/admin/holdings/${holdingToDelete.id}`, {
+				method: 'DELETE'
 			});
 
 			if (!response.ok) {
@@ -71,11 +60,7 @@ export default function AdminHoldingsList({ holdings }: AdminHoldingsListProps) 
 
 	return (
 		<div>
-			{error && (
-				<div className="mb-4 p-3 text-red-700 rounded-md">
-					{error}
-				</div>
-			)}
+			{error && <StatusMessage type="error" message={error} />}
 
 			<div className="overflow-x-auto">
 				<table className="min-w-full divide-y divide-white/[.145]">
@@ -137,20 +122,14 @@ export default function AdminHoldingsList({ holdings }: AdminHoldingsListProps) 
 											{formatCurrency(marketValue)}
 										</td>
 										<td className="px-4 py-4 whitespace-nowrap text-sm text-right">
-											<div className="flex justify-end space-x-3">
-												<Link
+											<div className="flex justify-end space-x-3" onClick={e => e.stopPropagation()}>
+												<EditLinkButton
 													href={`/admin/holdings/edit/${holding.id}`}
-													className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
 													onClick={(e) => e.stopPropagation()}
-												>
-													Edit
-												</Link>
-												<button
+												/>
+												<DeleteButton
 													onClick={(e) => openDeleteModal(holding, e)}
-													className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md"
-												>
-													Delete
-												</button>
+												/>
 											</div>
 										</td>
 									</tr>

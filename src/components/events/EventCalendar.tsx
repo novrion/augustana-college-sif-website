@@ -4,25 +4,38 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Event } from '@/lib/types/event';
 
-interface EventCalendarProps {
-	upcomingEvents: Event[];
-	pastEvents: Event[];
-}
-
-export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalendarProps) {
+export default function EventCalendar() {
 	const router = useRouter();
 	const [currentDate, setCurrentDate] = useState(new Date());
-	const [events, setEvents] = useState<Event[]>([]);
-
-	useEffect(() => {
-		setEvents([...upcomingEvents, ...pastEvents]);
-	}, [upcomingEvents, pastEvents]);
+	const [monthEvents, setMonthEvents] = useState<Event[]>([]);
 
 	const currentYear = currentDate.getFullYear();
 	const currentMonth = currentDate.getMonth();
 	const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 	const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
 	const monthName = currentDate.toLocaleString('default', { month: 'long' });
+
+	useEffect(() => {
+		const fetchMonthEvents = async () => {
+			try {
+				// Format the date to YYYY-MM
+				const monthParam = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+				const response = await fetch(`/api/events?type=month&month=${monthParam}`);
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch month events');
+				}
+
+				const data = await response.json();
+				setMonthEvents(data || []);
+			} catch (error) {
+				console.error('Error fetching month events:', error);
+				setMonthEvents([]);
+			}
+		};
+
+		fetchMonthEvents();
+	}, [currentYear, currentMonth]);
 
 	const handlePrevMonth = () => {
 		setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
@@ -49,7 +62,7 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 	};
 
 	const getEventsForDay = (day: number): Event[] => {
-		return events.filter(event => {
+		return monthEvents.filter(event => {
 			const eventDate = new Date(`${event.date}T12:00:00Z`);
 			return (
 				eventDate.getUTCFullYear() === currentYear &&
@@ -111,7 +124,7 @@ export default function EventCalendar({ upcomingEvents, pastEvents }: EventCalen
 					</svg>
 				</button>
 
-				<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-sans)]">
+				<h2 className="text-xl font-semibold font-[family-name:var(--font-geist-mono)]">
 					{monthName} {currentYear}
 				</h2>
 

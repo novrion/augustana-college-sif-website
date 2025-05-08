@@ -47,11 +47,17 @@ export async function getPaginatedGalleryImages(params: {
 	orderBy?: string;
 	ascending?: boolean;
 }): Promise<{ data: GalleryImage[]; total: number; totalPages: number }> {
-	return getPaginated<GalleryImage>({
+	const result = await getPaginated<Record<string, unknown>>({
 		table,
 		page: params.page || 1,
 		pageSize: params.pageSize || 12,
 		orderBy: params.orderBy || 'date',
 		ascending: params.ascending !== undefined ? params.ascending : false
 	});
+
+	return {
+		data: result.data as unknown as GalleryImage[],
+		total: result.total,
+		totalPages: result.totalPages
+	};
 }

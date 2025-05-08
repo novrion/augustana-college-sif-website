@@ -42,7 +42,7 @@ export default function Navbar() {
 					hasAccess={hasHoldingsReadAccess()}
 				/>
 
-				<Link href="/events" className="hover:underline">Events</Link>
+				<Link href="/events" className="hover:underline">Guest Speakers</Link>
 				<Link href="/newsletter" className="hover:underline">Newsletter</Link>
 				<Link href="/contact" className="hover:underline">Contact</Link>
 				<Link href="/about" className="hover:underline">About</Link>

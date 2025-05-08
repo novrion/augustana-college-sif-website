@@ -91,7 +91,7 @@ export async function uploadProfilePicture(id: string, file: File, oldUrl: strin
 		// Upload new profile picture
 		const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 		const path = `profile_pictures/${id}/${fileName}`;
-		return await uploadFileToBucket('profile_pictures', path, file, fileName);
+		return await uploadFileToBucket('profile-pictures', path, file, fileName);
 	} catch (error) {
 		console.error('Error in uploadProfilePicture:', error);
 		return null;

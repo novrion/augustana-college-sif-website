@@ -2,9 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Newsletter, Attachment } from '@/lib/types/newsletter';
+import { Newsletter, Attachment } from '@/lib/types';
 import Form from "@/components/Form";
 import { FilledButton, EmptyButton } from "@/components/Buttons";
+import { formatDateForInput, formatFileSize } from '@/lib/utils';
 
 interface NewsletterFormProps {
 	initialData?: Newsletter;
@@ -17,31 +18,11 @@ export default function NewsletterForm({
 }: NewsletterFormProps) {
 	const router = useRouter();
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
 	const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
-
-	const getTodayLocalDate = () => {
-		const now = new Date();
-		const year = now.getFullYear();
-		const month = String(now.getMonth() + 1).padStart(2, '0');
-		const day = String(now.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
-	};
-
-	// Format date for the input field, ensuring it displays correctly
-	const formatDateForInput = (dateString?: string) => {
-		if (!dateString) return getTodayLocalDate();
-
-		// Create a date object with noon UTC time to avoid timezone issues
-		const date = new Date(`${dateString}T12:00:00Z`);
-		const year = date.getUTCFullYear();
-		const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-		const day = String(date.getUTCDate()).padStart(2, '0');
-
-		return `${year}-${month}-${day}`;
-	};
 
 	const [formData, setFormData] = useState({
 		title: initialData?.title || '',
@@ -127,15 +108,7 @@ export default function NewsletterForm({
 		}
 	};
 
-	const formatFileSize = (bytes: number) => {
-		if (bytes === 0) return '0 Bytes';
-		const k = 1024;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-	};
-
-	const getFileIconClass = (fileType: string) => {
+	const getFileIconClass = (fileType: string): string => {
 		if (fileType.startsWith('image/')) return 'text-green-500';
 		if (fileType.includes('pdf')) return 'text-red-500';
 		if (fileType.includes('word') || fileType.includes('document')) return 'text-blue-500';
@@ -204,7 +177,7 @@ export default function NewsletterForm({
 						type="text"
 						value={formData.title}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>
@@ -219,7 +192,7 @@ export default function NewsletterForm({
 						type="text"
 						value={formData.author}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>
@@ -234,7 +207,7 @@ export default function NewsletterForm({
 						type="date"
 						value={formData.date}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>
@@ -249,7 +222,7 @@ export default function NewsletterForm({
 						rows={15}
 						value={formData.content}
 						onChange={handleChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent font-[family-name:var(--font-geist-sans)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent font-[family-name:var(--font-geist-sans)] focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>
 				</div>
@@ -265,7 +238,6 @@ export default function NewsletterForm({
 							isLoading={isUploadingAttachment}
 							loadingText="Uploading..."
 							type="button"
-							className=""
 						/>
 						<input
 							type="file"
@@ -314,7 +286,13 @@ export default function NewsletterForm({
 				</div>
 			</div>
 
-			<div className="flex justify-end mt-6">
+			<div className="flex justify-end gap-3 mt-6">
+				<EmptyButton
+					onClick={() => router.push('/admin/newsletter')}
+					text="Cancel"
+					isLoading={false}
+					type="button"
+				/>
 				<FilledButton
 					type="submit"
 					text={isEditing ? 'Update Newsletter' : 'Add Newsletter'}

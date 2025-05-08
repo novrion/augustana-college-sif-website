@@ -1,4 +1,5 @@
 import { Holding } from '@/lib/types/holding';
+import { formatCurrency, formatPercent, formatDateForDisplay } from '@/lib/utils';
 
 interface HoldingDetailsProps {
 	holding: Holding;
@@ -13,27 +14,6 @@ export default function HoldingDetails({
 	const gainLoss = marketValue - holding.cost_basis;
 	const gainLossPercent = holding.cost_basis > 0 ? (gainLoss / holding.cost_basis) * 100 : 0;
 	const equityPercent = (marketValue / totalEquityValue) * 100;
-
-	const formatCurrency = (value: number) => {
-		return new Intl.NumberFormat('en-US', {
-			style: 'currency',
-			currency: 'USD'
-		}).format(value);
-	};
-
-	const formatPercent = (value: number) => {
-		return `${value.toFixed(2)}%`;
-	};
-
-	const formatDate = (dateString: string) => {
-		if (!dateString) return 'N/A';
-		return new Date(`${dateString}T12:00:00Z`).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			timeZone: 'UTC'
-		});
-	};
 
 	return (
 		<>
@@ -61,7 +41,7 @@ export default function HoldingDetails({
 				<div className="rounded-lg border border-solid border-white/[.145] p-6 flex flex-col">
 					<span className="text-sm text-gray-400 mb-2">Gain/Loss</span>
 					<span className={`text-2xl font-bold ${gainLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-						{formatCurrency(gainLoss)} ({gainLossPercent >= 0 ? '+' : ''}{gainLossPercent.toFixed(2)}%)
+						{formatCurrency(gainLoss)} ({gainLossPercent >= 0 ? '+' : ''}{formatPercent(gainLossPercent)})
 					</span>
 				</div>
 
@@ -81,7 +61,7 @@ export default function HoldingDetails({
 					<div>{holding.sector || 'N/A'}</div>
 
 					<div className="text-sm text-gray-400">Purchase Date</div>
-					<div>{formatDate(holding.purchase_date)}</div>
+					<div>{formatDateForDisplay(holding.purchase_date, { format: 'long' })}</div>
 				</div>
 			</div>
 		</>

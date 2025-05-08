@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,7 +8,6 @@ import { FilledButton } from "@/components/Buttons";
 
 interface AboutSectionFormProps {
 	initialData?: AboutSection;
-	maxOrderIndex?: number;
 	isEditing?: boolean;
 }
 
@@ -20,7 +19,6 @@ export default function AboutSectionForm({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
-
 	const [formData, setFormData] = useState({
 		title: initialData?.title || '',
 		content: initialData?.content || '',
@@ -38,12 +36,8 @@ export default function AboutSectionForm({
 		setSuccess('');
 
 		try {
-			const endpoint = isEditing
-				? `/api/admin/about/${initialData?.id}`
-				: '/api/admin/about';
-
+			const endpoint = isEditing ? `/api/admin/about/${initialData?.id}` : '/api/admin/about';
 			const method = isEditing ? 'PUT' : 'POST';
-
 			const response = await fetch(endpoint, {
 				method,
 				headers: { 'Content-Type': 'application/json' },
@@ -52,12 +46,10 @@ export default function AboutSectionForm({
 
 			if (!response.ok) {
 				const data = await response.json();
-				throw new Error(data.error || 'Failed to save about section');
+				throw new Error(data.error || 'Failed to save section');
 			}
 
 			setSuccess(isEditing ? 'Section updated successfully!' : 'Section created successfully!');
-
-			// Redirect after a short delay
 			setTimeout(() => {
 				router.push('/admin/about');
 				router.refresh();
@@ -77,7 +69,6 @@ export default function AboutSectionForm({
 			success={success}
 		>
 			<div className="space-y-4">
-				{/* Title Field */}
 				<div>
 					<label htmlFor="title" className="block text-sm font-medium mb-1">
 						Section Title
@@ -93,7 +84,6 @@ export default function AboutSectionForm({
 					/>
 				</div>
 
-				{/* Content Field */}
 				<div>
 					<label htmlFor="content" className="block text-sm font-medium mb-1">
 						Content
