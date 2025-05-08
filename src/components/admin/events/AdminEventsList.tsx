@@ -75,7 +75,7 @@ export default function AdminEventsList({
 			setIsDeleteModalOpen(false);
 			setEventToDelete(null);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Failed to delete event');
+			setError(err instanceof Error ? err.message : 'Failed to delete speaker');
 		} finally {
 			setIsDeleting(false);
 		}
@@ -94,15 +94,15 @@ export default function AdminEventsList({
 			<AdminList
 				error={error}
 				isEmpty={allEvents.length === 0}
-				emptyMessage="No events found. Add your first event to get started."
+				emptyMessage="No speakers found. Add your first speaker to get started."
 			>
 				{paginatedEvents.map(event => (
 					<AdminListItem
 						key={event.id}
-						title={event.title || `Speaker: ${event.speaker_name}`}
+						title={event.title || event.speaker_name}
 						subtitle={
 							<div className="flex items-center gap-4">
-								<span>{formatDateForDisplay(event.date)} - {event.speaker_name}</span>
+								<span>{formatDateForDisplay(event.date)}{event.title ? ` - ${event.speaker_name}` : ''}</span>
 								<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-700 text-gray-200">
 									{event.location}
 								</span>
@@ -131,7 +131,7 @@ export default function AdminEventsList({
 							onPageChange={handlePageChange}
 						/>
 						<div className="mt-2 text-sm text-gray-400 text-center">
-							Showing {paginatedEvents.length} of {allEvents.length} events
+							Showing {paginatedEvents.length} of {allEvents.length} speakers
 						</div>
 					</div>
 				)}
@@ -142,8 +142,8 @@ export default function AdminEventsList({
 				onClose={closeDeleteModal}
 				onConfirm={confirmDelete}
 				isLoading={isDeleting}
-				title="Delete Event"
-				message="Are you sure you want to delete this event? This action cannot be undone."
+				title="Delete Speaker"
+				message="Are you sure you want to delete this speaker? This action cannot be undone."
 				itemName={eventToDelete?.title || eventToDelete?.speaker_name}
 			/>
 		</>

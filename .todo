@@ -10,3 +10,6 @@ Stock pitches
 - Add images and attachments to the stock pitches
 
 Fix the home page!
+
+Timing glitch under events:
+- showing upcoming events in past tab (because they are for today)

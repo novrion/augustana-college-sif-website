@@ -56,7 +56,7 @@ export default function EventForm({ initialData, isEditing = false }: EventFormP
 				throw new Error(data.error || 'Failed to save event');
 			}
 
-			setSuccess(isEditing ? 'Event updated successfully!' : 'Event created successfully!');
+			setSuccess(isEditing ? 'Guest speaker event updated successfully!' : 'Guest speaker event created successfully!');
 
 			// Redirect after short delay
 			setTimeout(() => {
@@ -178,7 +178,7 @@ export default function EventForm({ initialData, isEditing = false }: EventFormP
 						type="text"
 						value={formData.location}
 						onChange={handleChange}
-						placeholder="e.g., Gerber Center, Room 123"
+						placeholder="e.g., Lindberg 205"
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
 					/>

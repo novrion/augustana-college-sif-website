@@ -11,8 +11,8 @@ export default async function AddEventPage() {
 		<div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-mono)]">
 			<div className="max-w-4xl mx-auto">
 				<div className="flex justify-between items-center mb-6">
-					<h1 className="text-3xl font-bold">Add Event</h1>
-					<EmptyLinkButton href="/admin/events" text="Back to Event Management" />
+					<h1 className="text-3xl font-bold">Add Guest Speaker</h1>
+					<EmptyLinkButton href="/admin/events" text="Back to Guest Speaker Management" />
 				</div>
 				<EventForm />
 			</div>

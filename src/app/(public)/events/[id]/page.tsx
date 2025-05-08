@@ -23,19 +23,19 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
 
 						<EmptyLinkButton
 							href="/events"
-							text="Back to All Events"
+							text="Back to All Speakers"
 						/>
 					</div>
 
 					<div className="rounded-lg border border-solid border-white/[.145] p-6">
 						<h2 className="text-2xl font-semibold mb-4 font-[family-name:var(--font-geist-mono)]">
-							{event.title || `Speaker: ${event.speaker_name}`}
+							{event.title || event.speaker_name}
 						</h2>
 
 						<div className="flex flex-col mb-6 text-sm text-gray-400 font-[family-name:var(--font-geist-mono)]">
 							<span className="mb-1">{formatDateForDisplay(event.date, { includeWeekday: true })}</span>
 							<span>
-								{event.speaker_name}
+								{event.title ? event.speaker_name : ''}
 								{event.role && event.company && <span>, {event.role} at {event.company}</span>}
 								{event.role && !event.company && <span>, {event.role}</span>}
 								{!event.role && event.company && <span>, {event.company}</span>}

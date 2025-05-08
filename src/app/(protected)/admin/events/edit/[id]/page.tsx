@@ -18,9 +18,9 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
 				<div className="max-w-4xl mx-auto">
 					<div className="flex justify-between items-center mb-6">
 						<h1 className="text-3xl font-bold">
-							Edit: {event.title || `Speaker: ${event.speaker_name}`}
+							Edit: {event.title || event.speaker_name}
 						</h1>
-						<EmptyLinkButton href="/admin/events" text="Back to Event Management" />
+						<EmptyLinkButton href="/admin/events" text="Back to Guest Speaker Management" />
 					</div>
 					<EventForm initialData={event} isEditing={true} />
 				</div>
