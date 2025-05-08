@@ -33,7 +33,7 @@ export default async function AdminHoldingsPage() {
 				</div>
 
 				<div className="rounded-lg border border-solid border-white/[.145] p-6">
-					<h2 className="text-xl font-semibold mb-4">Current Holdings</h2>
+					<h2 className="text-xl font-semibold mb-4">Holdings</h2>
 					<AdminHoldingsList holdings={sortedHoldings} />
 				</div>
 			</div>

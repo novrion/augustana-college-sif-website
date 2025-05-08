@@ -4,6 +4,9 @@ import { useTickerContext } from "@/contexts/TickerContext";
 import { Holding } from '@/lib/types';
 import "@/styles/ticker.css";
 
+const BASE_HOLDINGS_COUNT = 40;
+const BASE_DURATION_SECONDS = 120;
+
 export default function Ticker() {
 	const { holdings, isLoading, error } = useTickerContext();
 
@@ -15,25 +18,34 @@ export default function Ticker() {
 		return <div className="ticker-wrapper ticker-error"><span>Error: {error}</span></div>;
 	}
 
-	if (holdings.length === 0) {
+	if (!holdings || holdings.length === 0) {
 		return null;
 	}
 
+	const secondsPerHolding = BASE_DURATION_SECONDS / BASE_HOLDINGS_COUNT;
+	const dynamicDuration = holdings.length * secondsPerHolding;
+	const minDuration = 5;
+	const finalDuration = Math.max(dynamicDuration, minDuration);
+
 	const renderHolding = (holding: Holding, index: number, keyPrefix: string) => {
-		const isPositive = holding.percent_change! >= 0;
+		const percentChange = holding.percent_change ?? 0;
+		const isPositive = percentChange >= 0;
 		const colorClass = isPositive ? 'positive' : 'negative';
 		const arrow = isPositive ? '▲' : '▼';
 		return (
 			<span key={`${keyPrefix}-${holding.ticker}-${index}`} className="ticker-item">
 				<span className={`ticker-symbol ${colorClass}`}>{holding.ticker}</span>
-				<span className={`ticker-change ${colorClass}`}>{arrow}{Math.abs(holding.percent_change!).toFixed(2)}</span>
+				<span className={`ticker-change ${colorClass}`}>{arrow}{Math.abs(percentChange).toFixed(2)}</span>
 			</span>
 		);
 	};
 
 	return (
 		<div className="ticker-wrapper">
-			<div className="ticker">
+			<div
+				className="ticker"
+				style={{ animationDuration: `${finalDuration}s` }}
+			>
 				{holdings.map((holding, index) => renderHolding(holding, index, 'item1'))}
 				{holdings.map((holding, index) => renderHolding(holding, index, 'item2'))}
 				{holdings.map((holding, index) => renderHolding(holding, index, 'item3'))}

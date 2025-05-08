@@ -7,7 +7,7 @@ import Image from 'next/image';
 //const boxesData = [
 //	{
 //		title: "Our Portfolio",
-//		description: "View our current holdings and performance metrics.",
+//		description: "View our holdings and performance metrics.",
 //		link: "/portfolio",
 //		linkText: "Portfolio Tracker"
 //	},

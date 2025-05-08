@@ -13,3 +13,8 @@ Fix the home page!
 
 Timing glitch under events:
 - showing upcoming events in past tab (because they are for today)
+
+Home page management (admin)
+- Should be able to add one high quality picture + text for each section.
+
+Custom Add and edit holding if stock api doesn't work
