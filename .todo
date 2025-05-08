@@ -1,4 +1,12 @@
-1. Security checks.
-2. Stock pitches
+1. Scheduler for updated stock info in vercel
+2. Security checks.
 3. Google @augustana.edu domain authentication
 4. Error handling
+
+Stock pitches
+- Click to get to actual specific pitch page from holdings.
+- Make protected since this is sensitive information (update middleware for example)
+- Make adding the stock pitch easier using symbol query and automatic fetching from finnhub stock api for company information (just input symbol)
+- Add images and attachments to the stock pitches
+
+Fix the home page!

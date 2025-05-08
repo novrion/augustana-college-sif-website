@@ -24,6 +24,12 @@ const dashboardItems: DashboardItem[] = [
 		requiredPermission: "HOLDINGS_WRITE"
 	},
 	{
+		title: "Stock Pitch Management",
+		description: "Create and manage stock pitches",
+		href: "/admin/pitches",
+		requiredPermission: "HOLDINGS_WRITE"
+	},
+	{
 		title: "Newsletter Management",
 		description: "Create and edit newsletter posts",
 		href: "/admin/newsletter",

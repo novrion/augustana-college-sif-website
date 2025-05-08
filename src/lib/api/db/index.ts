@@ -6,3 +6,4 @@ export * from './about';
 export * from './cash';
 export * from './event';
 export * from './gallery';
+export * from './pitch';

@@ -5,5 +5,6 @@ export * from "./event"
 export * from "./gallery"
 export * from "./holding"
 export * from "./newsletter"
-export * from "./user"
 export * from "./note"
+export * from './pitch';
+export * from "./user"
