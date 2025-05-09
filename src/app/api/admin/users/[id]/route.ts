@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getUserById, deleteUser } from '@/lib/api/db';
@@ -63,6 +64,7 @@ async function deleteUserHandler(_request: Request, session: Session, params: Pr
 		);
 	}
 
+	revalidatePages('user');
 	return NextResponse.json({
 		message: 'User deleted successfully'
 	});

@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { uploadGalleryImage, createGalleryImage } from '@/lib/api/db';
@@ -40,6 +41,7 @@ async function uploadGalleryImageHandler(request: Request, _session: Session): P
 		);
 	}
 
+	revalidatePages('gallery');
 	return NextResponse.json(galleryImage, { status: 201 });
 }
 

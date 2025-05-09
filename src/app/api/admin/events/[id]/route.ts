@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getEventById, updateEvent, deleteEvent } from '@/lib/api/db';
@@ -55,6 +56,7 @@ async function updateEventHandler(request: Request, _session: Session, params: P
 		);
 	}
 
+	revalidatePages('event', id);
 	return NextResponse.json({ message: 'Event updated successfully' });
 }
 
@@ -77,6 +79,7 @@ async function deleteEventHandler(_request: Request, _session: Session, params: 
 		);
 	}
 
+	revalidatePages('event', id);
 	return NextResponse.json({ message: 'Event deleted successfully' });
 }
 

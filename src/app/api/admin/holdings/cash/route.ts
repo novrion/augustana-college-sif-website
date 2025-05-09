@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { updateCashBalance } from '@/lib/api/db';
@@ -20,6 +21,7 @@ async function updateCashHandler(request: Request, _session: Session): Promise<N
 		);
 	}
 
+	revalidatePages('cash');
 	return NextResponse.json({
 		message: 'Cash balance updated successfully'
 	});

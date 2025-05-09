@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getHoldingById, updateHolding, deleteHolding } from '@/lib/api/db';
@@ -35,6 +36,7 @@ async function updateHoldingHandler(request: Request, _session: Session, params:
 		);
 	}
 
+	revalidatePages('holding', id);
 	return NextResponse.json({
 		message: 'Holding updated successfully'
 	});
@@ -65,6 +67,7 @@ async function deleteHoldingHandler(request: Request, _session: Session, params:
 		);
 	}
 
+	revalidatePages('holding', id);
 	return NextResponse.json({
 		message: 'Holding deleted successfully'
 	});

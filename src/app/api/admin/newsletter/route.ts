@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { createNewsletter } from '@/lib/api/db';
@@ -27,6 +28,7 @@ async function createNewsletterHandler(request: Request, _session: Session): Pro
 		);
 	}
 
+	revalidatePages('newsletter');
 	return NextResponse.json(newsletter, { status: 201 });
 }
 

@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { createAboutSection, getAllAboutSections } from '@/lib/api/db';
@@ -39,6 +40,7 @@ async function createAboutSectionHandler(request: Request, _session: Session): P
 		);
 	}
 
+	revalidatePages('about');
 	return NextResponse.json(section, { status: 201 });
 }
 

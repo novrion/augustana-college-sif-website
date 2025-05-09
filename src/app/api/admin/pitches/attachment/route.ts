@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { uploadPitchAttachment, deletePitchAttachment } from '@/lib/api/db';
@@ -32,6 +33,7 @@ async function uploadPitchAttachmentHandler(request: Request, _session: Session)
 		);
 	}
 
+	revalidatePages('pitch');
 	return NextResponse.json(attachment, { status: 201 });
 }
 
@@ -54,6 +56,7 @@ async function deletePitchAttachmentHandler(request: Request, _session: Session)
 		);
 	}
 
+	revalidatePages('pitch');
 	return NextResponse.json(
 		{ message: 'Attachment deleted successfully' },
 		{ status: 200 }

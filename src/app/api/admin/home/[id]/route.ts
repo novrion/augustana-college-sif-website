@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getHomeSectionById, updateHomeSection, deleteHomeSection } from '@/lib/api/db';
@@ -54,6 +55,7 @@ async function updateHomeSectionHandler(request: Request, _session: Session, par
 		);
 	}
 
+	revalidatePages('home', id);
 	return NextResponse.json({ message: 'Section updated successfully' });
 }
 
@@ -76,6 +78,7 @@ async function deleteHomeSectionHandler(_request: Request, _session: Session, pa
 		);
 	}
 
+	revalidatePages('home', id);
 	return NextResponse.json({ message: 'Section deleted successfully' });
 }
 

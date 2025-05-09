@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getUserById, updateUserRole } from '@/lib/api/db';
@@ -66,6 +67,7 @@ async function updateRoleHandler(request: Request, session: Session, params: Pro
 		);
 	}
 
+	revalidatePages('user');
 	return NextResponse.json({
 		message: 'User role updated successfully',
 		role: newRole

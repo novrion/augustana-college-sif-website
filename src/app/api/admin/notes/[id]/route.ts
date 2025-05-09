@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getNoteById, updateNote, deleteNote } from '@/lib/api/db';
@@ -50,6 +51,7 @@ async function updateNoteHandler(request: Request, _session: Session, params: Pr
 		);
 	}
 
+	revalidatePages('note', id);
 	return NextResponse.json({ message: 'Note updated successfully' });
 }
 
@@ -72,6 +74,7 @@ async function deleteNoteHandler(_request: Request, _session: Session, params: P
 		);
 	}
 
+	revalidatePages('note', id);
 	return NextResponse.json({ message: 'Note deleted successfully' });
 }
 

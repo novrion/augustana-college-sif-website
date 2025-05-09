@@ -1,4 +1,4 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { createHomeSection, getAllHomeSections } from '@/lib/api/db';
@@ -41,7 +41,7 @@ async function createHomeSectionHandler(request: Request, _session: Session): Pr
 		);
 	}
 
-	revalidatePath('/');
+	revalidatePages('home');
 	return NextResponse.json(section, { status: 201 });
 }
 

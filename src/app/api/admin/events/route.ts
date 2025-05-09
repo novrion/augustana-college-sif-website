@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { createEvent } from '@/lib/api/db';
@@ -24,6 +25,7 @@ async function createEventHandler(request: Request, _session: Session): Promise<
 		contact: data.contact || ''
 	});
 
+	revalidatePages('event');
 	return NextResponse.json(event, { status: 201 });
 }
 

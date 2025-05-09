@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getAboutSectionById, reorderAboutSection, getAllAboutSections } from '@/lib/api/db';
@@ -32,6 +33,7 @@ async function reorderAboutSectionHandler(request: Request, _session: Session, p
 
 	const updatedSections = await getAllAboutSections();
 
+	revalidatePages('about', id);
 	return NextResponse.json({
 		message: 'Section reordered successfully',
 		sections: updatedSections

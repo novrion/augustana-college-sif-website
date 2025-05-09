@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getHomeSectionById, reorderHomeSection, getAllHomeSections } from '@/lib/api/db';
@@ -32,6 +33,7 @@ async function reorderHomeSectionHandler(request: Request, _session: Session, pa
 
 	const updatedSections = await getAllHomeSections();
 
+	revalidatePages('home', id);
 	return NextResponse.json({
 		message: 'Section reordered successfully',
 		sections: updatedSections

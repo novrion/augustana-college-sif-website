@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getPitchById, updatePitch, deletePitch } from '@/lib/api/db';
@@ -57,6 +58,7 @@ async function updatePitchHandler(request: Request, _session: Session, params: P
 		);
 	}
 
+	revalidatePages('pitch', id);
 	return NextResponse.json({ message: 'Pitch updated successfully' });
 }
 
@@ -79,6 +81,7 @@ async function deletePitchHandler(_request: Request, _session: Session, params: 
 		);
 	}
 
+	revalidatePages('pitch', id);
 	return NextResponse.json({ message: 'Pitch deleted successfully' });
 }
 

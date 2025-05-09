@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getGalleryImageById, uploadGalleryImage, updateGalleryImage, deleteGalleryImage } from '@/lib/api/db';
@@ -54,6 +55,7 @@ async function updateGalleryImageHandler(request: Request, _session: Session, pa
 		);
 	}
 
+	revalidatePages('gallery', id);
 	return NextResponse.json({
 		message: 'Image updated successfully'
 	});
@@ -76,6 +78,7 @@ async function deleteGalleryImageHandler(_request: Request, _session: Session, p
 		);
 	}
 
+	revalidatePages('gallery', id);
 	return NextResponse.json({
 		message: 'Image deleted successfully'
 	});

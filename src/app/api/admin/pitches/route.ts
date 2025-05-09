@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { createPitch } from '@/lib/api/db';
@@ -33,6 +34,7 @@ async function createPitchHandler(request: Request, _session: Session): Promise<
 		);
 	}
 
+	revalidatePages('pitch');
 	return NextResponse.json(pitch, { status: 201 });
 }
 

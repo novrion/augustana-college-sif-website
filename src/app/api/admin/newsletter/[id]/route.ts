@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getNewsletterById, updateNewsletter, deleteNewsletter, getNewsletterAttachments } from '@/lib/api/db';
@@ -54,6 +55,7 @@ async function updateNewsletterHandler(request: Request, _session: Session, para
 		);
 	}
 
+	revalidatePages('newsletter', id);
 	return NextResponse.json({ message: 'Newsletter updated successfully' });
 }
 
@@ -76,6 +78,7 @@ async function deleteNewsletterHandler(request: Request, _session: Session, para
 		);
 	}
 
+	revalidatePages('newsletter', id);
 	return NextResponse.json({ message: 'Newsletter deleted successfully' });
 }
 

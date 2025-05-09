@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { createHolding } from '@/lib/api/db';
@@ -41,6 +42,7 @@ async function createHoldingHandler(request: Request, _session: Session): Promis
 		);
 	}
 
+	revalidatePages('holding');
 	return NextResponse.json({
 		message: 'Holding created successfully',
 		holding

@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { createNote } from '@/lib/api/db';
@@ -26,6 +27,7 @@ async function createNoteHandler(request: Request, _session: Session): Promise<N
 		);
 	}
 
+	revalidatePages('note');
 	return NextResponse.json(note, { status: 201 });
 }
 

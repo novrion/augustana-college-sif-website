@@ -1,3 +1,4 @@
+import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getUserById, updateUserStatus } from '@/lib/api/db';
@@ -58,6 +59,7 @@ async function updateStatusHandler(request: Request, session: Session, params: P
 		);
 	}
 
+	revalidatePages('user');
 	return NextResponse.json({
 		message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
 		isActive
