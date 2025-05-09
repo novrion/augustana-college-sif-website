@@ -8,3 +8,7 @@ Portfolio page:
 compare to S&P 500 (time needed and finnhub api call)
 
 proper clean up of all attachments and images (home page, newsletter, stock pitches, profile pictures...)
+
+REVALIDATION !!!
+LET CLAUDE GO THROUGH MY WHOLE PROJECT AND USE THESE WHERE APPROPRIATE
+import { revalidatePath } from 'next/cache';
