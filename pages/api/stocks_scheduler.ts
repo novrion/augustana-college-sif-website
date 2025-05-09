@@ -1,42 +1,54 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-// Types
 interface Holding {
 	id: string;
 	ticker: string;
 	company_name?: string;
 	current_price: number;
 	last_updated: string;
+	percent_change?: number;
 }
 
-// Initialize Supabase client
+interface FinnhubQuoteData {
+	c: number; // Current price
+	dp: number; // Daily percent change
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Finnhub API constants
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
-const MAX_API_CALLS_PER_MINUTE = 45; // Safety margin below the 60 limit
+const MAX_API_CALLS_PER_MINUTE = 45;
 
-// Check if market is currently open (Eastern Time)
+// Basic check if market is currently open (Eastern Time)
 function isMarketOpen(): boolean {
 	const now = new Date();
 	const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
 
-	// If weekend, market is closed
-	if (day === 0 || day === 6) return false;
+	if (day === 0 || day === 6) return false; // Weekend
 
-	// Convert to Eastern Time (approximation)
-	let etHour = (now.getUTCHours() - 4) % 24; // Adjust for daylight saving as needed
+	let etHour = (now.getUTCHours() - 4) % 24; // Approximate ET
 	if (etHour < 0) etHour += 24;
+	const etMinute = now.getUTCMinutes();
+
 
 	// Market hours: 9:30 AM - 4:00 PM ET
+	const marketOpenHour = 9;
+	const marketOpenMinute = 30;
+	const marketCloseHour = 16; // 4:00 PM
+
+	const nowInMinutesET = etHour * 60 + etMinute;
+	const marketOpenInMinutesET = marketOpenHour * 60 + marketOpenMinute;
+	const marketCloseInMinutesET = marketCloseHour * 60;
+
+
 	return (day >= 1 && day <= 5) && // Monday to Friday
-		(etHour >= 9 && etHour < 16); // 9 AM to 4 PM ET
+		(nowInMinutesET >= marketOpenInMinutesET && nowInMinutesET < marketCloseInMinutesET);
 }
 
-async function fetchStockPrice(ticker: string): Promise<number | null> {
+async function fetchStockQuote(ticker: string): Promise<FinnhubQuoteData | null> {
 	if (!FINNHUB_API_KEY) {
 		console.error('Finnhub API key not found');
 		return null;
@@ -54,17 +66,17 @@ async function fetchStockPrice(ticker: string): Promise<number | null> {
 			throw new Error(`API returned status ${response.status}`);
 		}
 
-		const data = await response.json();
+		const data: FinnhubQuoteData = await response.json();
 
-		// Finnhub returns the current price in the 'c' field
-		if (data && typeof data.c === 'number') {
-			return data.c;
+		// Finnhub returns the current price in 'c' and daily percent change in 'dp'
+		if (data && typeof data.c === 'number' && typeof data.dp === 'number') {
+			return data;
 		}
 
-		console.error('Unexpected API response structure:', data);
+		console.error('Unexpected API response structure for quote:', data);
 		return null;
 	} catch (error) {
-		console.error(`Error fetching price for ${ticker}:`, error);
+		console.error(`Error fetching quote for ${ticker}:`, error);
 		return null;
 	}
 }
@@ -72,7 +84,7 @@ async function fetchStockPrice(ticker: string): Promise<number | null> {
 async function getStocksToUpdate(limit: number): Promise<Holding[]> {
 	const { data, error } = await supabase
 		.from('holdings')
-		.select('*')
+		.select('*') // Select all fields as requested
 		.order('last_updated', { ascending: true })
 		.limit(limit);
 
@@ -81,20 +93,21 @@ async function getStocksToUpdate(limit: number): Promise<Holding[]> {
 		return [];
 	}
 
-	return data || [];
+	return data as Holding[] || [];
 }
 
-async function updateHoldingPrice(id: string, currentPrice: number): Promise<boolean> {
+async function updateHoldingData(id: string, currentPrice: number, percentChange: number): Promise<boolean> {
 	const { error } = await supabase
 		.from('holdings')
 		.update({
 			current_price: currentPrice,
+			percent_change: percentChange,
 			last_updated: new Date().toISOString()
 		})
 		.eq('id', id);
 
 	if (error) {
-		console.error('Error updating holding price:', error);
+		console.error('Error updating holding data:', error);
 		return false;
 	}
 
@@ -102,9 +115,8 @@ async function updateHoldingPrice(id: string, currentPrice: number): Promise<boo
 }
 
 async function updateStockPrices() {
-	// Determine how many stocks to update
 	const batchSize = isMarketOpen() ? MAX_API_CALLS_PER_MINUTE : 10;
-	console.log(`Market ${isMarketOpen() ? 'open' : 'closed'}, updating ${batchSize} stocks`);
+	console.log(`Market ${isMarketOpen() ? 'open' : 'closed'}, attempting to update ${batchSize} stocks`);
 
 	const holdings = await getStocksToUpdate(batchSize);
 
@@ -116,7 +128,6 @@ async function updateStockPrices() {
 		};
 	}
 
-	// Track results
 	const results = {
 		success: 0,
 		failed: 0,
@@ -125,20 +136,19 @@ async function updateStockPrices() {
 			ticker: string,
 			success: boolean,
 			price?: number,
+			percentChange?: number,
 			message?: string
 		}>
 	};
 
-	// Process each holding
 	for (const holding of holdings) {
-		// Add a small delay between API calls
+		// Add a small delay between API calls (100ms minimum for Finnhub free tier)
 		if (results.success > 0 || results.failed > 0) {
 			await new Promise(resolve => setTimeout(resolve, 100));
 		}
 
-		// Skip if market is closed and stock was updated recently (last 2 hours)
 		if (!isMarketOpen()) {
-			const lastUpdated = new Date(holding.last_updated);
+			const lastUpdated = holding.last_updated ? new Date(holding.last_updated) : new Date(0); // Treat undefined as very old
 			const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
 
 			if (lastUpdated > twoHoursAgo) {
@@ -152,27 +162,29 @@ async function updateStockPrices() {
 			}
 		}
 
-		try {
-			const currentPrice = await fetchStockPrice(holding.ticker);
 
-			if (currentPrice === null) {
+		try {
+			const quote = await fetchStockQuote(holding.ticker);
+
+			if (quote === null) {
 				results.failed++;
 				results.details.push({
 					ticker: holding.ticker,
 					success: false,
-					message: 'Failed to fetch price'
+					message: 'Failed to fetch quote'
 				});
 				continue;
 			}
 
-			const success = await updateHoldingPrice(holding.id, currentPrice);
+			const success = await updateHoldingData(holding.id, quote.c, quote.dp);
 
 			if (success) {
 				results.success++;
 				results.details.push({
 					ticker: holding.ticker,
 					success: true,
-					price: currentPrice
+					price: quote.c,
+					percentChange: quote.dp
 				});
 			} else {
 				results.failed++;
@@ -202,11 +214,11 @@ async function updateStockPrices() {
 	};
 }
 
+
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	// Check authorization
 	const authHeader = req.headers.authorization;
 	if (!authHeader || authHeader !== `Bearer ${process.env.API_SECRET_KEY}`) {
 		return res.status(401).json({ message: 'Unauthorized' });

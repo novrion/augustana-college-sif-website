@@ -1,9 +1,6 @@
-1. Scheduler for updated stock info in vercel
 2. Security checks.
 3. Google @augustana.edu domain authentication
 4. Error handling
-
-Fix the home page!
 
 Custom Add and edit holding + stock pitches, if stock api doesn't work
 
