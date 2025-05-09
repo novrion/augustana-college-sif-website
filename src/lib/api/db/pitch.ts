@@ -1,5 +1,6 @@
-import { Pitch } from '@/lib/types/pitch';
-import { getAll, getById, create, update, remove, getPaginated, getYears } from './common';
+import { Pitch, Attachment } from '@/lib/types';
+import { db } from './supabase';
+import { getAll, getById, create, update, remove, getPaginated, getYears, uploadFileToBucket, deleteFileFromBucket } from './common';
 
 const table = 'pitches';
 
@@ -9,7 +10,11 @@ export async function getAllPitches(): Promise<Pitch[]> {
 }
 
 export async function getPitchById(id: string): Promise<Pitch | null> {
-	return (await getById(table, id)) as Pitch | null;
+	const pitch = (await getById(table, id)) as Pitch | null;
+	if (pitch) {
+		pitch.attachments = await getPitchAttachments(id);
+	}
+	return pitch;
 }
 
 export async function createPitch(pitch: Record<string, unknown>): Promise<Pitch | null> {
@@ -21,6 +26,11 @@ export async function updatePitch(id: string, pitch: Record<string, unknown>): P
 }
 
 export async function deletePitch(id: string): Promise<boolean> {
+	const attachments = await getPitchAttachments(id);
+	for (const attachment of attachments) {
+		await deletePitchAttachment(attachment.path);
+	}
+
 	return await remove(table, id);
 }
 
@@ -57,8 +67,16 @@ export async function getPaginatedPitches(params: {
 		searchFields: ['title', 'analyst', 'company', 'symbol', 'description']
 	});
 
+	// Load attachments for each pitch
+	const pitchesWithAttachments = await Promise.all(
+		(result.data as unknown as Pitch[]).map(async (pitch) => {
+			pitch.attachments = await getPitchAttachments(pitch.id);
+			return pitch;
+		})
+	);
+
 	return {
-		data: result.data as unknown as Pitch[],
+		data: pitchesWithAttachments,
 		total: result.total,
 		totalPages: result.totalPages
 	};
@@ -69,4 +87,39 @@ export async function getPitchesYears(): Promise<number[]> {
 	return getYears({
 		items: pitches as unknown as Record<string, unknown>[]
 	});
+}
+
+export async function getPitchAttachments(id: string): Promise<Attachment[]> {
+	const { data, error } = await db.storage
+		.from('attachments')
+		.list(`pitch_attachments/${id}`);
+
+	if (error) {
+		console.error('Error fetching pitch attachments:', error);
+		return [];
+	}
+
+	return data.map(file => {
+		const url = db.storage
+			.from('attachments')
+			.getPublicUrl(`pitch_attachments/${id}/${file.name}`).data.publicUrl;
+
+		return {
+			name: file.name,
+			url: url,
+			path: `pitch_attachments/${id}/${file.name}`,
+			type: file.metadata?.mimetype || '',
+			size: file.metadata?.size || 0
+		};
+	});
+}
+
+export async function uploadPitchAttachment(id: string, file: File): Promise<Attachment | null> {
+	const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+	const path = `pitch_attachments/${id}/${fileName}`;
+	return await uploadFileToBucket('attachments', path, file, fileName);
+}
+
+export async function deletePitchAttachment(path: string): Promise<boolean> {
+	return await deleteFileFromBucket('attachments', path);
 }

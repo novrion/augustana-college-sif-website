@@ -6,6 +6,7 @@ type PermissionKey = keyof typeof PERMISSIONS;
 
 const PROTECTED_ROUTES: Record<string, PermissionKey> = {
 	"/holdings": "HOLDINGS_READ",
+	"/pitches": "HOLDINGS_READ",
 	"/admin": "ADMIN_DASHBOARD",
 	"/admin/holdings": "HOLDINGS_WRITE",
 	"/admin/notes": "SECRETARY",
@@ -49,6 +50,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
 	matcher: [
 		"/holdings/:path*",
+		"/pitches/:path*",
 		"/admin/:path*"
 	],
 };

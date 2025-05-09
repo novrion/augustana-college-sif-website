@@ -56,6 +56,8 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 				const data = await response.json();
 				throw new Error(data.error || 'Failed to update section order');
 			}
+
+			router.refresh();
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to update section order');
 			setSections(aboutSections); // Revert to original order on error
@@ -87,6 +89,7 @@ export default function AdminAboutSectionsList({ aboutSections }: AdminAboutSect
 			setSections(sections.filter(section => section.id !== sectionToDelete.id));
 			setIsDeleteModalOpen(false);
 			setSectionToDelete(null);
+			router.refresh();
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to delete section');
 		} finally {

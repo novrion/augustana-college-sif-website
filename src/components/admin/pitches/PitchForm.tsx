@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Pitch } from '@/lib/types/pitch';
+import { Pitch, Attachment } from '@/lib/types';
 import Form from "@/components/Form";
 import { FilledButton, EmptyButton } from "@/components/Buttons";
-import { formatDateForInput } from '@/lib/utils';
+import { formatDateForInput, formatFileSize } from '@/lib/utils';
 
 interface PitchFormProps {
 	initialData?: Pitch;
@@ -17,9 +17,11 @@ export default function PitchForm({
 	isEditing = false
 }: PitchFormProps) {
 	const router = useRouter();
+	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
+	const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
 
 	const [formData, setFormData] = useState({
 		title: initialData?.title || '',
@@ -28,9 +30,12 @@ export default function PitchForm({
 		description: initialData?.description || '',
 		is_buy: initialData?.is_buy ?? true,
 		amount: initialData?.amount?.toString() || '',
-		company: initialData?.company || '',
 		symbol: initialData?.symbol || '',
 	});
+
+	const [attachments, setAttachments] = useState<Attachment[]>(
+		initialData?.attachments || []
+	);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
 		const { name, value, type } = e.target;
@@ -42,6 +47,87 @@ export default function PitchForm({
 		}
 	};
 
+	const handleSymbolChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const symbol = e.target.value.toUpperCase();
+		setFormData(prev => ({ ...prev, symbol }));
+	};
+
+	const handleFileSelect = () => {
+		fileInputRef.current?.click();
+	};
+
+	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = e.target.files;
+		if (!files || files.length === 0) return;
+
+		setIsUploadingAttachment(true);
+
+		try {
+			const uploadedAttachments: Attachment[] = [];
+
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
+				const formData = new FormData();
+				formData.append('file', file);
+
+				if (isEditing && initialData?.id) {
+					formData.append('pitchId', initialData.id);
+				}
+
+				const response = await fetch('/api/admin/pitches/attachment', {
+					method: 'POST',
+					body: formData,
+				});
+
+				if (!response.ok) {
+					const data = await response.json();
+					throw new Error(data.error || 'Failed to upload attachment');
+				}
+
+				const data = await response.json();
+				uploadedAttachments.push(data);
+			}
+
+			setAttachments(prev => [...prev, ...uploadedAttachments]);
+
+			// Reset file input
+			if (fileInputRef.current) {
+				fileInputRef.current.value = '';
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Failed to upload attachment');
+		} finally {
+			setIsUploadingAttachment(false);
+		}
+	};
+
+	const handleRemoveAttachment = async (attachment: Attachment) => {
+		try {
+			if (isEditing) {
+				const response = await fetch(`/api/admin/pitches/attachment?path=${encodeURIComponent(attachment.path)}`, {
+					method: 'DELETE',
+				});
+
+				if (!response.ok) {
+					const data = await response.json();
+					throw new Error(data.error || 'Failed to delete attachment');
+				}
+			}
+
+			setAttachments(prev => prev.filter(a => a.path !== attachment.path));
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Failed to remove attachment');
+		}
+	};
+
+	const getFileIconClass = (fileType: string): string => {
+		if (fileType.startsWith('image/')) return 'text-green-500';
+		if (fileType.includes('pdf')) return 'text-red-500';
+		if (fileType.includes('word') || fileType.includes('document')) return 'text-blue-500';
+		if (fileType.includes('excel') || fileType.includes('spreadsheet')) return 'text-green-700';
+		return 'text-gray-500';
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSubmitting(true);
@@ -49,20 +135,40 @@ export default function PitchForm({
 		setSuccess('');
 
 		try {
+			// Fetch company information only when submitting the form
+			let companyName = initialData?.company || '';
+
+			if (!isEditing && formData.symbol) {
+				// Get company name from Finnhub API
+				try {
+					const response = await fetch(`/api/admin/holdings/stock-info?symbol=${formData.symbol}`);
+					if (response.ok) {
+						const data = await response.json();
+						companyName = data.name || formData.symbol;
+					}
+				} catch (err) {
+					console.error('Error fetching company name:', err);
+				}
+			}
+
 			const endpoint = isEditing
 				? `/api/admin/pitches/${initialData?.id}`
 				: '/api/admin/pitches';
 
 			const method = isEditing ? 'PUT' : 'POST';
 
+			const pitchData = {
+				...formData,
+				symbol: formData.symbol.toUpperCase(),
+				amount: parseFloat(formData.amount),
+				company: companyName, // Use fetched company name
+				attachments: attachments
+			};
+
 			const response = await fetch(endpoint, {
 				method,
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					...formData,
-					symbol: formData.symbol.toUpperCase(),
-					amount: parseFloat(formData.amount)
-				})
+				body: JSON.stringify(pitchData)
 			});
 
 			if (!response.ok) {
@@ -93,8 +199,25 @@ export default function PitchForm({
 		>
 			<div className="space-y-4">
 				<div>
+					<label htmlFor="symbol" className="block text-sm font-medium mb-1">
+						Symbol *
+					</label>
+					<input
+						id="symbol"
+						name="symbol"
+						type="text"
+						value={formData.symbol}
+						onChange={handleSymbolChange}
+						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+						placeholder="e.g., AAPL"
+						required
+						disabled={isEditing} // Can't change symbol when editing
+					/>
+				</div>
+
+				<div>
 					<label htmlFor="title" className="block text-sm font-medium mb-1">
-						Title
+						Title *
 					</label>
 					<input
 						id="title"
@@ -109,7 +232,7 @@ export default function PitchForm({
 
 				<div>
 					<label htmlFor="analyst" className="block text-sm font-medium mb-1">
-						Analyst
+						Analyst *
 					</label>
 					<input
 						id="analyst"
@@ -125,7 +248,7 @@ export default function PitchForm({
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
 						<label htmlFor="date" className="block text-sm font-medium mb-1">
-							Date
+							Date *
 						</label>
 						<input
 							id="date"
@@ -140,7 +263,7 @@ export default function PitchForm({
 
 					<div>
 						<label htmlFor="amount" className="block text-sm font-medium mb-1">
-							Amount ($)
+							Amount ($) *
 						</label>
 						<input
 							id="amount"
@@ -156,42 +279,9 @@ export default function PitchForm({
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div>
-						<label htmlFor="company" className="block text-sm font-medium mb-1">
-							Company
-						</label>
-						<input
-							id="company"
-							name="company"
-							type="text"
-							value={formData.company}
-							onChange={handleChange}
-							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-							required
-						/>
-					</div>
-
-					<div>
-						<label htmlFor="symbol" className="block text-sm font-medium mb-1">
-							Symbol
-						</label>
-						<input
-							id="symbol"
-							name="symbol"
-							type="text"
-							value={formData.symbol}
-							onChange={handleChange}
-							className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-							placeholder="e.g., AAPL"
-							required
-						/>
-					</div>
-				</div>
-
 				<div>
 					<label className="block text-sm font-medium mb-2">
-						Type
+						Type *
 					</label>
 					<div className="flex gap-6">
 						<label className="flex items-center">
@@ -221,16 +311,76 @@ export default function PitchForm({
 
 				<div>
 					<label htmlFor="description" className="block text-sm font-medium mb-1">
-						Description (Optional)
+						Analysis *
 					</label>
 					<textarea
 						id="description"
 						name="description"
-						rows={5}
+						rows={10}
 						value={formData.description}
 						onChange={handleChange}
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent font-[family-name:var(--font-geist-sans)] focus:outline-none focus:ring-2 focus:ring-blue-500"
+						required
 					/>
+				</div>
+
+				<div>
+					<div className="flex justify-between items-center mb-2">
+						<label className="block text-sm font-medium">
+							Supporting Materials
+						</label>
+						<EmptyButton
+							onClick={handleFileSelect}
+							text="Add Attachment"
+							isLoading={isUploadingAttachment}
+							loadingText="Uploading..."
+							type="button"
+						/>
+						<input
+							type="file"
+							ref={fileInputRef}
+							onChange={handleFileChange}
+							className="hidden"
+							multiple
+							accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+						/>
+					</div>
+
+					{attachments.length > 0 ? (
+						<div className="border border-white/[.145] rounded-md p-2 max-h-60 overflow-y-auto">
+							<ul className="divide-y divide-white/[.145]">
+								{attachments.map((attachment, index) => (
+									<li key={index} className="py-2 px-1 flex items-center justify-between">
+										<div className="flex items-center">
+											<div className={`mr-3 ${getFileIconClass(attachment.type)}`}>
+												<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+												</svg>
+											</div>
+											<div className="truncate max-w-xs">
+												<p className="text-sm truncate">{attachment.originalName || attachment.name}</p>
+												<p className="text-xs text-gray-400">{formatFileSize(attachment.size || 0)}</p>
+											</div>
+										</div>
+										<button
+											type="button"
+											onClick={() => handleRemoveAttachment(attachment)}
+											className="text-red-500 hover:text-red-700 ml-2"
+											title="Remove attachment"
+										>
+											<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+											</svg>
+										</button>
+									</li>
+								))}
+							</ul>
+						</div>
+					) : (
+						<div className="text-center border border-white/[.145] rounded-md p-4 text-gray-400">
+							No attachments added
+						</div>
+					)}
 				</div>
 			</div>
 

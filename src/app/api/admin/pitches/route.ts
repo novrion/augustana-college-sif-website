@@ -22,7 +22,8 @@ async function createPitchHandler(request: Request, _session: Session): Promise<
 		is_buy: data.is_buy,
 		amount: parseFloat(data.amount),
 		company: data.company,
-		symbol: data.symbol.toUpperCase()
+		symbol: data.symbol.toUpperCase(),
+		attachments: data.attachments || []
 	});
 
 	if (!pitch) {

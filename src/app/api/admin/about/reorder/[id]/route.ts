@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
-import { getAboutSectionById, reorderAboutSection, } from '@/lib/api/db';
+import { getAboutSectionById, reorderAboutSection, getAllAboutSections } from '@/lib/api/db';
 import { withAuthParam } from '@/lib/api/server/routeHandlers';
 
 async function reorderAboutSectionHandler(request: Request, _session: Session, params: Promise<{ id: string }>): Promise<NextResponse> {
@@ -30,7 +30,12 @@ async function reorderAboutSectionHandler(request: Request, _session: Session, p
 		);
 	}
 
-	return NextResponse.json({ message: 'Section reordered successfully' });
+	const updatedSections = await getAllAboutSections();
+
+	return NextResponse.json({
+		message: 'Section reordered successfully',
+		sections: updatedSections
+	});
 }
 
 export const POST = withAuthParam(reorderAboutSectionHandler, 'ADMIN');

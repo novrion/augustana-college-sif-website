@@ -35,7 +35,7 @@ export default function HoldingsTable({
 						const equityPercent = (marketValue / totalEquityValue) * 100;
 						const gainLoss = marketValue - holding.cost_basis;
 						const gainLossPercent = holding.cost_basis > 0 ? (gainLoss / holding.cost_basis) * 100 : 0;
-						const companyName = holding.company_name.length > 37 ? holding.company_name.slice(0, 37).trim() + '...' : holding.company_name;
+						const companyName = holding.company_name.length > 35 ? holding.company_name.slice(0, 35).trim() + '...' : holding.company_name;
 
 						return (
 							<tr

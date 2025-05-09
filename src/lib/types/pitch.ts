@@ -1,3 +1,5 @@
+import { Attachment } from './attachment';
+
 export interface Pitch {
 	id: string;
 	title: string;
@@ -10,4 +12,5 @@ export interface Pitch {
 	symbol: string;
 	created_at?: string;
 	updated_at?: string;
+	attachments?: Attachment[];
 }

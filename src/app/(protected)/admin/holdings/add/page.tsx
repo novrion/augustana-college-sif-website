@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { hasPermission } from '@/lib/auth/auth';
 import HoldingForm from '@/components/admin/holdings/HoldingForm';
-import HoldingQueryForm from '@/components/admin/holdings/HoldingQueryForm';
+import { StockQueryForm } from '@/components/admin/common';
 import { EmptyLinkButton } from "@/components/Buttons";
 
 export default async function AddHoldingPage() {
@@ -17,7 +17,7 @@ export default async function AddHoldingPage() {
 				</div>
 
 				<HoldingForm />
-				<HoldingQueryForm />
+				<StockQueryForm />
 			</div>
 		</div>
 	);

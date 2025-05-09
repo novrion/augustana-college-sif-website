@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { hasPermission } from '@/lib/auth/auth';
 import PitchForm from '@/components/admin/pitches/PitchForm';
+import { StockQueryForm } from '@/components/admin/common';
 import { EmptyLinkButton } from "@/components/Buttons";
 
 export default async function AddPitchPage() {
@@ -15,6 +16,7 @@ export default async function AddPitchPage() {
 					<EmptyLinkButton href="/admin/pitches" text="Back to Pitch Management" />
 				</div>
 				<PitchForm />
+				<StockQueryForm title="Stock Symbol Lookup" />
 			</div>
 		</div>
 	);

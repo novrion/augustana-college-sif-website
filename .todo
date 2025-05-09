@@ -3,12 +3,6 @@
 3. Google @augustana.edu domain authentication
 4. Error handling
 
-Stock pitches
-- Click to get to actual specific pitch page from holdings.
-- Make protected since this is sensitive information (update middleware for example)
-- Make adding the stock pitch easier using symbol query and automatic fetching from finnhub stock api for company information (just input symbol)
-- Add images and attachments to the stock pitches
-
 Fix the home page!
 
 Timing glitch under events:
@@ -17,7 +11,7 @@ Timing glitch under events:
 Home page management (admin)
 - Should be able to add one high quality picture + text for each section.
 
-Custom Add and edit holding if stock api doesn't work
+Custom Add and edit holding + stock pitches, if stock api doesn't work
 
 Portfolio page:
 compare to S&P 500 (time needed and finnhub api call)
