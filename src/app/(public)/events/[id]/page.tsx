@@ -36,9 +36,10 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
 							<span className="mb-1">{formatDateForDisplay(event.date, { includeWeekday: true })}</span>
 							<span>
 								{event.title ? event.speaker_name : ''}
-								{event.role && event.company && <span>, {event.role} at {event.company}</span>}
-								{event.role && !event.company && <span>, {event.role}</span>}
-								{!event.role && event.company && <span>, {event.company}</span>}
+								{(event.title && (event.role || event.company)) && <span>, </span>}
+								{event.role && event.company && <span>{event.role} at {event.company}</span>}
+								{event.role && !event.company && <span>{event.role}</span>}
+								{!event.role && event.company && <span>{event.company}</span>}
 							</span>
 
 							{!isPast && (

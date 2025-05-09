@@ -58,7 +58,13 @@ const dashboardItems: DashboardItem[] = [
 		description: "Edit sections on the About Us page",
 		href: "/admin/about",
 		requiredPermission: "ADMIN"
-	}
+	},
+	{
+		title: "Home Page Management",
+		description: "Edit sections on the Home page",
+		href: "/admin/home",
+		requiredPermission: "ADMIN"
+	},
 ];
 
 export default async function AdminPage() {

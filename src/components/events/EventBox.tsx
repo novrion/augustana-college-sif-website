@@ -25,9 +25,10 @@ export default function EventBox({ event }: EventBoxProps) {
 			<div className="mt-1 flex flex-col mb-6 text-sm text-gray-400 font-[family-name:var(--font-geist-mono)]">
 				<span>
 					{event.title ? event.speaker_name : ''}
-					{event.role && event.company && <span>, {event.role} at {event.company}</span>}
-					{event.role && !event.company && <span>, {event.role}</span>}
-					{!event.role && event.company && <span>, {event.company}</span>}
+					{(event.title && (event.role || event.company)) && <span>, </span>}
+					{event.role && event.company && <span>{event.role} at {event.company}</span>}
+					{event.role && !event.company && <span>{event.role}</span>}
+					{!event.role && event.company && <span>{event.company}</span>}
 				</span>
 
 				<div className="flex flex-wrap items-center gap-3 mt-2">

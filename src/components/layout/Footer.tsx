@@ -11,7 +11,7 @@ export default function Footer() {
 	};
 
 	return (
-		<footer className="mt-20 mb-5 row-start-3 flex gap-6 flex-wrap items-center justify-center font-[family-name:var(--font-geist-mono)]">
+		<footer className="mt-8 mb-5 row-start-3 flex gap-6 flex-wrap items-center justify-center font-[family-name:var(--font-geist-mono)]">
 			<a
 				className="flex items-center gap-2 hover:underline hover:underline-offset-4"
 				href="/contact"

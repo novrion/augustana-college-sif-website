@@ -5,13 +5,9 @@
 
 Fix the home page!
 
-Timing glitch under events:
-- showing upcoming events in past tab (because they are for today)
-
-Home page management (admin)
-- Should be able to add one high quality picture + text for each section.
-
 Custom Add and edit holding + stock pitches, if stock api doesn't work
 
 Portfolio page:
 compare to S&P 500 (time needed and finnhub api call)
+
+proper clean up of all attachments and images (home page, newsletter, stock pitches, profile pictures...)

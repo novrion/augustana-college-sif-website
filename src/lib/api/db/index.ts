@@ -7,3 +7,4 @@ export * from './cash';
 export * from './event';
 export * from './gallery';
 export * from './pitch';
+export * from './home';

@@ -1,6 +1,6 @@
 import { db } from './supabase';
 import { getYearFromDate } from '@/lib/utils';
-import { User, Holding, Newsletter, Note, AboutSection, Event, GalleryImage, Attachment, Pitch } from '@/lib/types';
+import { User, Holding, Newsletter, Note, AboutSection, Event, GalleryImage, Attachment, Pitch, HomeSection } from '@/lib/types';
 
 export interface Database {
 	users: User;
@@ -12,6 +12,7 @@ export interface Database {
 	gallery_images: GalleryImage;
 	cash: { id: string; amount: number };
 	pitches: Pitch;
+	home_sections: HomeSection;
 }
 
 type Tables = keyof Database;
