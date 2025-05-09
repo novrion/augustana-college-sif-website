@@ -86,7 +86,7 @@ export function FilledLinkButton({ text, href, className = '' }: FilledLinkButto
 interface HoldingsLinkButtonProps {
 	text: string;
 	href: string;
-	currentPathName: string;
+	currentPathName: string | null;
 	hasAccess: boolean;
 }
 

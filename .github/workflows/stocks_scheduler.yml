@@ -2,7 +2,7 @@ name: Update Stock Prices
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Run every 5 minutes
+    - cron: '*/2 * * * *'  # Every 2 minutes
 
 jobs:
   update-stocks:
@@ -10,4 +10,5 @@ jobs:
     steps:
       - name: Trigger stock update
         run: |
-          curl -X POST https://augustana-college-sif-website-novrions-projects.vercel.app/api/stocks_scheduler
+          curl -X POST https://augustana-college-sif-website-novrions-projects.vercel.app/api/stocks_scheduler \
+          -H "Authorization: Bearer ${{ secrets.API_SECRET_KEY }}"
