@@ -208,8 +208,6 @@ export default async function handler(
 ) {
 	// Check authorization
 	const authHeader = req.headers.authorization;
-	console.log("Received Auth Header:", authHeader);
-	console.log("expected:", process.env.API_SECRET_KEY);
 	if (!authHeader || authHeader !== `Bearer ${process.env.API_SECRET_KEY}`) {
 		return res.status(401).json({ message: 'Unauthorized' });
 	}
