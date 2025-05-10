@@ -50,6 +50,6 @@ The complete codebase is maintained in this GitHub repository, which serves as t
 ```
 
 ## Credits & Warning
-The entire project was created by **Elias Lindstenz** (https://github.com/novrion) during two weeks in the spring of 2025.
+The entire project was created by **Elias Lindstenz** (https://github.com/novrion) for the Augustana College Student Investment Fund during two weeks in the spring of 2025.
 Elias had no web development experience prior to this project and therefore a lot of the code is conventionally inconsistent. There is also a good amount of code duplication.
 To whoever gets the task of maintaining this website, good luck :).
