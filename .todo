@@ -7,6 +7,4 @@ Custom Add and edit holding + stock pitches, if stock api doesn't work
 Portfolio page:
 compare to S&P 500 (time needed and finnhub api call)
 
-proper clean up of all attachments and images (home page, newsletter, stock pitches, profile pictures...)
-
 Navbar sometimes hiding
