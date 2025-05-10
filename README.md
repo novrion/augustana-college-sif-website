@@ -11,7 +11,7 @@
   - Google OAuth (restricted to @augustana.edu domains)
   - Credential-based login (username/password)
 
-## Data Integration
+## Stock Data API
 - **Stock Data**: Finnhub API
 - **Automation**: GitHub Actions workflow (automatically schedules stock updates)
 
@@ -28,25 +28,48 @@ Role-based permissions system with hierarchical access levels:
 ## Development & Deployment
 The complete codebase is maintained in this GitHub repository, which serves as the direct source for Vercel deployments.
 
-## System Flow
+## Application Flow
 ```
-┌──────────────┐     ┌─────────────────────┐     ┌───────────────────┐
-│ User Browser │<--->│  Vercel (Next.js)   │<--->│  Supabase         │
-└──────────────┘     │  - Frontend         │     │  - PostgreSQL     │
-                     │  - API Routes       │     │    Database       │
-                     └─────────────────────┘     └───────────────────┘
-                              ↑   ↑                        ↑
-                              │   │                        │
-                              ↓   ↓                        ↓
-                      ┌────────────────┐            ┌───────────────┐
-                      │  Google OAuth  │            │  Finnhub API  │
-                      └────────────────┘            └───────────────┘
-                                                          ↑
-                                                          │
-                      ┌─────────────────────┐             │
-                      │  GitHub Actions     │-------------┘
-                      │  - Stock Scheduler  │
-                      └─────────────────────┘
+                           ┌──────────────┐     ┌─────────────────────┐     ┌───────────────────┐
+                           │ User Browser │<--->│  Vercel (Next.js)   │<--->│  Supabase         │
+                           └──────────────┘     │  - Frontend         │     │  - PostgreSQL     │
+                                                │  - API Routes       │     │    Database       │
+                                                └─────────────────────┘     └───────────────────┘
+                                                         ↑   ↑                        ↑
+                                                         │   │                        │
+                                                         ↓   ↓                        ↓
+                                                 ┌────────────────┐            ┌───────────────┐
+                                                 │  Google OAuth  │            │  Finnhub API  │
+                                                 └────────────────┘            └───────────────┘
+                                                                                     ↑
+                                                                                     │
+                                                 ┌─────────────────────┐             │
+                                                 │  GitHub Actions     │-------------┘
+                                                 │  - Stock Scheduler  │
+                                                 └─────────────────────┘
+```
+
+# Environment Variables
+Add the environment variables in Vercel if the website is still deployed there. Otherwise, add them to a `.env.local` file in the root directory.
+```
+# NextAuth.js Authentication
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+
+# Supabase Database
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_KEY=
+
+# Finnhub Stock API
+FINNHUB_API_KEY=
+
+# Github Actions Scheduler
+API_SECRET_KEY=
+
+# Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 ```
 
 ## Credits & Warning
