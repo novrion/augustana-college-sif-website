@@ -101,6 +101,7 @@ export default function ProfilePicture({
 					alt={alt}
 					width={size}
 					height={size}
+					quality={100}
 					className="object-cover w-full h-full"
 					onError={handleImageError}
 					priority

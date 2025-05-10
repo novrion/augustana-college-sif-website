@@ -1,6 +1,5 @@
 import { Pitch, Attachment } from '@/lib/types';
-import { db } from './supabase';
-import { getAll, getById, create, update, remove, getPaginated, getYears, uploadFileToBucket, deleteFileFromBucket } from './common';
+import { getAll, getById, create, update, remove, getPaginated, getYears, uploadFileToBucket, deleteFileFromBucket, getAllAttachments } from './common';
 
 const table = 'pitches';
 
@@ -12,7 +11,7 @@ export async function getAllPitches(): Promise<Pitch[]> {
 export async function getPitchById(id: string): Promise<Pitch | null> {
 	const pitch = (await getById(table, id)) as Pitch | null;
 	if (pitch) {
-		pitch.attachments = await getPitchAttachments(id);
+		pitch.attachments = await getAllAttachments('attachments', `pitch_attachments/${id}`);
 	}
 	return pitch;
 }
@@ -26,12 +25,17 @@ export async function updatePitch(id: string, pitch: Record<string, unknown>): P
 }
 
 export async function deletePitch(id: string): Promise<boolean> {
-	const attachments = await getPitchAttachments(id);
-	for (const attachment of attachments) {
-		await deletePitchAttachment(attachment.path);
-	}
+	try {
+		const attachments = await getAllAttachments('attachments', `pitch_attachments/${id}`);
+		for (const attachment of attachments) {
+			await deletePitchAttachment(attachment.path);
+		}
 
-	return await remove(table, id);
+		return await remove(table, id);
+	} catch (error) {
+		console.error('Error deleting pitch and attachments:', error);
+		return false;
+	}
 }
 
 export async function getPaginatedPitches(params: {
@@ -67,10 +71,9 @@ export async function getPaginatedPitches(params: {
 		searchFields: ['title', 'analyst', 'company', 'symbol', 'description']
 	});
 
-	// Load attachments for each pitch
 	const pitchesWithAttachments = await Promise.all(
 		(result.data as unknown as Pitch[]).map(async (pitch) => {
-			pitch.attachments = await getPitchAttachments(pitch.id);
+			pitch.attachments = await getAllAttachments('attachments', `pitch_attachments/${pitch.id}`);
 			return pitch;
 		})
 	);
@@ -90,28 +93,7 @@ export async function getPitchesYears(): Promise<number[]> {
 }
 
 export async function getPitchAttachments(id: string): Promise<Attachment[]> {
-	const { data, error } = await db.storage
-		.from('attachments')
-		.list(`pitch_attachments/${id}`);
-
-	if (error) {
-		console.error('Error fetching pitch attachments:', error);
-		return [];
-	}
-
-	return data.map(file => {
-		const url = db.storage
-			.from('attachments')
-			.getPublicUrl(`pitch_attachments/${id}/${file.name}`).data.publicUrl;
-
-		return {
-			name: file.name,
-			url: url,
-			path: `pitch_attachments/${id}/${file.name}`,
-			type: file.metadata?.mimetype || '',
-			size: file.metadata?.size || 0
-		};
-	});
+	return await getAllAttachments('attachments', `pitch_attachments/${id}`);
 }
 
 export async function uploadPitchAttachment(id: string, file: File): Promise<Attachment | null> {

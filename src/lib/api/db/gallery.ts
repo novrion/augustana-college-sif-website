@@ -17,7 +17,22 @@ export async function createGalleryImage(imageData: Record<string, unknown>): Pr
 }
 
 export async function updateGalleryImage(id: string, imageData: Record<string, unknown>): Promise<boolean> {
-	return await update(table, id, imageData);
+	try {
+		const existingImage = await getGalleryImageById(id);
+		if (!existingImage) return false;
+
+		if (existingImage.src !== imageData.src && existingImage.src) {
+			const fileInfo = await extractUrl(existingImage.src);
+			if (fileInfo) {
+				await deleteFileFromBucket(fileInfo.bucket, fileInfo.path);
+			}
+		}
+
+		return await update(table, id, imageData);
+	} catch (error) {
+		console.error('Error updating gallery image:', error);
+		return false;
+	}
 }
 
 export async function deleteGalleryImage(id: string): Promise<boolean> {
@@ -34,11 +49,25 @@ export async function deleteGalleryImage(id: string): Promise<boolean> {
 	return await remove(table, id);
 }
 
-export async function uploadGalleryImage(file: File): Promise<Attachment | null> {
-	const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-	const path = `gallery_images/${fileName}`;
+export async function uploadGalleryImage(file: File, oldUrl?: string): Promise<Attachment | null> {
+	try {
+		// Clean up old image if it exists
+		if (oldUrl) {
+			const fileInfo = await extractUrl(oldUrl);
+			if (fileInfo) {
+				await deleteFileFromBucket(fileInfo.bucket, fileInfo.path);
+			}
+		}
 
-	return await uploadFileToBucket('gallery', path, file, fileName);
+		// Upload new image
+		const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+		const path = `gallery_images/${fileName}`;
+
+		return await uploadFileToBucket('gallery', path, file, fileName);
+	} catch (error) {
+		console.error('Error in uploadGalleryImage:', error);
+		return null;
+	}
 }
 
 export async function getPaginatedGalleryImages(params: {

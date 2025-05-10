@@ -30,6 +30,7 @@ export default function HomeSectionForm({
 	});
 
 	const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.image_url || null);
+	const [previousImageUrl, setPreviousImageUrl] = useState<string | null>(initialData?.image_url || null);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const { name, value } = e.target;
@@ -66,6 +67,11 @@ export default function HomeSectionForm({
 			const formData = new FormData();
 			formData.append('file', file);
 
+			// Add the previous image URL to be deleted
+			if (previousImageUrl) {
+				formData.append('previousImageUrl', previousImageUrl);
+			}
+
 			const response = await fetch('/api/admin/home/upload-image', {
 				method: 'POST',
 				body: formData,
@@ -77,6 +83,9 @@ export default function HomeSectionForm({
 			}
 
 			const data = await response.json();
+
+			// Update previous image URL to the new one
+			setPreviousImageUrl(data.url);
 			setFormData(prev => ({ ...prev, image_url: data.url }));
 			setPreviewUrl(data.url);
 		} catch (err) {
@@ -99,10 +108,17 @@ export default function HomeSectionForm({
 
 			const endpoint = isEditing ? `/api/admin/home/${initialData?.id}` : '/api/admin/home';
 			const method = isEditing ? 'PUT' : 'POST';
+
+			// For updates, include the previous image URL if it's different from the current one
+			const requestData = {
+				...formData,
+				previousImageUrl: isEditing && initialData?.image_url !== formData.image_url ? initialData?.image_url : null
+			};
+
 			const response = await fetch(endpoint, {
 				method,
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(formData)
+				body: JSON.stringify(requestData)
 			});
 
 			if (!response.ok) {

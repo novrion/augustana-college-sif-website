@@ -22,6 +22,7 @@ export default function PitchForm({
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
 	const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
+	const [createdPitchId, setCreatedPitchId] = useState<string | null>(null);
 
 	const [formData, setFormData] = useState({
 		title: initialData?.title || '',
@@ -31,6 +32,7 @@ export default function PitchForm({
 		is_buy: initialData?.is_buy ?? true,
 		amount: initialData?.amount?.toString() || '',
 		symbol: initialData?.symbol || '',
+		company: initialData?.company || ''
 	});
 
 	const [attachments, setAttachments] = useState<Attachment[]>(
@@ -65,14 +67,18 @@ export default function PitchForm({
 		try {
 			const uploadedAttachments: Attachment[] = [];
 
+			// Get the ID to use - either the existing pitch ID or the newly created one
+			const pitchId = isEditing ? initialData?.id : createdPitchId;
+
+			if (!pitchId) {
+				throw new Error('Please save the pitch before adding attachments');
+			}
+
 			for (let i = 0; i < files.length; i++) {
 				const file = files[i];
 				const formData = new FormData();
 				formData.append('file', file);
-
-				if (isEditing && initialData?.id) {
-					formData.append('pitchId', initialData.id);
-				}
+				formData.append('pitchId', pitchId);
 
 				const response = await fetch('/api/admin/pitches/attachment', {
 					method: 'POST',
@@ -103,15 +109,13 @@ export default function PitchForm({
 
 	const handleRemoveAttachment = async (attachment: Attachment) => {
 		try {
-			if (isEditing) {
-				const response = await fetch(`/api/admin/pitches/attachment?path=${encodeURIComponent(attachment.path)}`, {
-					method: 'DELETE',
-				});
+			const response = await fetch(`/api/admin/pitches/attachment?path=${encodeURIComponent(attachment.path)}`, {
+				method: 'DELETE',
+			});
 
-				if (!response.ok) {
-					const data = await response.json();
-					throw new Error(data.error || 'Failed to delete attachment');
-				}
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || 'Failed to delete attachment');
 			}
 
 			setAttachments(prev => prev.filter(a => a.path !== attachment.path));
@@ -136,32 +140,34 @@ export default function PitchForm({
 
 		try {
 			// Fetch company information only when submitting the form
-			let companyName = initialData?.company || '';
+			let companyName = formData.company || initialData?.company || '';
 
-			if (!isEditing && formData.symbol) {
-				// Get company name from Finnhub API
+			if (!isEditing && !createdPitchId && formData.symbol) {
+				// Get company name from API for new pitches
 				try {
 					const response = await fetch(`/api/admin/holdings/stock-info?symbol=${formData.symbol}`);
 					if (response.ok) {
 						const data = await response.json();
 						companyName = data.name || formData.symbol;
+						formData.company = companyName;
 					}
 				} catch (err) {
 					console.error('Error fetching company name:', err);
 				}
 			}
 
-			const endpoint = isEditing
-				? `/api/admin/pitches/${initialData?.id}`
+			// Determine the endpoint and method based on state
+			const endpoint = isEditing || createdPitchId
+				? `/api/admin/pitches/${isEditing ? initialData?.id : createdPitchId}`
 				: '/api/admin/pitches';
 
-			const method = isEditing ? 'PUT' : 'POST';
+			const method = isEditing || createdPitchId ? 'PUT' : 'POST';
 
 			const pitchData = {
 				...formData,
+				company: companyName,
 				symbol: formData.symbol.toUpperCase(),
 				amount: parseFloat(formData.amount),
-				company: companyName, // Use fetched company name
 				attachments: attachments
 			};
 
@@ -176,13 +182,21 @@ export default function PitchForm({
 				throw new Error(data.error || 'Failed to save pitch');
 			}
 
-			setSuccess(isEditing ? 'Pitch updated successfully!' : 'Pitch created successfully!');
+			const data = await response.json();
 
-			// Redirect after a short delay
-			setTimeout(() => {
-				router.push('/admin/pitches');
-				router.refresh();
-			}, 1000);
+			// If this was the initial creation, store the ID for future attachment uploads
+			if (!isEditing && !createdPitchId) {
+				setCreatedPitchId(data.id);
+				setSuccess('Pitch created successfully! You can now add attachments.');
+			} else {
+				setSuccess(isEditing ? 'Pitch updated successfully!' : 'Pitch saved successfully!');
+
+				// After a successful final save, redirect back to the list
+				setTimeout(() => {
+					router.push('/admin/pitches');
+					router.refresh();
+				}, 1000);
+			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'An error occurred');
 		} finally {
@@ -198,6 +212,7 @@ export default function PitchForm({
 			success={success}
 		>
 			<div className="space-y-4">
+				{/* Existing form fields */}
 				<div>
 					<label htmlFor="symbol" className="block text-sm font-medium mb-1">
 						Symbol *
@@ -211,7 +226,7 @@ export default function PitchForm({
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 						placeholder="e.g., AAPL"
 						required
-						disabled={isEditing} // Can't change symbol when editing
+						disabled={isEditing || !!createdPitchId} // Can't change symbol when editing or after creation
 					/>
 				</div>
 
@@ -324,18 +339,21 @@ export default function PitchForm({
 					/>
 				</div>
 
+				{/* Attachments section - only enabled after initial save or when editing */}
 				<div>
 					<div className="flex justify-between items-center mb-2">
 						<label className="block text-sm font-medium">
 							Supporting Materials
 						</label>
-						<EmptyButton
-							onClick={handleFileSelect}
-							text="Add Attachment"
-							isLoading={isUploadingAttachment}
-							loadingText="Uploading..."
-							type="button"
-						/>
+						{(isEditing || createdPitchId) && (
+							<EmptyButton
+								onClick={handleFileSelect}
+								text="Add Attachment"
+								isLoading={isUploadingAttachment}
+								loadingText="Uploading..."
+								type="button"
+							/>
+						)}
 						<input
 							type="file"
 							ref={fileInputRef}
@@ -343,8 +361,15 @@ export default function PitchForm({
 							className="hidden"
 							multiple
 							accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+							disabled={!isEditing && !createdPitchId}
 						/>
 					</div>
+
+					{!isEditing && !createdPitchId && (
+						<p className="text-sm text-gray-400 mb-2">
+							Add attachments after creating the pitch
+						</p>
+					)}
 
 					{attachments.length > 0 ? (
 						<div className="border border-white/[.145] rounded-md p-2 max-h-60 overflow-y-auto">
@@ -393,7 +418,7 @@ export default function PitchForm({
 				/>
 				<FilledButton
 					type="submit"
-					text={isEditing ? 'Update Pitch' : 'Add Pitch'}
+					text={isEditing ? 'Update Pitch' : createdPitchId ? 'Save Changes' : 'Create Pitch'}
 					loadingText="Saving..."
 					isLoading={isSubmitting}
 				/>

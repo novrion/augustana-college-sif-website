@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
-import { withAuth } from '@/lib/api/server/routeHandlers';
+import { extractUrl, deleteFileFromBucket } from '@/lib/api/db/common';
 import { uploadHomeImage } from '@/lib/api/db';
+import { withAuth } from '@/lib/api/server/routeHandlers';
 
 async function uploadImageHandler(request: Request, _session: Session): Promise<NextResponse> {
 	try {
 		const formData = await request.formData();
 		const file = formData.get('file') as File;
+		const previousImageUrl = formData.get('previousImageUrl') as string;
 
 		if (!file) {
 			return NextResponse.json(
@@ -29,6 +31,14 @@ async function uploadImageHandler(request: Request, _session: Session): Promise<
 				{ error: 'File size exceeds 5MB limit.' },
 				{ status: 400 }
 			);
+		}
+
+		// Delete previous image if it exists
+		if (previousImageUrl) {
+			const fileInfo = await extractUrl(previousImageUrl);
+			if (fileInfo) {
+				await deleteFileFromBucket(fileInfo.bucket, fileInfo.path);
+			}
 		}
 
 		const result = await uploadHomeImage(file);

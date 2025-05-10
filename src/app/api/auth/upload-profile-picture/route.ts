@@ -38,7 +38,10 @@ async function uploadProfilePictureHandler(request: Request, session: Session): 
 		);
 	}
 
-	const profilePicture = await uploadProfilePicture(session.user.id, file, user.profile_picture);
+	// Pass the current profile picture URL to be cleaned up
+	const oldProfilePictureUrl = user.profile_picture || '';
+	const profilePicture = await uploadProfilePicture(session.user.id, file, oldProfilePictureUrl);
+
 	if (!profilePicture) {
 		return NextResponse.json(
 			{ error: 'Failed to upload profile picture' },

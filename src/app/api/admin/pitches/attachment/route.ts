@@ -7,11 +7,18 @@ import { withAuth } from '@/lib/api/server/routeHandlers';
 async function uploadPitchAttachmentHandler(request: Request, _session: Session): Promise<NextResponse> {
 	const formData = await request.formData();
 	const file = formData.get('file');
-	const pitchId = formData.get('pitchId') as string || 'temp'; // Use 'temp' if no ID provided
+	const pitchId = formData.get('pitchId') as string;
 
 	if (!file || !(file instanceof File)) {
 		return NextResponse.json(
 			{ error: 'No file provided' },
+			{ status: 400 }
+		);
+	}
+
+	if (!pitchId) {
+		return NextResponse.json(
+			{ error: 'Pitch ID is required' },
 			{ status: 400 }
 		);
 	}

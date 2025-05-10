@@ -1,6 +1,5 @@
 import { HomeSection } from '@/lib/types';
-import { getAll, getById, create, update, remove } from './common';
-import { db } from './supabase';
+import { getAll, getById, create, update, remove, uploadFileToBucket } from './common';
 
 const table = 'home_sections';
 
@@ -83,33 +82,7 @@ export async function reorderHomeSection(id: string, direction: 'up' | 'down'): 
 }
 
 export async function uploadHomeImage(file: File): Promise<{ url: string } | null> {
-	try {
-		// Generate a unique filename
-		const timestamp = Date.now();
-		const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
-		const path = `home_images/${fileName}`;
-
-		// Upload the file to Supabase Storage
-		const { error: uploadError } = await db.storage
-			.from('home-images') // Adjust this to your bucket name
-			.upload(path, file, {
-				cacheControl: '3600',
-				upsert: false
-			});
-
-		if (uploadError) {
-			console.error(`Failed to upload image: ${uploadError.message}`);
-			return null;
-		}
-
-		// Get the public URL for the uploaded file
-		const { data } = db.storage
-			.from('home-images') // Adjust this to your bucket name
-			.getPublicUrl(path);
-
-		return { url: data.publicUrl };
-	} catch (error) {
-		console.error('Error in uploadHomeImage:', error);
-		return null;
-	}
+	const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+	const path = `home_images/${fileName}`;
+	return await uploadFileToBucket('home-images', path, file, fileName);
 }

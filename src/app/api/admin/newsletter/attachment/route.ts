@@ -7,11 +7,18 @@ import { withAuth } from '@/lib/api/server/routeHandlers';
 async function uploadNewsletterAttachmentHandler(request: Request, _session: Session): Promise<NextResponse> {
 	const formData = await request.formData();
 	const file = formData.get('file');
-	const newsletterId = formData.get('newsletterId') as string || 'temp'; // Use 'temp' if no ID provided
+	const newsletterId = formData.get('newsletterId') as string;
 
 	if (!file || !(file instanceof File)) {
 		return NextResponse.json(
 			{ error: 'No file provided' },
+			{ status: 400 }
+		);
+	}
+
+	if (!newsletterId) {
+		return NextResponse.json(
+			{ error: 'Newsletter ID is required' },
 			{ status: 400 }
 		);
 	}

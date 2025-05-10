@@ -42,6 +42,10 @@ export default function Navbar() {
 					hasAccess={hasHoldingsReadAccess()}
 				/>
 
+				{hasHoldingsReadAccess() && (
+					<Link href="/pitches" className="hover:underline">Stock Pitches</Link>
+				)}
+
 				<Link href="/events" className="hover:underline">Guest Speakers</Link>
 				<Link href="/newsletter" className="hover:underline">Newsletter</Link>
 				<Link href="/gallery" className="hover:underline">Gallery</Link>

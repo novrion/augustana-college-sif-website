@@ -31,6 +31,8 @@ async function updatePitchHandler(request: Request, _session: Session, params: P
 
 	const data = await request.json();
 
+	console.log(existingPitch);
+
 	if (!data.title || !data.analyst || !data.date || !data.company ||
 		!data.symbol || data.is_buy === undefined || !data.amount) {
 		return NextResponse.json(
@@ -48,7 +50,7 @@ async function updatePitchHandler(request: Request, _session: Session, params: P
 		amount: parseFloat(data.amount),
 		company: data.company,
 		symbol: data.symbol.toUpperCase(),
-		attachments: data.attachments || []  // Save attachments reference
+		attachments: data.attachments || []
 	});
 
 	if (!success) {

@@ -37,6 +37,7 @@ async function updateGalleryImageHandler(request: Request, _session: Session, pa
 				{ status: 500 }
 			);
 		}
+		// Note: existing image will be cleaned up in the updateGalleryImage function
 		imageUrl = uploadedImage.url;
 	}
 

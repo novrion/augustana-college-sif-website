@@ -2,6 +2,7 @@ import { revalidatePages } from '@/lib/api/server/revalidationHandler';
 import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getHomeSectionById, updateHomeSection, deleteHomeSection } from '@/lib/api/db';
+import { extractUrl, deleteFileFromBucket } from '@/lib/api/db/common';
 import { withAuthParam } from '@/lib/api/server/routeHandlers';
 
 async function getHomeSectionHandler(_request: Request, _session: Session, params: Promise<{ id: string }>): Promise<NextResponse> {
@@ -41,6 +42,18 @@ async function updateHomeSectionHandler(request: Request, _session: Session, par
 		data.order_index = existingSection.order_index;
 	}
 
+	// Check if image_url has changed, and if there's a previousImageUrl to clean up
+	const imageHasChanged = data.image_url !== existingSection.image_url;
+	const previousImageUrl = data.previousImageUrl;
+
+	// If there's a previous image URL and it's different from the current one, delete it
+	if (imageHasChanged && previousImageUrl) {
+		const fileInfo = await extractUrl(previousImageUrl);
+		if (fileInfo) {
+			await deleteFileFromBucket(fileInfo.bucket, fileInfo.path);
+		}
+	}
+
 	const success = await updateHomeSection(id, {
 		title: data.title,
 		content: data.content,
@@ -68,6 +81,14 @@ async function deleteHomeSectionHandler(_request: Request, _session: Session, pa
 			{ error: 'Section not found' },
 			{ status: 404 }
 		);
+	}
+
+	// Delete associated image
+	if (existingSection.image_url) {
+		const fileInfo = await extractUrl(existingSection.image_url);
+		if (fileInfo) {
+			await deleteFileFromBucket(fileInfo.bucket, fileInfo.path);
+		}
 	}
 
 	const success = await deleteHomeSection(id);

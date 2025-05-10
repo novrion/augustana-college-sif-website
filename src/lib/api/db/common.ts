@@ -340,3 +340,31 @@ export async function getYears({
 		return [];
 	}
 }
+
+export async function getAllAttachments(
+	bucket: string,
+	path: string,
+): Promise<Attachment[]> {
+	const { data, error } = await db.storage
+		.from(bucket)
+		.list(path);
+
+	if (error) {
+		console.error('Error fetching attachments:', error);
+		return [];
+	}
+
+	return data.map(file => {
+		const url = db.storage
+			.from(bucket)
+			.getPublicUrl(`${path}/${file.name}`).data.publicUrl;
+
+		return {
+			name: file.name,
+			url: url,
+			path: `${path}/${file.name}`,
+			type: file.metadata?.mimetype || '',
+			size: file.metadata?.size || 0
+		};
+	});
+}

@@ -1,7 +1,5 @@
-import { Newsletter } from '@/lib/types/newsletter';
-import { db } from './supabase';
-import { getAll, getById, create, update, remove, uploadFileToBucket, deleteFileFromBucket, getPaginated, getYears } from './common';
-import { Attachment } from '@/lib/types';
+import { Newsletter, Attachment } from '@/lib/types';
+import { getAll, getById, create, update, remove, uploadFileToBucket, deleteFileFromBucket, getPaginated, getYears, getAllAttachments } from './common';
 
 const table = 'newsletters';
 
@@ -23,32 +21,21 @@ export async function updateNewsletter(id: string, newsletter: Record<string, un
 }
 
 export async function deleteNewsletter(id: string): Promise<boolean> {
-	return await remove(table, id);
+	try {
+		const attachments = await getAllAttachments('attachments', `newsletter_attachments/${id}`);
+		for (const attachment of attachments) {
+			await deleteNewsletterAttachment(attachment.path);
+		}
+
+		return await remove(table, id);
+	} catch (error) {
+		console.error('Error deleting newsletter and attachments:', error);
+		return false;
+	}
 }
 
 export async function getNewsletterAttachments(id: string): Promise<Attachment[]> {
-	const { data, error } = await db.storage
-		.from('attachments')
-		.list(`newsletter_attachments/${id}`);
-
-	if (error) {
-		console.error('Error fetching attachments:', error);
-		return [];
-	}
-
-	return data.map(file => {
-		const url = db.storage
-			.from('attachments')
-			.getPublicUrl(`newsletter_attachments/${id}/${file.name}`).data.publicUrl;
-
-		return {
-			name: file.name,
-			url: url,
-			path: `newsletter_attachments/${id}/${file.name}`,
-			type: file.metadata?.mimetype || '',
-			size: file.metadata?.size || 0
-		};
-	});
+	return await getAllAttachments('attachments', `newsletter_attachments/${id}`);
 }
 
 export async function uploadNewsletterAttachment(id: string, file: File): Promise<object | null> {

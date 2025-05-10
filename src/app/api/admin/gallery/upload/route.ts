@@ -10,6 +10,7 @@ async function uploadGalleryImageHandler(request: Request, _session: Session): P
 	const title = formData.get('title') as string;
 	const description = formData.get('description') as string;
 	const date = formData.get('date') as string;
+	const previousImageUrl = formData.get('previousImageUrl') as string;
 
 	if (!file || !title || !date) {
 		return NextResponse.json(
@@ -18,7 +19,7 @@ async function uploadGalleryImageHandler(request: Request, _session: Session): P
 		);
 	}
 
-	const uploadedImage = await uploadGalleryImage(file);
+	const uploadedImage = await uploadGalleryImage(file, previousImageUrl);
 	if (!uploadedImage) {
 		return NextResponse.json(
 			{ error: 'Failed to upload image' },
