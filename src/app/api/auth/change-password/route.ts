@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { Session } from 'next-auth';
 import { getUserCredentialsById, verifyPassword, updateUserPassword } from '@/lib/api/db';
 import { withAuth } from '@/lib/api/server/routeHandlers';
-import bcrypt from 'bcrypt';
 
 async function changePasswordHandler(request: Request, session: Session): Promise<NextResponse> {
 	const { currentPassword, newPassword } = await request.json();
@@ -29,10 +28,7 @@ async function changePasswordHandler(request: Request, session: Session): Promis
 		);
 	}
 
-	const salt = await bcrypt.genSalt(10);
-	const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-	const success = await updateUserPassword(session.user.id, hashedPassword);
+	const success = await updateUserPassword(session.user.id, newPassword);
 	if (!success) {
 		return NextResponse.json(
 			{ error: 'Failed to update password' },

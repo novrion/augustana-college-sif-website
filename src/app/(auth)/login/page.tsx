@@ -11,7 +11,7 @@ export default async function LogInPage({ searchParams }: { searchParams: Promis
 	return (
 		<div className="min-h-screen p-8 sm:p-20 flex flex-col items-center justify-center">
 			{isRegistered && (
-				<div className="mb-4 p-3 text-green-500 rounded-md">
+				<div className="mb-4 p-3 text-green-500 rounded-md font-[family-name:var(--font-geist-mono)]">
 					Registration successful
 				</div>
 			)}
