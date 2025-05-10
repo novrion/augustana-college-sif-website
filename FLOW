@@ -1,0 +1,19 @@
+┌───────────────┐     ┌─────────────────────┐     ┌───────────────────┐
+│  User Browser │<--->│  Vercel (Next.js)   │<--->│  Supabase         │
+└───────────────┘     │  - Frontend         │     │  - PostgreSQL DB  │
+                      │  - API Routes       │     │  - File Storage   │
+                      └─────────────────────┘     └───────────────────┘
+                              ↑   ↑                        ↑
+                              │   │                        │
+                              ↓   ↓                        ↓
+                      ┌─────────────┐            ┌───────────────────┐
+                      │ Google OAuth │            │  Finnhub API      │
+                      └─────────────┘            └───────────────────┘
+                                                          ↑
+                                                          │
+                      ┌─────────────────────┐             │
+                      │  GitHub Actions     │-------------┘
+                      │  - Scheduled Jobs   │
+                      └─────────────────────┘
+
+The Augustana Student Investment Fund website uses Next.js for both frontend and backend functionality, hosted on Vercel. Supabase provides PostgreSQL database services and file storage for all content (images, attachments, etc.). Authentication is handled by NextAuth.js with Google OAuth integration for @augustana.edu emails and regular username/password login. Stock data for the portfolio tracker comes from Finnhub API through a GitHub Actions workflow that automatically updates data at 15-minute intervals during market hours. Role-based permissions control access to features, with multiple user types (admin, president, vice-president, secretary) having different permissions. The complete codebase and configuration are maintained in the GitHub repository, which serves as the source for Vercel deployments.
