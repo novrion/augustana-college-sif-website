@@ -30,20 +30,40 @@ export async function getUserCredentialsByEmail(email: string): Promise<UserWith
 }
 
 export async function createUser(userData: Record<string, unknown>): Promise<User | null> {
-	const { name, email, password } = userData as { name: string, email: string, password: string };
+	try {
+		// If this is a Google user (no password), don't try to hash anything
+		if (!userData.password && userData.google_id) {
+			const userRecord = {
+				name: userData.name,
+				email: userData.email,
+				google_id: userData.google_id,
+				role: 'user',
+				is_active: true,
+				profile_picture: userData.profile_picture
+			};
 
-	const salt = await bcrypt.genSalt(10);
-	const hashedPassword = await bcrypt.hash(password, salt);
+			return (await create(table, userRecord)) as User | null;
+		}
 
-	const userRecord = {
-		name,
-		email,
-		password: hashedPassword,
-		role: 'user',
-		is_active: true
-	};
+		// Regular user with password
+		const { name, email, password } = userData as { name: string, email: string, password: string };
 
-	return (await create(table, userRecord)) as User | null;
+		const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(password, salt);
+
+		const userRecord = {
+			name,
+			email,
+			password: hashedPassword,
+			role: 'user',
+			is_active: true
+		};
+
+		return (await create(table, userRecord)) as User | null;
+	} catch (error) {
+		console.error("Error creating user:", error);
+		return null;
+	}
 }
 
 export async function updateUser(id: string, userData: Record<string, unknown>): Promise<boolean> {

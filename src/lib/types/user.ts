@@ -4,9 +4,11 @@ export interface User {
 	email: string;
 	role: UserRole;
 	is_active: boolean;
+	password?: string;
 	profile_picture?: string;
 	description?: string;
 	phone?: string;
+	google_id?: string;
 }
 
 export interface UserWithCredentials extends User {

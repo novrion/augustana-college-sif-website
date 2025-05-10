@@ -20,6 +20,8 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 	const { updateSession } = useAuth();
 	const router = useRouter();
 
+	const isGoogleAccount = !!initialUserData.google_id;
+
 	const [profileData, setProfileData] = useState({
 		name: initialUserData.name || '',
 		email: initialUserData.email || '',
@@ -40,7 +42,6 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 	const [passwordError, setPasswordError] = useState('');
 	const [passwordSuccess, setPasswordSuccess] = useState('');
 
-	// Delete account state
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [deletePassword, setDeletePassword] = useState('');
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -243,6 +244,7 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 						onChange={handleProfileChange}
 						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 						required
+						disabled={isGoogleAccount}
 					/>
 				</div>
 
@@ -286,66 +288,68 @@ export default function ProfileForm({ initialUserData, session }: ProfileFormPro
 				</div>
 			</Form>
 
-			<Form
-				onSubmit={handlePasswordUpdate}
-				title="Change Password"
-				error={passwordError}
-				success={passwordSuccess}
-			>
-				<div className="mb-4">
-					<label className="block text-sm font-medium mb-1" htmlFor="currentPassword">
-						Current Password
-					</label>
-					<input
-						id="currentPassword"
-						name="currentPassword"
-						type="password"
-						value={passwordData.currentPassword}
-						onChange={handlePasswordChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
-					/>
-				</div>
+			{!isGoogleAccount && (
+				<Form
+					onSubmit={handlePasswordUpdate}
+					title="Change Password"
+					error={passwordError}
+					success={passwordSuccess}
+				>
+					<div className="mb-4">
+						<label className="block text-sm font-medium mb-1" htmlFor="currentPassword">
+							Current Password
+						</label>
+						<input
+							id="currentPassword"
+							name="currentPassword"
+							type="password"
+							value={passwordData.currentPassword}
+							onChange={handlePasswordChange}
+							className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							required
+						/>
+					</div>
 
-				<div className="mb-4">
-					<label className="block text-sm font-medium mb-1" htmlFor="newPassword">
-						New Password
-					</label>
-					<input
-						id="newPassword"
-						name="newPassword"
-						type="password"
-						value={passwordData.newPassword}
-						onChange={handlePasswordChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
-					/>
-				</div>
+					<div className="mb-4">
+						<label className="block text-sm font-medium mb-1" htmlFor="newPassword">
+							New Password
+						</label>
+						<input
+							id="newPassword"
+							name="newPassword"
+							type="password"
+							value={passwordData.newPassword}
+							onChange={handlePasswordChange}
+							className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							required
+						/>
+					</div>
 
-				<div className="mb-4">
-					<label className="block text-sm font-medium mb-1" htmlFor="confirmPassword">
-						Confirm New Password
-					</label>
-					<input
-						id="confirmPassword"
-						name="confirmPassword"
-						type="password"
-						value={passwordData.confirmPassword}
-						onChange={handlePasswordChange}
-						className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
-					/>
-				</div>
+					<div className="mb-4">
+						<label className="block text-sm font-medium mb-1" htmlFor="confirmPassword">
+							Confirm New Password
+						</label>
+						<input
+							id="confirmPassword"
+							name="confirmPassword"
+							type="password"
+							value={passwordData.confirmPassword}
+							onChange={handlePasswordChange}
+							className="w-full px-3 py-2 border border-white/[.145] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							required
+						/>
+					</div>
 
-				<div className="flex justify-end">
-					<FilledButton
-						type="submit"
-						text="Change Password"
-						loadingText="Changing..."
-						isLoading={isChangingPassword}
-					/>
-				</div>
-			</Form>
+					<div className="flex justify-end">
+						<FilledButton
+							type="submit"
+							text="Change Password"
+							loadingText="Changing..."
+							isLoading={isChangingPassword}
+						/>
+					</div>
+				</Form>
+			)}
 
 			{/* Danger Zone - Delete Account */}
 			<div className="mt-12">

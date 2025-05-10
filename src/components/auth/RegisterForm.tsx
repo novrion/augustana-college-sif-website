@@ -65,6 +65,15 @@ export default function RegisterForm() {
 				title="Sign Up"
 				error={error}
 			>
+				<div className="mb-6 text-center max-w-96">
+					<p className="text-sm text-blue-400">
+						<svg className="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						Augustana College associates should sign in directly with Google
+					</p>
+				</div>
+
 				<div className="mb-4">
 					<label className="block text-sm font-medium mb-1" htmlFor="name">
 						Name

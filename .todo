@@ -6,5 +6,3 @@ Custom Add and edit holding + stock pitches, if stock api doesn't work
 
 Portfolio page:
 compare to S&P 500 (time needed and finnhub api call)
-
-Navbar sometimes hiding
