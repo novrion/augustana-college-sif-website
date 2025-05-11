@@ -1,20 +1,5 @@
--- WHEN DONE:
-
--- Create initial admin user (be sure to change this password)
-INSERT INTO users (name, email, password, role) VALUES 
-('Admin User', 'admin@example.com', 'CHANGE_THIS_PASSWORD_HASH', 'admin');
-
-
-
-
-
--- FIRST COPY PASTE THIS:
-
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Create auth schema if it doesn't exist (for Supabase)
-CREATE SCHEMA IF NOT EXISTS auth;
 
 -- ======== TABLES ========
 
@@ -224,178 +209,26 @@ ALTER TABLE gallery_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE about_sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE home_sections ENABLE ROW LEVEL SECURITY;
 
--- Create a custom function to check role-based access
-CREATE OR REPLACE FUNCTION auth.has_role(required_roles TEXT[])
-RETURNS BOOLEAN AS $$
+DO $$
 DECLARE
-    current_role TEXT;
+    table_name text;
 BEGIN
-    -- Get the role of the currently authenticated user
-    -- This uses Supabase's auth.uid() function to get the current user's ID
-    SELECT role INTO current_role FROM users WHERE id = auth.uid();
-    RETURN current_role = ANY(required_roles);
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+    FOR table_name IN 
+        SELECT tablename FROM pg_tables 
+        WHERE schemaname = 'public' 
+        AND tablename IN ('users', 'holdings', 'cash', 'pitches', 'newsletters', 'notes', 'events', 'gallery_images', 'about_sections', 'home_sections')
+    LOOP
+        EXECUTE format('CREATE POLICY "Service Role Access for %I" ON %I FOR ALL TO service_role USING (true)', table_name, table_name);
+    END LOOP;
+END $$;
 
--- Create a function to check if a user has permissions to view their own data
-CREATE OR REPLACE FUNCTION auth.is_self(user_id UUID)
-RETURNS BOOLEAN AS $$
-BEGIN
-    RETURN auth.uid() = user_id;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- RLS Policies for users
--- Only admins can see all users, users can only see themselves
-CREATE POLICY users_read_policy ON users
-    FOR SELECT
-    USING (
-        auth.has_role(ARRAY['admin', 'president', 'vice_president']) OR 
-        auth.is_self(id)
-    );
-
--- Only admins and leadership can update user roles
-CREATE POLICY users_role_update_policy ON users
-    FOR UPDATE
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president']))
-    WITH CHECK (
-        auth.has_role(ARRAY['admin', 'president', 'vice_president']) OR
-        auth.is_self(id)
-    );
-
--- Users can update their own profile, but not role
-CREATE POLICY users_self_update_policy ON users
-    FOR UPDATE
-    USING (auth.is_self(id))
-    WITH CHECK (
-        auth.is_self(id) AND 
-        OLD.role = NEW.role  -- Can't change their own role
-    );
-
--- Only admins can delete users
-CREATE POLICY users_delete_policy ON users
-    FOR DELETE
-    USING (
-        -- Allow admins to delete any user
-        auth.has_role(ARRAY['admin']) OR 
-        -- Allow presidents and vice_presidents to delete non-admin users
-        (auth.has_role(ARRAY['president', 'vice_president']) AND 
-         users.role != 'admin') OR
-        -- Allow users to delete their own accounts
-        auth.is_self(id)
-    );
-	
--- Any user can create an account
-CREATE POLICY users_insert_policy ON users
-    FOR INSERT
-    WITH CHECK (true);
-
--- RLS Policies for holdings
--- Users with HOLDINGS_READ can read holdings
-CREATE POLICY holdings_read_policy ON holdings
-    FOR SELECT
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'secretary', 'holdings_write', 'holdings_read']));
-
--- Only users with HOLDINGS_WRITE can modify holdings
-CREATE POLICY holdings_write_policy ON holdings
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'holdings_write']));
-
--- RLS Policies for cash
--- Users with HOLDINGS_READ can read cash balance
-CREATE POLICY cash_read_policy ON cash
-    FOR SELECT
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'secretary', 'holdings_write', 'holdings_read']));
-
--- Only users with HOLDINGS_WRITE can modify cash
-CREATE POLICY cash_write_policy ON cash
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'holdings_write']));
-
--- RLS Policies for pitches
--- Users with HOLDINGS_READ can read pitches
-CREATE POLICY pitches_read_policy ON pitches
-    FOR SELECT
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'secretary', 'holdings_write', 'holdings_read']));
-
--- Only users with HOLDINGS_WRITE can modify pitches
-CREATE POLICY pitches_write_policy ON pitches
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'holdings_write']));
-
--- RLS Policies for newsletters
--- All users can read newsletters
-CREATE POLICY newsletters_read_policy ON newsletters
-    FOR SELECT
-    USING (true);
-
--- Only admins can modify newsletters
-CREATE POLICY newsletters_write_policy ON newsletters
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president']));
-
--- RLS Policies for notes (meeting minutes)
--- All users can read notes
-CREATE POLICY notes_read_policy ON notes
-    FOR SELECT
-    USING (true);
-
--- Only secretary and above can modify notes
-CREATE POLICY notes_write_policy ON notes
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'secretary']));
-
--- RLS Policies for events
--- All users can read events
-CREATE POLICY events_read_policy ON events
-    FOR SELECT
-    USING (true);
-
--- Only admins can modify events
-CREATE POLICY events_write_policy ON events
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president']));
-
--- RLS Policies for gallery_images
--- All users can read gallery images
-CREATE POLICY gallery_images_read_policy ON gallery_images
-    FOR SELECT
-    USING (true);
-
--- Only secretary and above can modify gallery images
-CREATE POLICY gallery_images_write_policy ON gallery_images
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president', 'secretary']));
-
--- RLS Policies for about_sections
--- All users can read about sections
-CREATE POLICY about_sections_read_policy ON about_sections
-    FOR SELECT
-    USING (true);
-
--- Only admins can modify about sections
-CREATE POLICY about_sections_write_policy ON about_sections
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president']));
-
--- RLS Policies for home_sections
--- All users can read home sections
-CREATE POLICY home_sections_read_policy ON home_sections
-    FOR SELECT
-    USING (true);
-
--- Only admins can modify home sections
-CREATE POLICY home_sections_write_policy ON home_sections
-    FOR ALL
-    USING (auth.has_role(ARRAY['admin', 'president', 'vice_president']));
-
-
-
-
-
-
-
-
+-- Create public read access policies for public content
+CREATE POLICY "Public Read Access to Newsletters" ON newsletters FOR SELECT USING (true);
+CREATE POLICY "Public Read Access to Notes" ON notes FOR SELECT USING (true);
+CREATE POLICY "Public Read Access to Events" ON events FOR SELECT USING (true);
+CREATE POLICY "Public Read Access to Gallery Images" ON gallery_images FOR SELECT USING (true);
+CREATE POLICY "Public Read Access to About Sections" ON about_sections FOR SELECT USING (true);
+CREATE POLICY "Public Read Access to Home Sections" ON home_sections FOR SELECT USING (true);
 
 -- Create storage buckets with appropriate permissions
 INSERT INTO storage.buckets (id, name, public) VALUES 
@@ -404,60 +237,14 @@ INSERT INTO storage.buckets (id, name, public) VALUES
     ('gallery', 'Gallery Images', true),
     ('home-images', 'Home Page Images', true);
 
--- Create RLS policies for storage buckets
-CREATE POLICY "Profile pictures are accessible to everyone" ON storage.objects
-    FOR SELECT USING (bucket_id = 'profile-pictures');
+-- Set storage permissions 
+-- Allow public read access to all storage buckets
+CREATE POLICY "Public Read Access to Storage" ON storage.objects
+    FOR SELECT 
+    USING (bucket_id IN ('profile-pictures', 'attachments', 'gallery', 'home-images'));
 
-CREATE POLICY "Only authenticated users can upload profile pictures" ON storage.objects
-    FOR INSERT WITH CHECK (
-        bucket_id = 'profile-pictures' AND
-        auth.role() = 'authenticated'
-    );
-
-CREATE POLICY "Users can update their own profile pictures" ON storage.objects
-    FOR UPDATE USING (
-        bucket_id = 'profile-pictures' AND
-        (storage.foldername(name))[1] = auth.uid()::text
-    );
-
-CREATE POLICY "Attachments are accessible to everyone" ON storage.objects
-    FOR SELECT USING (bucket_id = 'attachments');
-
-CREATE POLICY "Only authenticated users with proper roles can upload attachments" ON storage.objects
-    FOR INSERT WITH CHECK (
-        bucket_id = 'attachments' AND
-        auth.role() = 'authenticated' AND
-        (EXISTS (
-            SELECT 1 FROM users
-            WHERE id = auth.uid() AND
-            role IN ('admin', 'president', 'vice_president', 'secretary', 'holdings_write')
-        ))
-    );
-
-CREATE POLICY "Gallery images are accessible to everyone" ON storage.objects
-    FOR SELECT USING (bucket_id = 'gallery');
-
-CREATE POLICY "Only users with secretary role or above can upload gallery images" ON storage.objects
-    FOR INSERT WITH CHECK (
-        bucket_id = 'gallery' AND
-        auth.role() = 'authenticated' AND
-        (EXISTS (
-            SELECT 1 FROM users
-            WHERE id = auth.uid() AND
-            role IN ('admin', 'president', 'vice_president', 'secretary')
-        ))
-    );
-
-CREATE POLICY "Home images are accessible to everyone" ON storage.objects
-    FOR SELECT USING (bucket_id = 'home-images');
-
-CREATE POLICY "Only admins can upload home images" ON storage.objects
-    FOR INSERT WITH CHECK (
-        bucket_id = 'home-images' AND
-        auth.role() = 'authenticated' AND
-        (EXISTS (
-            SELECT 1 FROM users
-            WHERE id = auth.uid() AND
-            role IN ('admin', 'president', 'vice_president')
-        ))
-    );
+-- Allow service role to manage all storage
+CREATE POLICY "Service Role Access to Storage" ON storage.objects
+    FOR ALL
+    TO service_role
+    USING (true);
