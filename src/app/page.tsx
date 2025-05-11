@@ -42,7 +42,7 @@ export default async function Home() {
         </section>
 
         {/* Content sections */}
-        {sortedSections.length > 0 ? (
+        {sortedSections.length > 0 && (
           sortedSections.map((section, index) => (
             <section
               key={section.id}
@@ -85,12 +85,6 @@ export default async function Home() {
               </div>
             </section>
           ))
-        ) : (
-          <section className="min-h-screen w-full flex items-center justify-center bg-black" data-section-id="empty">
-            <div className="text-center py-12 text-gray-400 font-[family-name:var(--font-geist-mono)]">
-              No content available. Please add sections in the admin panel.
-            </div>
-          </section>
         )}
       </main>
     </div>

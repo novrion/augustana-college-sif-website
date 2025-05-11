@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS holdings (
     share_count INTEGER NOT NULL,
     cost_basis DECIMAL(16, 2) NOT NULL,
     current_price DECIMAL(16, 2) NOT NULL,
+    percent_change DECIMAL(16, 2),
     purchase_date DATE NOT NULL,
     last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS pitches (
     amount DECIMAL(16, 2) NOT NULL,
     company TEXT NOT NULL,
     symbol TEXT NOT NULL,
+    attachments JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -64,6 +66,7 @@ CREATE TABLE IF NOT EXISTS newsletters (
     author TEXT NOT NULL,
     date DATE NOT NULL,
     content TEXT NOT NULL,
+    attachments JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -232,10 +235,10 @@ CREATE POLICY "Public Read Access to Home Sections" ON home_sections FOR SELECT 
 
 -- Create storage buckets with appropriate permissions
 INSERT INTO storage.buckets (id, name, public) VALUES 
-    ('profile-pictures', 'Profile Pictures', true),
-    ('attachments', 'Attachments', true),
-    ('gallery', 'Gallery Images', true),
-    ('home-images', 'Home Page Images', true);
+    ('profile-pictures', 'profile-pictures', true),
+    ('attachments', 'attachments', true),
+    ('gallery', 'gallery', true),
+    ('home-images', 'home-images', true);
 
 -- Set storage permissions 
 -- Allow public read access to all storage buckets

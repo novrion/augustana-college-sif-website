@@ -36,7 +36,7 @@ const dashboardItems: DashboardItem[] = [
 		requiredPermission: "ADMIN"
 	},
 	{
-		title: "Guest Speakers",
+		title: "Guest Speaker Management",
 		description: "Manage guest speaker events",
 		href: "/admin/events",
 		requiredPermission: "ADMIN"
