@@ -10,6 +10,7 @@ import { LogInLinkButton, SignOutButton } from "@/components/Buttons";
 import ProfilePicture from "@/components/ProfilePicture";
 import { User } from '@/lib/types';
 
+// Define consistent types
 interface MenuItem {
 	name: string;
 	href: string;
@@ -34,21 +35,6 @@ export default function Navbar() {
 		setMobileMenuOpen(false);
 		setActiveDropdown(null);
 	}, [pathName]);
-
-	// Handle clicking outside to close dropdowns
-	useEffect(() => {
-		function handleClickOutside(event: MouseEvent) {
-			if (activeDropdown) {
-				const target = event.target as HTMLElement;
-				if (!target.closest('.dropdown-container')) {
-					setActiveDropdown(null);
-				}
-			}
-		}
-
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => document.removeEventListener('mousedown', handleClickOutside);
-	}, [activeDropdown]);
 
 	const menus: Menu[] = [
 		{
@@ -90,11 +76,14 @@ export default function Navbar() {
 	];
 
 	const toggleDropdown = (label: string) => {
-		setActiveDropdown(activeDropdown === label ? null : label);
-	};
-
-	const closeDropdowns = () => {
-		setActiveDropdown(null);
+		// If clicking the already active dropdown, close it
+		if (activeDropdown === label) {
+			setActiveDropdown(null);
+		}
+		// Otherwise, switch to the new dropdown
+		else {
+			setActiveDropdown(label);
+		}
 	};
 
 	const handleSignOut = () => {
@@ -130,7 +119,7 @@ export default function Navbar() {
 			{/* Desktop menu */}
 			<div className="hidden md:flex items-center gap-4">
 				{menus.filter(menu => menu.visible).map((menu) => (
-					<div key={menu.label} className="relative dropdown-container">
+					<div key={menu.label} className="relative">
 						<button
 							onClick={() => toggleDropdown(menu.label)}
 							className="flex items-center gap-1 px-3 py-2 hover:bg-gray-800 rounded-md"
@@ -160,7 +149,6 @@ export default function Navbar() {
 										href={item.href}
 										className={`block px-4 py-2 hover:bg-gray-700 ${pathName?.startsWith(item.href) ? "text-blue-400" : ""
 											}`}
-										onClick={closeDropdowns}
 									>
 										{item.name}
 									</Link>
@@ -180,7 +168,7 @@ export default function Navbar() {
 				)}
 
 				{isAuthenticated ? (
-					<div className="relative dropdown-container">
+					<div className="relative">
 						<button
 							onClick={() => toggleDropdown("profile")}
 							className="flex items-center gap-2"
@@ -197,7 +185,6 @@ export default function Navbar() {
 								<Link
 									href="/profile"
 									className="block px-4 py-2 hover:bg-gray-700"
-									onClick={closeDropdowns}
 								>
 									Profile
 								</Link>
@@ -243,10 +230,7 @@ export default function Navbar() {
 												href={item.href}
 												className={`block px-4 py-2 hover:bg-gray-700 ${pathName?.startsWith(item.href) ? "text-blue-400" : ""
 													}`}
-												onClick={() => {
-													closeDropdowns();
-													setMobileMenuOpen(false);
-												}}
+												onClick={() => setMobileMenuOpen(false)}
 											>
 												{item.name}
 											</Link>
