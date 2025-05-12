@@ -13,15 +13,11 @@ export async function getCashBalance(): Promise<number> {
 		return 0;
 	}
 
-	if (!data) {
-		return 0;
-	}
-
+	if (!data) { return 0; }
 	return data.amount || 0;
 }
 
 export async function updateCashBalance(amount: number): Promise<boolean> {
-	// Check if any cash record exists
 	const { data: existingRecord } = await db
 		.from(table)
 		.select('id')
@@ -29,7 +25,6 @@ export async function updateCashBalance(amount: number): Promise<boolean> {
 
 	const id = existingRecord?.id;
 
-	// No cash balance record exists, create one
 	if (!id) {
 		const { error: insertError } = await db
 			.from(table)
@@ -45,7 +40,6 @@ export async function updateCashBalance(amount: number): Promise<boolean> {
 		return true;
 	}
 
-	// Update existing cash balance record
 	const { error } = await db
 		.from(table)
 		.update([{ amount }])
@@ -55,7 +49,6 @@ export async function updateCashBalance(amount: number): Promise<boolean> {
 		console.error('Error updating cash balance:', error);
 		return false;
 	}
-	console.error("ok  here3", amount);
 
 	return true;
 }
