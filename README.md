@@ -1,3 +1,6 @@
+# Migration
+As of 2025-05-11 this repository has been migrated to the Augustana College Student Investment Fund GitHub account. The current repository is found here: https://github.com/augie-sif/augustana-college-sif-website
+
 # Technical Summary
 
 ## Core
@@ -76,6 +79,3 @@ GOOGLE_CLIENT_SECRET=
 I created this website for the Augustana College Student Investment Fund during two weeks in the spring of 2025.
 I had no web development experience prior to this project and therefore a lot of the code is conventionally inconsistent. There is also a good amount of code duplication.
 To whoever gets the task of maintaining this website, good luck :).
-
-# Migration
-As of 2025-05-11 this repository has been migrated to the Augustana College Student Investment Fund GitHub account. The current repository is found here: https://github.com/augie-sif/augustana-college-sif-website
